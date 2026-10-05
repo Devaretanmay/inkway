@@ -76,10 +76,20 @@ export type AgentColumnKey =
   | "model"
   | "created";
 
-/** Model and created are opt-in: hidden until the user enables them. Owner
- *  is shown by default (the user wants to see who owns each agent). */
+/**
+ * Ink's default Agents list is "who can I assign work to, and on what".
+ *
+ * That is Name, Runtime, Model and Status. Owner, access scope, last-active,
+ * 30-day run count and creation date are real data and stay one toggle away in
+ * the display panel — they are not removed, just not what the page leads with.
+ * Identity-heavy entities read best when the row answers its purpose, not when
+ * it audits its own history.
+ */
 export const AGENT_DEFAULT_HIDDEN_COLUMNS: AgentColumnKey[] = [
-  "model",
+  "owner",
+  "access",
+  "lastActive",
+  "runs",
   "created",
 ];
 
@@ -162,7 +172,7 @@ export const useAgentsViewStore = create<AgentsViewState>()(
       clearFilters: () => set({ filters: EMPTY_AGENT_FILTERS }),
     }),
     {
-      name: "multica_agents_view",
+      name: "inkway_agents_view",
       storage: createJSONStorage(() =>
         createWorkspaceAwareStorage(defaultStorage),
       ),

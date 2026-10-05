@@ -1,12 +1,12 @@
 "use client";
 
-import { issueStatusCategory } from "@multica/core/issues";
+import { issueStatusCategory } from "@inkway/core/issues";
 import { useMemo } from "react";
 import { useQueries, useQuery } from "@tanstack/react-query";
-import { selectRecentContexts, useRecentContextStore, type RecentContextEntry } from "@multica/core/chat";
-import { issueDetailOptions } from "@multica/core/issues/queries";
-import { projectDetailOptions } from "@multica/core/projects/queries";
-import type { Issue, Project } from "@multica/core/types";
+import { selectRecentContexts, useRecentContextStore, type RecentContextEntry } from "@inkway/core/chat";
+import { issueDetailOptions } from "@inkway/core/issues/queries";
+import { projectDetailOptions } from "@inkway/core/projects/queries";
+import type { Issue, Project } from "@inkway/core/types";
 import type { MentionItem } from "../../editor/extensions/mention-suggestion";
 import { useNavigation } from "../../navigation";
 

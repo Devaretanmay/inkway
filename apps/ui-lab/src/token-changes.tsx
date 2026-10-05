@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Check, RotateCcw } from "lucide-react";
-import { Button } from "@multica/ui/components/ui/button";
+import { Button } from "@inkway/ui/components/ui/button";
 import {
   baseline,
   changeCount,

@@ -7,15 +7,15 @@ import type {
   Issue,
   IssueTableFacetSpec,
   IssueTableFacetsResponse,
-} from "@multica/core/types";
+} from "@inkway/core/types";
 import {
   actorIssuesViewStore,
   type ActorIssuesScope,
-} from "@multica/core/issues/stores/actor-issues-view-store";
-import { Button } from "@multica/ui/components/ui/button";
-import { cn } from "@multica/ui/lib/utils";
-import { Input } from "@multica/ui/components/ui/input";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@multica/ui/components/ui/tooltip";
+} from "@inkway/core/issues/stores/actor-issues-view-store";
+import { Button } from "@inkway/ui/components/ui/button";
+import { cn } from "@inkway/ui/lib/utils";
+import { Input } from "@inkway/ui/components/ui/input";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@inkway/ui/components/ui/tooltip";
 import {
   IssueDisplayControls,
   ViewRefreshIndicator,

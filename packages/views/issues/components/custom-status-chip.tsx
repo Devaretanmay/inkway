@@ -1,10 +1,10 @@
 "use client";
 
-import { useIssueStatuses } from "@multica/core/issue-statuses/hooks";
-import type { IssueStatusCatalog } from "@multica/core/issue-statuses";
-import { isBuiltInIssueStatus } from "@multica/core/issue-statuses";
-import { useWorkspaceId } from "@multica/core/hooks";
-import type { IssueStatus } from "@multica/core/types";
+import { useIssueStatuses } from "@inkway/core/issue-statuses/hooks";
+import type { IssueStatusCatalog } from "@inkway/core/issue-statuses";
+import { isBuiltInIssueStatus } from "@inkway/core/issue-statuses";
+import { useWorkspaceId } from "@inkway/core/hooks";
+import type { IssueStatus } from "@inkway/core/types";
 import { StatusIcon } from "./status-icon";
 
 /**

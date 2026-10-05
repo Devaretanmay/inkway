@@ -7,11 +7,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/multica-ai/multica/server/internal/events"
-	"github.com/multica-ai/multica/server/internal/integrations/channel"
-	"github.com/multica-ai/multica/server/internal/integrations/channel/engine"
-	"github.com/multica-ai/multica/server/internal/util"
-	"github.com/multica-ai/multica/server/pkg/protocol"
+	"github.com/Devaretanmay/inkway/server/internal/events"
+	"github.com/Devaretanmay/inkway/server/internal/integrations/channel"
+	"github.com/Devaretanmay/inkway/server/internal/integrations/channel/engine"
+	"github.com/Devaretanmay/inkway/server/internal/util"
+	"github.com/Devaretanmay/inkway/server/pkg/protocol"
 )
 
 func TestOutboundArchiveClearsPendingReceiptsOnlyForItsAgent(t *testing.T) {

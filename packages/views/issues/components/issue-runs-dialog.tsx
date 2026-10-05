@@ -2,22 +2,22 @@
 
 import { useMemo, useRef, useState } from "react";
 import { ArrowRight, Ban, XCircle } from "lucide-react";
-import type { AgentTask } from "@multica/core/types";
-import { cn } from "@multica/ui/lib/utils";
+import type { AgentTask } from "@inkway/core/types";
+import { cn } from "@inkway/ui/lib/utils";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@multica/ui/components/ui/dialog";
+} from "@inkway/ui/components/ui/dialog";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@multica/ui/components/ui/popover";
-import { useActorName } from "@multica/core/workspace/hooks";
-import { useCustomPricingStore } from "@multica/core/runtimes/custom-pricing-store";
+} from "@inkway/ui/components/ui/popover";
+import { useActorName } from "@inkway/core/workspace/hooks";
+import { useCustomPricingStore } from "@inkway/core/runtimes/custom-pricing-store";
 import { ActorAvatar } from "../../common/actor-avatar";
 import { TranscriptButton } from "../../common/task-transcript";
 import { cancellationActorLabel, cancelReasonLabel, failureReasonLabel } from "../../agents/components/tabs/task-failure";

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { I18nProvider } from "@multica/core/i18n/react";
+import { I18nProvider } from "@inkway/core/i18n/react";
 import enCommon from "../locales/en/common.json";
 import enOnboarding from "../locales/en/onboarding.json";
 import enWorkspace from "../locales/en/workspace.json";
@@ -11,21 +11,21 @@ const TEST_RESOURCES = {
 
 vi.mock("../auth", () => ({ useLogout: () => vi.fn() }));
 
-vi.mock("@multica/core/config", () => ({
+vi.mock("@inkway/core/config", () => ({
   useConfigStore: (
     selector: (s: { workspaceCreationDisabled: boolean; daemonAppUrl: string }) => unknown,
   ) => selector({ workspaceCreationDisabled: false, daemonAppUrl: "" }),
 }));
 
-vi.mock("@multica/core/api", () => ({
+vi.mock("@inkway/core/api", () => ({
   api: { getBaseUrl: () => "https://multica.ai" },
 }));
 
-vi.mock("@multica/core/workspace/mutations", () => ({
+vi.mock("@inkway/core/workspace/mutations", () => ({
   useCreateWorkspace: () => ({ mutate: vi.fn(), isPending: false }),
 }));
 
-vi.mock("@multica/core/auth", () => ({
+vi.mock("@inkway/core/auth", () => ({
   useAuthStore: Object.assign(
     (selector: (s: { user: unknown }) => unknown) =>
       selector({ user: { id: "u-1", onboarding_questionnaire: {} } }),
@@ -35,8 +35,9 @@ vi.mock("@multica/core/auth", () => ({
 
 // Returning one workspace proves new-workspace mode does not offer to
 // continue with it.
-vi.mock("@multica/core/workspace", () => {
+vi.mock("@inkway/core/workspace", () => {
   return {
+    useCreateWorkspace: () => ({ mutate: vi.fn(), mutateAsync: vi.fn(), isPending: false }),
     useWorkspaceList: () => ({
       workspaces: [{ id: "ws-1", name: "Existing", slug: "existing" }],
       ready: true,
@@ -44,9 +45,9 @@ vi.mock("@multica/core/workspace", () => {
   };
 });
 
-vi.mock("@multica/core/onboarding", async () => {
+vi.mock("@inkway/core/onboarding", async () => {
   const actual = await vi.importActual<Record<string, unknown>>(
-    "@multica/core/onboarding",
+    "@inkway/core/onboarding",
   );
   return { ...actual, useBootstrapMika: () => ({ mutateAsync: vi.fn() }) };
 });
@@ -65,7 +66,7 @@ describe("OnboardingFlow — new-workspace mode", () => {
   it("starts at the workspace step instead of the product intro", () => {
     renderFlow({ mode: "new_workspace", onCancel: vi.fn() });
 
-    // The welcome screen teaches what Multica is; someone creating a second
+    // The welcome screen teaches what Inkway is; someone creating a second
     // workspace already knows, so the flow opens on naming it.
     expect(
       screen.getByRole("heading", { name: /Name your workspace/i }),
@@ -81,11 +82,12 @@ describe("OnboardingFlow — new-workspace mode", () => {
     expect(screen.getByLabelText("Workspace name")).toBeInTheDocument();
   });
 
-  it("still opens on the product intro in first-run mode", () => {
+  it("opens on Inkway's runtime-first setup in first-run mode", () => {
     renderFlow({});
 
     expect(
-      screen.queryByRole("heading", { name: /Name your workspace/i }),
-    ).not.toBeInTheDocument();
+      screen.getByRole("heading", { name: /Welcome to Inkway/i }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/Mika|questionnaire|tell us about you/i)).not.toBeInTheDocument();
   });
 });

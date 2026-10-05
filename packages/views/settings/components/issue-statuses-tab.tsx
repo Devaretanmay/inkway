@@ -32,46 +32,46 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { useWorkspaceId } from "@multica/core/hooks";
-import { useAuthStore } from "@multica/core/auth";
-import { derivePRMergeStatus } from "@multica/core/github";
-import { useCurrentWorkspace } from "@multica/core/paths";
-import { issueStatusArchiveConflictCount, createIssueStatusListStore } from "@multica/core/issue-statuses";
-import { baselineFromQuery } from "@multica/core/issue-views/baseline";
+import { useWorkspaceId } from "@inkway/core/hooks";
+import { useAuthStore } from "@inkway/core/auth";
+import { derivePRMergeStatus } from "@inkway/core/github";
+import { useCurrentWorkspace } from "@inkway/core/paths";
+import { issueStatusArchiveConflictCount, createIssueStatusListStore } from "@inkway/core/issue-statuses";
+import { baselineFromQuery } from "@inkway/core/issue-views/baseline";
 import { IssueSurfaceWithStore } from "../../issues/surface/issue-surface";
-import { memberListOptions } from "@multica/core/workspace/queries";
+import { memberListOptions } from "@inkway/core/workspace/queries";
 import {
   issueStatusColor,
   compareIssueStatusEntries,
   issueStatusListOptions,
   normalizeIssueStatusCategory,
-} from "@multica/core/issue-statuses/queries";
+} from "@inkway/core/issue-statuses/queries";
 import {
   useArchiveIssueStatus,
   useCreateIssueStatus,
   useReorderIssueStatuses,
   useUpdateIssueStatus,
-} from "@multica/core/issue-statuses/mutations";
-import { ALL_STATUSES } from "@multica/core/issues/config";
+} from "@inkway/core/issue-statuses/mutations";
+import { ALL_STATUSES } from "@inkway/core/issues/config";
 import type {
   BuiltInIssueStatus,
   IssueStatusCategory,
   IssueStatusEntry,
   IssueStatusIcon,
-} from "@multica/core/types";
-import { ISSUE_STATUS_ICONS } from "@multica/core/types/issue-status";
-import { Button } from "@multica/ui/components/ui/button";
-import { Input } from "@multica/ui/components/ui/input";
-import { Textarea } from "@multica/ui/components/ui/textarea";
-import { Label as FieldLabel } from "@multica/ui/components/ui/label";
-import { Switch } from "@multica/ui/components/ui/switch";
+} from "@inkway/core/types";
+import { ISSUE_STATUS_ICONS } from "@inkway/core/types/issue-status";
+import { Button } from "@inkway/ui/components/ui/button";
+import { Input } from "@inkway/ui/components/ui/input";
+import { Textarea } from "@inkway/ui/components/ui/textarea";
+import { Label as FieldLabel } from "@inkway/ui/components/ui/label";
+import { Switch } from "@inkway/ui/components/ui/switch";
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@multica/ui/components/ui/dialog";
+} from "@inkway/ui/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -81,26 +81,26 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@multica/ui/components/ui/alert-dialog";
+} from "@inkway/ui/components/ui/alert-dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@multica/ui/components/ui/dropdown-menu";
+} from "@inkway/ui/components/ui/dropdown-menu";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@multica/ui/components/ui/select";
+} from "@inkway/ui/components/ui/select";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@multica/ui/components/ui/tooltip";
+} from "@inkway/ui/components/ui/tooltip";
 import { ColorPicker, COLOR_PICKER_PRESETS } from "../../common/color-picker";
 import { StatusIcon } from "../../issues/components/status-icon";
 import { useStatusLabel } from "../../issues/utils/status-label";

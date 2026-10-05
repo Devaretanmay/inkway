@@ -25,10 +25,10 @@ import type {
   PurchaseWorkspaceSeatsRequest,
   ShareLink,
   WorkspaceSeatPurchasePreview,
-} from "@multica/core/types";
-import { Input } from "@multica/ui/components/ui/input";
-import { Button } from "@multica/ui/components/ui/button";
-import { Label } from "@multica/ui/components/ui/label";
+} from "@inkway/core/types";
+import { Input } from "@inkway/ui/components/ui/input";
+import { Button } from "@inkway/ui/components/ui/button";
+import { Label } from "@inkway/ui/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -36,8 +36,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@multica/ui/components/ui/dialog";
-import { Badge } from "@multica/ui/components/ui/badge";
+} from "@inkway/ui/components/ui/dialog";
+import { Badge } from "@inkway/ui/components/ui/badge";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -47,14 +47,14 @@ import {
   AlertDialogFooter,
   AlertDialogCancel,
   AlertDialogAction,
-} from "@multica/ui/components/ui/alert-dialog";
+} from "@inkway/ui/components/ui/alert-dialog";
 import {
   Select,
   SelectTrigger,
   SelectValue,
   SelectContent,
   SelectItem,
-} from "@multica/ui/components/ui/select";
+} from "@inkway/ui/components/ui/select";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -64,26 +64,26 @@ import {
   DropdownMenuSub,
   DropdownMenuSubTrigger,
   DropdownMenuSubContent,
-} from "@multica/ui/components/ui/dropdown-menu";
+} from "@inkway/ui/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useAuthStore } from "@multica/core/auth";
+import { useAuthStore } from "@inkway/core/auth";
 import {
   usePreviewWorkspaceSeatPurchase,
   usePurchaseWorkspaceSeats,
   workspaceSubscriptionSummaryOptions,
-} from "@multica/core/billing";
-import { useWorkspaceId } from "@multica/core/hooks";
-import { useFeatureEnabled } from "@multica/core/config";
-import { BILLING_WORKSPACE_SUBSCRIPTIONS_FLAG } from "@multica/core/feature-flags";
-import { useCurrentWorkspace } from "@multica/core/paths";
+} from "@inkway/core/billing";
+import { useWorkspaceId } from "@inkway/core/hooks";
+import { useFeatureEnabled } from "@inkway/core/config";
+import { BILLING_WORKSPACE_SUBSCRIPTIONS_FLAG } from "@inkway/core/feature-flags";
+import { useCurrentWorkspace } from "@inkway/core/paths";
 import {
   invitationListOptions,
   memberListOptions,
   shareLinkListOptions,
   workspaceKeys,
-} from "@multica/core/workspace/queries";
-import { api, errorCode } from "@multica/core/api";
+} from "@inkway/core/workspace/queries";
+import { api, errorCode } from "@inkway/core/api";
 import { useLocale, useT } from "../../i18n";
 import {
   SettingsCard,

@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
-import type { TimelineEntry } from "@multica/core/types";
+import type { TimelineEntry } from "@inkway/core/types";
 import {
   collectThreadParticipants,
   collectThreadReplies,

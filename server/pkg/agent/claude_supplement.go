@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	claudeSupplementInitializeID     = "multica-supplement-initialize"
+	claudeSupplementInitializeID     = "inkway-supplement-initialize"
 	claudeSupplementHandshakeTimeout = 3 * time.Second
 )
 
@@ -55,7 +55,7 @@ func (s *claudeSupplementSession) initialize(w io.Writer, timeout time.Duration)
 	defer cancel()
 	hooks := make(map[string]any, len(claudeSupplementEvents))
 	for _, event := range claudeSupplementEvents {
-		hooks[event] = []any{map[string]any{"hookCallbackIds": []string{"multica-supplement-" + event}}}
+		hooks[event] = []any{map[string]any{"hookCallbackIds": []string{"inkway-supplement-" + event}}}
 	}
 	if err := writeClaudeFrame(w, map[string]any{
 		"type": "control_request", "request_id": claudeSupplementInitializeID,
@@ -181,8 +181,8 @@ func (s *claudeSupplementSession) prepareHook(msg claudeSDKMessage) (func(io.Wri
 	output := map[string]any{}
 	s.mu.Lock()
 	// Hook registrations are inherited by subagents. Only the main loop may
-	// consume instructions addressed to this Multica task.
-	owned := slices.Contains(claudeSupplementEvents, req.Input.Event) && req.CallbackID == "multica-supplement-"+req.Input.Event
+	// consume instructions addressed to this Inkway task.
+	owned := slices.Contains(claudeSupplementEvents, req.Input.Event) && req.CallbackID == "inkway-supplement-"+req.Input.Event
 	var delivered []*claudeSupplementInput
 	if owned && req.Input.AgentID == "" && msg.ParentToolUseID == "" && !s.ended && s.ctx.Err() == nil {
 		s.started = true

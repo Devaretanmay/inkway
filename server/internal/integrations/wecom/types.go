@@ -31,7 +31,7 @@
 // receipt.
 //
 // Outbound file delivery cannot report back to the agent that produced the
-// file. `multica attachment upload` returns once the object is in storage and
+// file. `inkway attachment upload` returns once the object is in storage and
 // bound to the reply, while the send into the room runs on EventChatDone —
 // after the run has ended. A delivery that is shed, refused by WeCom, or lost
 // with the socket is therefore told to the person in the chat
@@ -64,8 +64,8 @@ import (
 
 	"github.com/jackc/pgx/v5/pgtype"
 
-	"github.com/multica-ai/multica/server/internal/integrations/channel"
-	db "github.com/multica-ai/multica/server/pkg/db/generated"
+	"github.com/Devaretanmay/inkway/server/internal/integrations/channel"
+	db "github.com/Devaretanmay/inkway/server/pkg/db/generated"
 )
 
 // TypeWecom is the channel discriminator for the WeCom smart-bot adapter.
@@ -109,7 +109,7 @@ type Installation struct {
 	SecretEncrypted []byte
 
 	// BotDisplayName is what the bot is called in a chat. A WeCom group
-	// mention arrives as literal text — "@Multica Bot /new 重新分析" — with no
+	// mention arrives as literal text — "@Inkway Bot /new 重新分析" — with no
 	// structured mention list anywhere in the payload, so recognising where
 	// the mention ends is the only way a name containing a space does not
 	// swallow the command after it.

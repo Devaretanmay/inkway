@@ -13,8 +13,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/multica-ai/multica/server/internal/daemon/repocache"
-	"github.com/multica-ai/multica/server/internal/util"
+	"github.com/Devaretanmay/inkway/server/internal/daemon/repocache"
+	"github.com/Devaretanmay/inkway/server/internal/util"
 )
 
 // HealthResponse is returned by the daemon's local health endpoint.
@@ -78,7 +78,7 @@ type HealthResponse struct {
 	// render as an absent runtime, which is what made GH #6077 unactionable for
 	// the reporter (MUL-5439).
 	SkippedAgents map[string]string `json:"skipped_agents,omitempty"`
-	// ReloadPendingReason explains why the daemon has confirmed a multica
+	// ReloadPendingReason explains why the daemon has confirmed a inkway
 	// version change on disk but hasn't restarted into it yet — it was busy at
 	// the last barrier check and will retry when idle. Omitted when empty, so
 	// older consumers see no change. Diagnostic only: nothing keys off it.
@@ -115,7 +115,7 @@ type repoCheckoutRequest struct {
 	// clients omit it and retain their historical unbounded lock-wait behavior.
 	RetryBusy bool `json:"retry_busy,omitempty"`
 	// Fresh asks to discard an existing checkout's uncommitted changes and
-	// untracked files and start over on a new branch (`multica repo checkout
+	// untracked files and start over on a new branch (`inkway repo checkout
 	// --fresh`). Without it an existing checkout that holds work is kept; older
 	// daemons ignore the field and always start over.
 	Fresh bool `json:"fresh,omitempty"`
@@ -158,7 +158,7 @@ const (
 	repoCheckoutAuthOK repoCheckoutAuthResult = iota
 	// repoCheckoutAuthNoCredential: the request carried no usable Authorization
 	// header. The current CLI always sends one, so in practice this is a
-	// `multica` binary older than repoCheckoutMinCLIVersion — a permanent
+	// `inkway` binary older than repoCheckoutMinCLIVersion — a permanent
 	// failure that no retry fixes.
 	repoCheckoutAuthNoCredential
 	// repoCheckoutAuthUnknownCredential: a token was presented but is not bound
@@ -167,7 +167,7 @@ const (
 	repoCheckoutAuthUnknownCredential
 )
 
-// repoCheckoutMinCLIVersion is the first release whose `multica repo checkout`
+// repoCheckoutMinCLIVersion is the first release whose `inkway repo checkout`
 // sends the Authorization header this endpoint requires. The header and the
 // check landed in the same commit (#7205), so every older CLI is rejected here
 // no matter how healthy the task is.
@@ -198,9 +198,9 @@ func (d *Daemon) activeRepoCheckoutTask(r *http.Request) (activeRepoCheckoutTask
 // the dead end.
 func repoCheckoutListBinariesCommand() string {
 	if runtime.GOOS == "windows" {
-		return "where.exe multica"
+		return "where.exe inkway"
 	}
-	return "which -a multica"
+	return "which -a inkway"
 }
 
 // repoCheckoutAuthErrorMessage builds the rejection body. It has to be
@@ -226,9 +226,9 @@ func (d *Daemon) repoCheckoutAuthErrorMessage(result repoCheckoutAuthResult) str
 
 	var b strings.Builder
 	b.WriteString("repo checkout requires an active task credential, and this request carried none. ")
-	b.WriteString("The multica CLI has sent that credential since ")
+	b.WriteString("The inkway CLI has sent that credential since ")
 	b.WriteString(repoCheckoutMinCLIVersion)
-	b.WriteString(", so this request came from an older `multica` binary")
+	b.WriteString(", so this request came from an older `inkway` binary")
 	if daemonVersion := strings.TrimSpace(d.cfg.CLIVersion); daemonVersion != "" {
 		b.WriteString(" (this daemon runs ")
 		b.WriteString(daemonVersion)
@@ -236,7 +236,7 @@ func (d *Daemon) repoCheckoutAuthErrorMessage(result repoCheckoutAuthResult) str
 	}
 	b.WriteString(" and will fail every time, not intermittently. List every copy on PATH with `")
 	b.WriteString(repoCheckoutListBinariesCommand())
-	b.WriteString("`, check each one's version, then upgrade the stale one with `multica update`")
+	b.WriteString("`, check each one's version, then upgrade the stale one with `inkway update`")
 	b.WriteString(" — it handles Homebrew and direct installs on every platform.")
 	// os.Executable() reports where this process was STARTED from, which is not
 	// a promise about the bytes on disk now: the daemon deliberately supports a
@@ -308,7 +308,7 @@ func authorizeRepoCheckoutWorkDir(activeRoot, requested string) (string, error) 
 const (
 	repoCheckoutLockWaitTimeout = 10 * time.Second
 	repoCheckoutRetryAfter      = 2 * time.Second
-	repoCheckoutRetryHeader     = "X-Multica-Retryable"
+	repoCheckoutRetryHeader     = "X-Inkway-Retryable"
 	repoCheckoutRetryValueBusy  = "repo-busy"
 )
 
@@ -382,7 +382,7 @@ func (d *Daemon) healthHandler(startedAt time.Time) http.HandlerFunc {
 }
 
 // shutdownHandler triggers a graceful daemon shutdown by cancelling the
-// top-level context. Used by `multica daemon stop` so we don't depend on
+// top-level context. Used by `inkway daemon stop` so we don't depend on
 // OS-signal delivery, which is unreliable on Windows once the daemon is
 // spawned with DETACHED_PROCESS (no shared console with the stop caller).
 // The listener is bound to 127.0.0.1 only, so only local processes can hit

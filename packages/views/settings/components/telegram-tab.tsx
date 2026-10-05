@@ -5,18 +5,18 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ChevronRight, ExternalLink, Trash2 } from "lucide-react";
 import { TelegramMark } from "./telegram-mark";
-import { cn } from "@multica/ui/lib/utils";
-import { Button } from "@multica/ui/components/ui/button";
-import { Card, CardContent } from "@multica/ui/components/ui/card";
+import { cn } from "@inkway/ui/lib/utils";
+import { Button } from "@inkway/ui/components/ui/button";
+import { Card, CardContent } from "@inkway/ui/components/ui/card";
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@multica/ui/components/ui/dialog";
-import { Input } from "@multica/ui/components/ui/input";
-import { Label } from "@multica/ui/components/ui/label";
+} from "@inkway/ui/components/ui/dialog";
+import { Input } from "@inkway/ui/components/ui/input";
+import { Label } from "@inkway/ui/components/ui/label";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,16 +26,15 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@multica/ui/components/ui/alert-dialog";
-import { useAuthStore } from "@multica/core/auth";
-import { useWorkspaceId } from "@multica/core/hooks";
-import { memberListOptions } from "@multica/core/workspace/queries";
-import { useActorName } from "@multica/core/workspace/hooks";
-import { telegramInstallationsOptions, telegramKeys } from "@multica/core/telegram";
-import { api } from "@multica/core/api";
-import type { TelegramInstallation } from "@multica/core/types";
+} from "@inkway/ui/components/ui/alert-dialog";
+import { useAuthStore } from "@inkway/core/auth";
+import { useWorkspaceId } from "@inkway/core/hooks";
+import { memberListOptions } from "@inkway/core/workspace/queries";
+import { useActorName } from "@inkway/core/workspace/hooks";
+import { telegramInstallationsOptions, telegramKeys } from "@inkway/core/telegram";
+import { api } from "@inkway/core/api";
+import type { TelegramInstallation } from "@inkway/core/types";
 import { ActorAvatar } from "../../common/actor-avatar";
-import { docsLocalePrefix } from "../../common/docs-locale";
 import { openExternal } from "../../platform";
 import { useLocale, useT } from "../../i18n";
 
@@ -108,7 +107,7 @@ export function TelegramTab() {
             <p className="text-caption text-muted-foreground">
               {t(($) => $.telegram.not_enabled_description_prefix)}{" "}
               <code className="rounded-xs bg-muted px-1 py-0.5 text-micro">
-                MULTICA_TELEGRAM_SECRET_KEY
+                INKWAY_TELEGRAM_SECRET_KEY
               </code>{" "}
               {t(($) => $.telegram.not_enabled_description_suffix)}{" "}
               {t(($) => $.telegram.not_enabled_self_host_hint)}
@@ -232,11 +231,6 @@ function InstallationRow({
   );
 }
 
-// telegramDocsUrl points at the Telegram integration guide on the docs site,
-// localized like the Slack docs link.
-function telegramDocsUrl(lang: string | undefined): string {
-  return `https://multica.ai/docs${docsLocalePrefix(lang)}/telegram-bot-integration`;
-}
 
 // TelegramAgentBindButton is the per-agent CTA on the agent detail page.
 // Telegram uses the paste-a-token model: the admin creates a bot with
@@ -256,7 +250,7 @@ export function TelegramAgentBindButton({
    * handler so management actions live in one place. */
   onShowConnectedDetails?: () => void;
 }) {
-  const { t, i18n } = useT("settings");
+  const { t } = useT("settings");
   const wsId = useWorkspaceId();
   const qc = useQueryClient();
   const user = useAuthStore((s) => s.user);
@@ -363,15 +357,6 @@ export function TelegramAgentBindButton({
             {t(($) => $.telegram.connect_dialog_description)}
           </p>
 
-          <button
-            type="button"
-            onClick={() => openExternal(telegramDocsUrl(i18n.language))}
-            className="inline-flex w-fit items-center gap-2 text-body font-medium text-primary underline-offset-2 hover:underline"
-            data-testid="telegram-docs-link"
-          >
-            <ExternalLink className="h-4 w-4" />
-            {t(($) => $.telegram.connect_docs_link)}
-          </button>
 
           <div className="space-y-1.5">
             <Label htmlFor="telegram-bot-token">

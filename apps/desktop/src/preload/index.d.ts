@@ -143,6 +143,7 @@ interface DaemonAPI {
     userId: string,
   ) => Promise<DaemonReauthResult>;
   isCliInstalled: () => Promise<boolean>;
+  providerCredential: (request: { action: "status" | "set" | "delete" | "validate"; runtimeId: string; provider: "openai" | "anthropic" | "groq"; model?: string; value?: string }) => Promise<{ ok: boolean; message: string; present?: boolean }>;
   getPrefs: () => Promise<DaemonPrefs>;
   setPrefs: (prefs: Partial<DaemonPrefs>) => Promise<DaemonPrefs>;
   autoStart: () => Promise<void>;

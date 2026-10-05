@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	agentpkg "github.com/multica-ai/multica/server/pkg/agent"
+	agentpkg "github.com/Devaretanmay/inkway/server/pkg/agent"
 )
 
 // TestOpenCodeV2RefusesSynthesizedMCPWithoutAgentConfig covers the seam between

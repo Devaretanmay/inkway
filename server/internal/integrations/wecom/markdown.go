@@ -9,7 +9,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/multica-ai/multica/server/internal/integrations/channel"
+	"github.com/Devaretanmay/inkway/server/internal/integrations/channel"
 )
 
 // breakMemberLinks is what every caller splicing member-authored text into a

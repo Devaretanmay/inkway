@@ -117,13 +117,16 @@
     "breadcrumb_title": "任务",
     "breadcrumb_workspace_fallback": "工作区",
     "empty_title": "还没有任务",
-    "move_failed": "移动任务失败"
+    "move_failed": "移动任务失败",
+    "subtitle": "将编码工作交给你的智能体。",
+    "search_placeholder": "Search issues…",
+    "new_issue": "New Issue"
   },
   "status": {
     "backlog": "待规划",
     "todo": "待办",
     "in_progress": "进行中",
-    "in_review": "审核中",
+    "in_review": "审核",
     "done": "已完成",
     "blocked": "已阻塞",
     "cancelled": "已取消"
@@ -435,6 +438,7 @@
     "prop_start_date": "开始日期",
     "prop_due_date": "截止日期",
     "prop_project": "项目",
+    "prop_repository": "代码库",
     "prop_labels": "标签",
     "add_property_action": "添加字段",
     "prop_created_by": "创建者",
@@ -832,7 +836,7 @@
       "open_link": "打开链接",
       "archived_hint": "已归档属性——值为只读",
       "unknown_value": "无法显示",
-      "unknown_value_hint": "该值由更新版本的 Multica 设置，当前版本无法编辑——请更新应用，或清除该值",
+      "unknown_value_hint": "该值由更新版本的 Inkway 设置，当前版本无法编辑——请更新应用，或清除该值",
       "none": "未设置",
       "op_is": "等于",
       "op_contains": "包含",
@@ -1338,7 +1342,7 @@
     "link_placeholder": "粘贴 PR 链接",
     "link_hint": "标题或分支名含 {{identifier}} 的 PR 会自动关联。",
     "link_submit": "关联",
-    "link_not_found": "Multica 还没有收到这个 PR。请确认它所在的仓库已连接。",
+    "link_not_found": "Inkway 还没有收到这个 PR。请确认它所在的仓库已连接。",
     "link_failed": "关联 PR 失败。",
     "row_menu": "PR 操作",
     "section_menu": "PR 自动化",
@@ -1392,5 +1396,55 @@
     "overview_close": "关闭",
     "overview_empty": "没有这类产物。",
     "group_comment_by": "{{name}} 的评论"
+  },
+  "status_tabs": {
+    "all": "All",
+    "more": "More statuses",
+    "hidden_hint": "Not a board column by default. Select one to add its column back."
+  },
+  "run_state": {
+    "running": "Running",
+    "queued": "Queued",
+    "needs_review": "Needs review",
+    "failed": "Failed",
+    "unassigned": "Unassigned"
+  },
+  "current_run": {
+    "title": "Current Run",
+    "started_ago": "Started {{time}} ago",
+    "stop": "Stop Run",
+    "view_details": "View run details",
+    "stop_confirm": "Stop this run? The issue keeps its history."
+  },
+  "review": {
+    "title": "Ready for review",
+    "performed_by": "Worked on by {{agent}}",
+    "no_agent": "No agent run has produced a result for this issue yet.",
+    "result_label": "Agent result",
+    "no_result": "The agent finished without leaving a result summary.",
+    "accept": "Accept",
+    "accept_hint": "Move this issue to Done",
+    "reopen": "Reopen",
+    "reopen_hint": "Send it back to In Progress",
+    "continue": "Continue",
+    "continue_hint": "Reply to the agent",
+    "provider_tool": "提供商 / 工具",
+    "agent_report": "智能体报告"
+  },
+  "back_to_issues": {
+    "0": "B",
+    "1": "a",
+    "2": "c",
+    "3": "k",
+    "4": " ",
+    "5": "t",
+    "6": "o",
+    "7": " ",
+    "8": "I",
+    "9": "s",
+    "10": "s",
+    "11": "u",
+    "12": "e",
+    "13": "s"
   }
 }

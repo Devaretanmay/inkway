@@ -1,19 +1,19 @@
 "use client";
 
 import { Eye, MoreHorizontal } from "lucide-react";
-import type { IssueStatus } from "@multica/core/types";
-import { Button } from "@multica/ui/components/ui/button";
+import type { IssueStatus } from "@inkway/core/types";
+import { Button } from "@inkway/ui/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-} from "@multica/ui/components/ui/dropdown-menu";
-import { useViewStoreApi } from "@multica/core/issues/stores/view-store-context";
+} from "@inkway/ui/components/ui/dropdown-menu";
+import { useViewStoreApi } from "@inkway/core/issues/stores/view-store-context";
 import { StatusIcon } from "./status-icon";
 import { useT } from "../../i18n";
-import { useWorkspaceId } from "@multica/core/hooks";
-import { useIssueStatuses } from "@multica/core/issue-statuses/hooks";
+import { useWorkspaceId } from "@inkway/core/hooks";
+import { useIssueStatuses } from "@inkway/core/issue-statuses/hooks";
 import { useStatusLabel } from "../utils/status-label";
 
 /**

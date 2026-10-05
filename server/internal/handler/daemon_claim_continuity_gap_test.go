@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/Devaretanmay/inkway/server/pkg/protocol"
 )
 
 // claimContinuityGapProbe decodes just the continuity-gap fields off a claim
@@ -16,6 +18,50 @@ type claimContinuityGapProbe struct {
 		PriorSessionID                string `json:"prior_session_id"`
 		PriorSessionResumeUnavailable bool   `json:"prior_session_resume_unavailable"`
 	} `json:"task"`
+}
+
+func TestClaimTaskByRuntime_InkRetryCarriesLineageAndFailure(t *testing.T) {
+	if testHandler == nil || testPool == nil {
+		t.Skip("database not available")
+	}
+	ctx := context.Background()
+	runtimeID := createClaimReclaimRuntime(t, ctx, "Ink retry claim")
+	agentID, issueID := createClaimReclaimAgentAndIssue(t, ctx, runtimeID, "Ink retry claim")
+	defer testPool.Exec(ctx, `DELETE FROM issue WHERE id = $1`, issueID)
+	var sourceID, retryID string
+	dbfx.QueryRow(t, `
+		INSERT INTO agent_task_queue (agent_id, runtime_id, issue_id, status, priority, failure_reason, error, session_id, completed_at)
+		VALUES ($1, $2, $3, 'failed', 0, 'agent_error.provider_network', 'Connection closed mid-response', 'codex-proof-session', now())
+		RETURNING id
+	`, agentID, runtimeID, issueID).Scan(&sourceID)
+	defer testPool.Exec(ctx, `DELETE FROM agent_task_queue WHERE id = $1`, sourceID)
+	dbfx.QueryRow(t, `
+		INSERT INTO agent_task_queue (agent_id, runtime_id, issue_id, status, priority, retry_of_task_id, attempt)
+		VALUES ($1, $2, $3, 'queued', 1000, $4, 2) RETURNING id
+	`, agentID, runtimeID, issueID, sourceID).Scan(&retryID)
+	defer testPool.Exec(ctx, `DELETE FROM agent_task_queue WHERE id = $1`, retryID)
+
+	req := newDaemonTokenRequest(http.MethodPost, "/api/daemon/runtimes/"+runtimeID+"/claim", nil, testWorkspaceID, "ink-retry-claim")
+	req.Header.Set("X-Client-Capabilities", protocol.DaemonCapabilityCheckoutKeepsWorkV1+","+protocol.DaemonCapabilityInkRecoveryV1)
+	req = withURLParam(req, "runtimeId", runtimeID)
+	w := httptest.NewRecorder()
+	testHandler.ClaimTaskByRuntime(w, req)
+	if w.Code != http.StatusOK {
+		t.Fatalf("ClaimTaskByRuntime: got %d: %s", w.Code, w.Body.String())
+	}
+	var got struct {
+		Task struct {
+			RetryOfTaskID      string `json:"retry_of_task_id"`
+			RetryFailureReason string `json:"retry_failure_reason"`
+			PriorSessionID     string `json:"prior_session_id"`
+		} `json:"task"`
+	}
+	if err := json.NewDecoder(w.Body).Decode(&got); err != nil {
+		t.Fatalf("decode claim response: %v", err)
+	}
+	if got.Task.RetryOfTaskID != sourceID || got.Task.RetryFailureReason != "agent_error.provider_network" || got.Task.PriorSessionID != "codex-proof-session" {
+		t.Fatalf("Ink retry claim metadata = %+v", got.Task)
+	}
 }
 
 func claimOneTaskForRuntime(t *testing.T, runtimeID, daemonID string) claimContinuityGapProbe {

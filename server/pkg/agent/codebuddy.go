@@ -142,7 +142,7 @@ func (b *codebuddyBackend) Execute(ctx context.Context, prompt string, opts Exec
 	if opts.Cwd != "" {
 		cmd.Dir = opts.Cwd
 	}
-	// Multica closes stdin after the first result and cannot wait for
+	// Inkway closes stdin after the first result and cannot wait for
 	// cross-turn task_notification events. Force CodeBuddy's documented
 	// headless disable so Bash/PowerShell/Agent never take the background
 	// path (CODEBUDDY_CODE_DISABLE_BACKGROUND_TASKS; see CLI headless docs).
@@ -302,7 +302,7 @@ func (b *codebuddyBackend) Execute(ctx context.Context, prompt string, opts Exec
 
 		completionGuardError := ""
 		if sawBackgroundTask {
-			completionGuardError = "codebuddy emitted a background task system event; Multica-managed runs require foreground execution (set CODEBUDDY_CODE_DISABLE_BACKGROUND_TASKS=1)"
+			completionGuardError = "codebuddy emitted a background task system event; Inkway-managed runs require foreground execution (set CODEBUDDY_CODE_DISABLE_BACKGROUND_TASKS=1)"
 		}
 		finalStatus, finalOutput, finalError := finalizeStreamResult(
 			"codebuddy",
@@ -535,7 +535,7 @@ func writeCodebuddyInput(w io.Writer, prompt string) error {
 const codebuddyDisableBackgroundTasksEnv = "CODEBUDDY_CODE_DISABLE_BACKGROUND_TASKS"
 
 // buildCodebuddyEnv merges task env and always forces background tasks off.
-// Multica's adapter closes stdin after the first result; CodeBuddy's
+// Inkway's adapter closes stdin after the first result; CodeBuddy's
 // background lifecycle can push task_notification after that point, which we
 // cannot observe. The official CLI documents this variable for exactly that
 // headless shape (https://www.codebuddy.ai/docs/cli/headless).

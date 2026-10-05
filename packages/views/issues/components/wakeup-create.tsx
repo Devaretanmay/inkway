@@ -18,24 +18,24 @@ import {
   Zap,
   type LucideIcon,
 } from "lucide-react";
-import { childIssuesOptions, issueDetailOptions, useCreateIssueWakeup } from "@multica/core/issues";
-import { useIssueStatuses } from "@multica/core/issue-statuses/hooks";
-import { labelListOptions } from "@multica/core/labels/queries";
-import { propertyListOptions } from "@multica/core/properties/queries";
-import { isAgentRuntimeBound } from "@multica/core/agents";
-import { ApiError } from "@multica/core/api";
-import { agentListOptions, memberListOptions, squadListOptions } from "@multica/core/workspace/queries";
-import { shortcutMatchesEvent, useShortcut } from "@multica/core/shortcuts";
-import { Button } from "@multica/ui/components/ui/button";
-import { Input } from "@multica/ui/components/ui/input";
-import { Textarea } from "@multica/ui/components/ui/textarea";
+import { childIssuesOptions, issueDetailOptions, useCreateIssueWakeup } from "@inkway/core/issues";
+import { useIssueStatuses } from "@inkway/core/issue-statuses/hooks";
+import { labelListOptions } from "@inkway/core/labels/queries";
+import { propertyListOptions } from "@inkway/core/properties/queries";
+import { isAgentRuntimeBound } from "@inkway/core/agents";
+import { ApiError } from "@inkway/core/api";
+import { agentListOptions, memberListOptions, squadListOptions } from "@inkway/core/workspace/queries";
+import { shortcutMatchesEvent, useShortcut } from "@inkway/core/shortcuts";
+import { Button } from "@inkway/ui/components/ui/button";
+import { Input } from "@inkway/ui/components/ui/input";
+import { Textarea } from "@inkway/ui/components/ui/textarea";
 import {
   Popover,
   PopoverContent,
   PopoverTitle,
   PopoverTrigger,
-} from "@multica/ui/components/ui/popover";
-import { DialogTitle } from "@multica/ui/components/ui/dialog";
+} from "@inkway/ui/components/ui/popover";
+import { DialogTitle } from "@inkway/ui/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -47,8 +47,8 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@multica/ui/components/ui/dropdown-menu";
-import { cn } from "@multica/ui/lib/utils";
+} from "@inkway/ui/components/ui/dropdown-menu";
+import { cn } from "@inkway/ui/lib/utils";
 import { ActorAvatar } from "../../common/actor-avatar";
 import { ShortcutKeycaps } from "../../common/shortcut-keycaps";
 import { useViewingTimezone } from "../../common/use-viewing-timezone";
@@ -79,7 +79,7 @@ const pillClass =
 
 /**
  * Lets a member add a wakeup from the issue sidebar. It creates the same rule
- * an agent creates with `multica issue wakeup create`.
+ * an agent creates with `inkway issue wakeup create`.
  */
 export function WakeupCreate({
   workspaceId,

@@ -3,13 +3,13 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { AlertCircle, Loader2 } from "lucide-react";
-import { pluginMCPToolsOptions, useApprovePluginMCPTools } from "@multica/core/plugins";
-import type { PluginHook, PluginMCPTool } from "@multica/core/types";
-import { Alert, AlertDescription, AlertTitle } from "@multica/ui/components/ui/alert";
-import { Badge } from "@multica/ui/components/ui/badge";
-import { Button } from "@multica/ui/components/ui/button";
-import { Checkbox } from "@multica/ui/components/ui/checkbox";
-import { Skeleton } from "@multica/ui/components/ui/skeleton";
+import { pluginMCPToolsOptions, useApprovePluginMCPTools } from "@inkway/core/plugins";
+import type { PluginHook, PluginMCPTool } from "@inkway/core/types";
+import { Alert, AlertDescription, AlertTitle } from "@inkway/ui/components/ui/alert";
+import { Badge } from "@inkway/ui/components/ui/badge";
+import { Button } from "@inkway/ui/components/ui/button";
+import { Checkbox } from "@inkway/ui/components/ui/checkbox";
+import { Skeleton } from "@inkway/ui/components/ui/skeleton";
 import { toast } from "sonner";
 import { useT } from "../i18n";
 

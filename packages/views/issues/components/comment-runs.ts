@@ -1,6 +1,6 @@
-import type { AgentTask, TimelineEntry } from "@multica/core/types";
-import { isDeletedComment } from "@multica/core/issues/comment-deletion";
-import { commentSupplementReceipts } from "@multica/core/issues/run-steering";
+import type { AgentTask, TimelineEntry } from "@inkway/core/types";
+import { isDeletedComment } from "@inkway/core/issues/comment-deletion";
+import { commentSupplementReceipts } from "@inkway/core/issues/run-steering";
 
 export interface CommentRun {
   task: AgentTask;
@@ -16,8 +16,13 @@ export const EMPTY_COMMENT_RUNS: CommentRun[] = [];
 /** Use the daemon's deliverable, never guess a final answer from progress text. */
 export function commentRunOutput(task: AgentTask): string | null {
   if (task.status !== "completed" || !task.result || typeof task.result !== "object") return null;
-  return "comment" in task.result && typeof task.result.comment === "string" && task.result.comment.trim()
-    ? task.result.comment : null;
+  if ("comment" in task.result && typeof task.result.comment === "string" && task.result.comment.trim()) {
+    return task.result.comment;
+  }
+  // Issue-assignment runs return the daemon's completed process output rather
+  // than a comment field. Keep that real deliverable visible in Review too.
+  return "output" in task.result && typeof task.result.output === "string" && task.result.output.trim()
+    ? task.result.output : null;
 }
 
 export function isActiveCommentRun(task: AgentTask): boolean {

@@ -2,9 +2,9 @@
 
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { pluginSurfaceLaunchOptions } from "@multica/core/plugins";
-import type { PluginInstallation, PluginSurface } from "@multica/core/types";
-import { cn } from "@multica/ui/lib/utils";
+import { pluginSurfaceLaunchOptions } from "@inkway/core/plugins";
+import type { PluginInstallation, PluginSurface } from "@inkway/core/types";
+import { cn } from "@inkway/ui/lib/utils";
 import { useT } from "../i18n";
 import { buildSurfaceFrameDocument, readThemeTokens } from "./surface-document";
 import { createSurfaceBridge } from "./surface-bridge";
@@ -77,13 +77,13 @@ export function PluginSurfaceFrame({ wsId, installation, surface, issueId, class
     if (!frame || !surfaceDocument) return () => bridge.close();
     const onMessage = (event: MessageEvent) => {
       const type = (event.data as { type?: string } | null)?.type;
-      if (type !== "multica:plugin-surface-error" &&
-          type !== "multica:plugin-surface-navigated" &&
-          type !== "multica:plugin-surface-navigation-blocked") return;
+      if (type !== "inkway:plugin-surface-error" &&
+          type !== "inkway:plugin-surface-navigated" &&
+          type !== "inkway:plugin-surface-navigation-blocked") return;
       // Same window-identity rule as the bridge: without it any frame on the
       // page could light up the failure banner on every other panel.
       if (!frame.contentWindow || event.source !== frame.contentWindow) return;
-      if (type === "multica:plugin-surface-error") setFailedSurfaceInstance(surfaceInstance);
+      if (type === "inkway:plugin-surface-error") setFailedSurfaceInstance(surfaceInstance);
       else setNavigatedSurfaceInstance(surfaceInstance);
     };
     // Terminal events and the bridge are both armed before srcdoc is assigned,

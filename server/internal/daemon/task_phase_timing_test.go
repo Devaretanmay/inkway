@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/multica-ai/multica/server/pkg/agent"
+	"github.com/Devaretanmay/inkway/server/pkg/agent"
 )
 
 func TestTaskPhaseRecorderRecordsElapsedDurations(t *testing.T) {

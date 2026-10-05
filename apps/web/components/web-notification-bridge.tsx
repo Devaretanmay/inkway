@@ -4,9 +4,9 @@ import { useEffect, useRef } from "react";
 import {
   registerSystemNotificationClickHandler,
   type SystemNotificationPayload,
-} from "@multica/core/platform";
-import { paths } from "@multica/core/paths";
-import { useNavigation } from "@multica/views/navigation";
+} from "@inkway/core/platform";
+import { paths } from "@inkway/core/paths";
+import { useNavigation } from "@inkway/views/navigation";
 
 /**
  * Routes browser notification clicks to the source workspace's inbox, focused

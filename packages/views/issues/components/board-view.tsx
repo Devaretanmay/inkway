@@ -1,7 +1,7 @@
 "use client";
 
-import { useIssueStatuses } from "@multica/core/issue-statuses/hooks";
-import { cn } from "@multica/ui/lib/utils";
+import { useIssueStatuses } from "@inkway/core/issue-statuses/hooks";
+import { cn } from "@inkway/ui/lib/utils";
 
 import { useState, useCallback, useMemo, useEffect, useRef, memo } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -23,13 +23,13 @@ import type {
   IssueStatus,
   Project,
   IssueProperty,
-} from "@multica/core/types";
-import { useViewStore } from "@multica/core/issues/stores/view-store-context";
-import { propertyIdFromViewKey } from "@multica/core/issues/stores/view-store";
-import { propertyListOptions, useSetIssueProperty, useUnsetIssueProperty } from "@multica/core/properties";
-import { useWorkspaceId } from "@multica/core/hooks";
-import type { IssueGrouping } from "@multica/core/issues/stores/view-store";
-import { useActorName } from "@multica/core/workspace/hooks";
+} from "@inkway/core/types";
+import { useViewStore } from "@inkway/core/issues/stores/view-store-context";
+import { propertyIdFromViewKey } from "@inkway/core/issues/stores/view-store";
+import { propertyListOptions, useSetIssueProperty, useUnsetIssueProperty } from "@inkway/core/properties";
+import { useWorkspaceId } from "@inkway/core/hooks";
+import type { IssueGrouping } from "@inkway/core/issues/stores/view-store";
+import { useActorName } from "@inkway/core/workspace/hooks";
 import { BoardColumn, BOARD_CARD_WIDTH, type BoardColumnGroup } from "./board-column";
 import { BoardCardContent } from "./board-card";
 import { HiddenColumnsPanel, HiddenColumnRow } from "./hidden-columns-panel";

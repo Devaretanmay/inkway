@@ -11,7 +11,7 @@ import {
 } from "vitest";
 import { render, screen, act, cleanup, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { I18nProvider } from "@multica/core/i18n/react";
+import { I18nProvider } from "@inkway/core/i18n/react";
 import enCommon from "../../locales/en/common.json";
 import enAuth from "../../locales/en/auth.json";
 import enSettings from "../../locales/en/settings.json";
@@ -36,14 +36,14 @@ const userRef = vi.hoisted(() => ({
   current: null as { id: string; timezone?: string | null } | null,
 }));
 
-vi.mock("@multica/ui/components/common/theme-provider", () => ({
+vi.mock("@inkway/ui/components/common/theme-provider", () => ({
   useTheme: () => ({ theme: "light", setTheme: mockSetTheme }),
 }));
 
-vi.mock("@multica/core/i18n/react", async () => {
+vi.mock("@inkway/core/i18n/react", async () => {
   const actual = await vi.importActual<
-    typeof import("@multica/core/i18n/react")
-  >("@multica/core/i18n/react");
+    typeof import("@inkway/core/i18n/react")
+  >("@inkway/core/i18n/react");
   return {
     ...actual,
     useLocaleAdapter: () => ({
@@ -60,18 +60,18 @@ const chatState = vi.hoisted(() => ({
   floatingChatEnabled: true,
   setFloatingChatEnabled: vi.fn(),
 }));
-vi.mock("@multica/core/chat", () => ({
+vi.mock("@inkway/core/chat", () => ({
   useChatStore: Object.assign(
     (selector: (state: typeof chatState) => unknown) => selector(chatState),
     { getState: () => chatState },
   ),
 }));
 
-vi.mock("@multica/core/paths", () => ({
+vi.mock("@inkway/core/paths", () => ({
   useCurrentWorkspace: () => ({ id: "ws-1", name: "Acme" }),
 }));
 
-vi.mock("@multica/core/api", () => ({
+vi.mock("@inkway/core/api", () => ({
   api: { updateMe: mockUpdateMe },
 }));
 
@@ -83,10 +83,10 @@ vi.mock("sonner", () => ({
   },
 }));
 
-vi.mock("@multica/core/auth", async () => {
+vi.mock("@inkway/core/auth", async () => {
   const actual =
-    await vi.importActual<typeof import("@multica/core/auth")>(
-      "@multica/core/auth",
+    await vi.importActual<typeof import("@inkway/core/auth")>(
+      "@inkway/core/auth",
     );
   type AuthState = {
     user: typeof userRef.current;
@@ -104,13 +104,13 @@ vi.mock("@multica/core/auth", async () => {
 });
 
 import { PreferencesTab } from "./preferences-tab";
-import { useCommentComposerStore } from "@multica/core/issues/stores";
-import { useIssueOpeningStore } from "@multica/core/issues/stores/issue-opening-store";
+import { useCommentComposerStore } from "@inkway/core/issues/stores";
+import { useIssueOpeningStore } from "@inkway/core/issues/stores/issue-opening-store";
 import {
   DEFAULT_MANUAL_CREATE_FIELDS,
   DEFAULT_QUICK_CREATE_FIELDS,
   useIssueCreateSettingsStore,
-} from "@multica/core/issues/stores/issue-create-settings-store";
+} from "@inkway/core/issues/stores/issue-create-settings-store";
 
 
 const TEST_RESOURCES = {
@@ -392,7 +392,7 @@ describe("PreferencesTab — Create-issue fields", () => {
     expect(within(table).getAllByRole("checkbox")).toHaveLength(10);
     expect(
       within(table).getByRole("checkbox", { name: "Project · Create with agent" }),
-    ).toBeChecked();
+    ).not.toBeChecked();
     expect(
       within(table).getByRole("checkbox", { name: "Due date · Manual create" }),
     ).not.toBeChecked();
@@ -410,7 +410,6 @@ describe("PreferencesTab — Create-issue fields", () => {
     await user.click(screen.getByRole("checkbox", { name: "Labels · Manual create" }));
 
     expect(useIssueCreateSettingsStore.getState().quickCreateFields).toEqual([
-      "project",
       "priority",
     ]);
     expect(useIssueCreateSettingsStore.getState().manualCreateFields).toEqual([

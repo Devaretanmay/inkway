@@ -15,8 +15,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 
-	"github.com/multica-ai/multica/server/internal/testutil"
-	db "github.com/multica-ai/multica/server/pkg/db/generated"
+	"github.com/Devaretanmay/inkway/server/internal/testutil"
+	db "github.com/Devaretanmay/inkway/server/pkg/db/generated"
 )
 
 func makePropertyDef(propType string, options []PropertyOption) db.IssueProperty {
@@ -1351,7 +1351,7 @@ func TestIssuePropertyFacetScalarTypes(t *testing.T) {
 func createPropertyTestMember(t *testing.T) string {
 	t.Helper()
 	ctx := context.Background()
-	email := "actor-second-" + uuid.NewString()[:8] + "@multica.test"
+	email := "actor-second-" + uuid.NewString()[:8] + "@inkway.test"
 	var userID string
 	if err := testPool.QueryRow(ctx,
 		`INSERT INTO "user" (name, email) VALUES ('Actor Second Member', $1) RETURNING id`, email,

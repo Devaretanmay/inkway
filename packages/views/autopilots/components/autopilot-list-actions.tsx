@@ -11,13 +11,13 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
-import type { Autopilot } from "@multica/core/types";
+import type { Autopilot } from "@inkway/core/types";
 import {
   useDeleteAutopilot,
   useUpdateAutopilot,
-} from "@multica/core/autopilots";
-import { useWorkspacePaths } from "@multica/core/paths";
-import { Button } from "@multica/ui/components/ui/button";
+} from "@inkway/core/autopilots";
+import { useWorkspacePaths } from "@inkway/core/paths";
+import { Button } from "@inkway/ui/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -25,14 +25,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@multica/ui/components/ui/dialog";
+} from "@inkway/ui/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@multica/ui/components/ui/dropdown-menu";
+} from "@inkway/ui/components/ui/dropdown-menu";
 import { useT } from "../../i18n";
 import { useIntentNavigate } from "../../navigation";
 

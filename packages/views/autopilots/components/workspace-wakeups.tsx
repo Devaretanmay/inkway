@@ -4,31 +4,31 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 import { useQuery } from "@tanstack/react-query";
 import { Bell, Clock3, AlertCircle, ListChecks, Search, TriangleAlert } from "lucide-react";
 import { toast } from "sonner";
-import { useWorkspaceId } from "@multica/core/hooks";
-import { useWorkspacePaths } from "@multica/core/paths";
+import { useWorkspaceId } from "@inkway/core/hooks";
+import { useWorkspacePaths } from "@inkway/core/paths";
 import {
   workspaceWakeupsOptions,
   useDisableWorkspaceWakeups,
   useDisableIssueWakeup,
   useEnableIssueWakeup,
   useUpdateIssueSystemWakeup,
-} from "@multica/core/issues/wakeups";
+} from "@inkway/core/issues/wakeups";
 import type {
   Issue,
   WorkspaceWakeup,
   WorkspaceWakeupFilters,
-} from "@multica/core/types";
-import { Switch } from "@multica/ui/components/ui/switch";
-import { Button } from "@multica/ui/components/ui/button";
-import { Checkbox } from "@multica/ui/components/ui/checkbox";
-import { Input } from "@multica/ui/components/ui/input";
+} from "@inkway/core/types";
+import { Switch } from "@inkway/ui/components/ui/switch";
+import { Button } from "@inkway/ui/components/ui/button";
+import { Checkbox } from "@inkway/ui/components/ui/checkbox";
+import { Input } from "@inkway/ui/components/ui/input";
 import {
   Select,
   SelectTrigger,
   SelectValue,
   SelectContent,
   SelectItem,
-} from "@multica/ui/components/ui/select";
+} from "@inkway/ui/components/ui/select";
 import {
   Table,
   TableHeader,
@@ -36,7 +36,7 @@ import {
   TableBody,
   TableRow,
   TableCell,
-} from "@multica/ui/components/ui/table";
+} from "@inkway/ui/components/ui/table";
 import {
   Dialog,
   DialogContent,
@@ -44,8 +44,8 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@multica/ui/components/ui/dialog";
-import { cn } from "@multica/ui/lib/utils";
+} from "@inkway/ui/components/ui/dialog";
+import { cn } from "@inkway/ui/lib/utils";
 import { AppLink } from "../../navigation";
 import { useLocale, useT } from "../../i18n";
 import { CollectionPageState } from "../../layout/collection-page";

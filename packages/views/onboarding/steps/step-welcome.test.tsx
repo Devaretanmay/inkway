@@ -14,7 +14,7 @@ describe("StepWelcome status labels", () => {
     renderWithI18n(<StepWelcome onNext={vi.fn()} />);
 
     expect(screen.getByText("In Progress")).toBeInTheDocument();
-    expect(screen.getByText("In Review")).toBeInTheDocument();
+    expect(screen.getByText("Review")).toBeInTheDocument();
     expect(screen.getAllByText("Done")).toHaveLength(2);
   });
 
@@ -22,7 +22,7 @@ describe("StepWelcome status labels", () => {
     renderWithI18n(<StepWelcome onNext={vi.fn()} />, { locale: "zh-Hans" });
 
     expect(screen.getByText("进行中")).toBeInTheDocument();
-    expect(screen.getByText("审核中")).toBeInTheDocument();
+    expect(screen.getByText("审核")).toBeInTheDocument();
     expect(screen.getAllByText("已完成")).toHaveLength(2);
     expect(screen.queryByText("In Progress")).not.toBeInTheDocument();
   });

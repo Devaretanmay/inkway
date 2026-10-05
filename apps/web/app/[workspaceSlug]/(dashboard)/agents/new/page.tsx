@@ -1,5 +1,5 @@
-import { ChooseCreateMethodPage } from "@multica/views/agents/choose-create-method-page";
+import { ManualCreateAgentPage } from "@inkway/views/agents";
 
 export default function NewAgentRoute() {
-  return <ChooseCreateMethodPage />;
+  return <ManualCreateAgentPage />;
 }

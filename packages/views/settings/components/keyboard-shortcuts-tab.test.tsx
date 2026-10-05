@@ -6,7 +6,7 @@ import {
   configureShortcutRuntime,
   getShortcut,
   useShortcutStore,
-} from "@multica/core/shortcuts";
+} from "@inkway/core/shortcuts";
 import { renderWithI18n } from "../../test/i18n";
 import { KeyboardShortcutsTab } from "./keyboard-shortcuts-tab";
 

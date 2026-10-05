@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/multica-ai/multica/server/internal/testutil"
+	"github.com/Devaretanmay/inkway/server/internal/testutil"
 )
 
 func TestArchivedInboxPageBeyond200(t *testing.T) {

@@ -1,19 +1,16 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { buildIssueStatusCatalog } from "@multica/core/issue-statuses/queries";
+import { buildIssueStatusCatalog } from "@inkway/core/issue-statuses/queries";
 
-vi.mock("@multica/core/issue-statuses/hooks", () => ({
+vi.mock("@inkway/core/issue-statuses/hooks", () => ({
   useIssueStatuses: () => buildIssueStatusCatalog([]),
 }));
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ApiError } from "@multica/core/api";
+import { ApiError } from "@inkway/core/api";
 import { renderWithI18n } from "../test/i18n";
 import { AppSidebar } from "./app-sidebar";
 
-const { appForeground, chatSessions, chatStore, detail, deletePin, invitationApi, navigation, pins, sidebarState, summary, workspaces } = vi.hoisted(() => ({
-  appForeground: { current: true },
+const { detail, deletePin, invitationApi, navigation, pins, sidebarState, summary, workspaces } = vi.hoisted(() => ({
   sidebarState: { setOpenMobile: vi.fn() },
-  chatSessions: { current: [] as { id?: string; unread_count?: number }[] },
-  chatStore: { current: { activeSessionId: null as string | null, isOpen: false } },
   detail: { current: { isPending: false, isError: false, data: null as unknown, error: null as unknown } },
   deletePin: vi.fn(),
   // Captures the sidebar's invitation accept/decline mutations so the
@@ -57,7 +54,7 @@ vi.mock("@dnd-kit/sortable", () => ({
   verticalListSortingStrategy: vi.fn(),
 }));
 vi.mock("@dnd-kit/utilities", () => ({ CSS: { Transform: { toString: () => undefined } } }));
-vi.mock("@multica/ui/components/ui/sidebar", () => ({
+vi.mock("@inkway/ui/components/ui/sidebar", () => ({
   Sidebar: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   SidebarContent: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   SidebarFooter: ({ children }: { children: React.ReactNode }) => <>{children}</>,
@@ -84,7 +81,7 @@ vi.mock("@multica/ui/components/ui/sidebar", () => ({
   SidebarRail: () => null,
   useSidebar: () => ({ setOpenMobile: sidebarState.setOpenMobile }),
 }));
-vi.mock("@multica/ui/components/ui/dropdown-menu", () => ({
+vi.mock("@inkway/ui/components/ui/dropdown-menu", () => ({
   DropdownMenu: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   DropdownMenuContent: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   DropdownMenuGroup: ({ children }: { children: React.ReactNode }) => <>{children}</>,
@@ -93,18 +90,15 @@ vi.mock("@multica/ui/components/ui/dropdown-menu", () => ({
   DropdownMenuSeparator: () => null,
   DropdownMenuTrigger: ({ render }: { render: React.ReactNode }) => <>{render}</>,
 }));
-vi.mock("@multica/ui/components/ui/collapsible", () => ({
+vi.mock("@inkway/ui/components/ui/collapsible", () => ({
   Collapsible: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   CollapsibleContent: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   CollapsibleTrigger: () => <button type="button" />,
 }));
-vi.mock("@multica/ui/components/ui/tooltip", () => ({
+vi.mock("@inkway/ui/components/ui/tooltip", () => ({
   Tooltip: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   TooltipContent: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   TooltipTrigger: ({ children }: { children: React.ReactNode }) => <button type="button">{children}</button>,
-}));
-vi.mock("../common/use-app-foreground", () => ({
-  useAppForeground: () => appForeground.current,
 }));
 vi.mock("./help-launcher", () => ({ HelpLauncher: () => null }));
 vi.mock("../auth", () => ({ useLogout: () => vi.fn() }));
@@ -115,28 +109,23 @@ vi.mock("../navigation", () => ({
 }));
 vi.mock("../projects/components/project-icon", () => ({ ProjectIcon: () => <span /> }));
 vi.mock("../workspace/workspace-avatar", () => ({ WorkspaceAvatar: () => <span /> }));
-vi.mock("@multica/ui/components/common/actor-avatar", () => ({ ActorAvatar: () => <span /> }));
+vi.mock("@inkway/ui/components/common/actor-avatar", () => ({ ActorAvatar: () => <span /> }));
 
-vi.mock("@multica/core/auth", () => ({
+vi.mock("@inkway/core/auth", () => ({
   useAuthStore: (selector: (state: { user: { id: string } }) => unknown) => selector({ user: { id: "user-1" } }),
 }));
 // Callable-store shape (selectorFn + getState) per the repo testing rules.
-vi.mock("@multica/core/chat", () => ({
-  useChatStore: Object.assign(
-    (selector: (state: { activeSessionId: string | null; isOpen: boolean }) => unknown) =>
-      selector(chatStore.current),
-    { getState: () => chatStore.current },
-  ),
-}));
-vi.mock("@multica/core/paths", async (importOriginal) => ({
+vi.mock("@inkway/core/paths", async (importOriginal) => ({
   // Spread the real module so pure helpers (resolveRouteIconName, used by the
   // nav to derive each item's icon from its href) stay intact; only the
   // workspace/context hooks below are stubbed to control routes in tests.
-  ...(await importOriginal<typeof import("@multica/core/paths")>()),
+  ...(await importOriginal<typeof import("@inkway/core/paths")>()),
   paths: { workspace: (slug: string) => ({ issues: () => `/${slug}/issues` }) },
   useCurrentWorkspace: () => ({ id: "ws-1", name: "Acme", slug: "acme" }),
   useWorkspacePaths: () => ({
+    root: () => "/acme/issues",
     inbox: () => "/acme/inbox",
+    inks: () => "/acme/inks",
     chat: () => "/acme/chat",
     myIssues: () => "/acme/my-issues",
     issues: () => "/acme/issues",
@@ -152,8 +141,8 @@ vi.mock("@multica/core/paths", async (importOriginal) => ({
     projectDetail: (id: string) => `/acme/projects/${id}`,
   }),
 }));
-vi.mock("@multica/core/api", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@multica/core/api")>();
+vi.mock("@inkway/core/api", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@inkway/core/api")>();
   return {
     ...actual,
     api: {
@@ -164,7 +153,7 @@ vi.mock("@multica/core/api", async (importOriginal) => {
     },
   };
 });
-vi.mock("@multica/core/inbox/queries", () => ({
+vi.mock("@inkway/core/inbox/queries", () => ({
   inboxUnreadSummaryOptions: () => ({ queryKey: ["inbox", "unread-summary"] }),
   // The nav badge and the switcher dot read the SAME cross-workspace summary,
   // so the fixture that drives one drives the other.
@@ -177,17 +166,17 @@ vi.mock("@multica/core/inbox/queries", () => ({
   unreadWorkspaceIds: (entries: { workspace_id: string; count: number }[]) =>
     new Set(entries.filter((s) => s.count > 0).map((s) => s.workspace_id)),
 }));
-vi.mock("@multica/core/issues/queries", () => ({ issueDetailOptions: () => ({ queryKey: ["issue"] }) }));
-vi.mock("@multica/core/issues/stores/create-mode-store", () => ({
+vi.mock("@inkway/core/issues/queries", () => ({ issueDetailOptions: () => ({ queryKey: ["issue"] }) }));
+vi.mock("@inkway/core/issues/stores/create-mode-store", () => ({
   useCreateModeStore: { getState: () => ({ lastMode: "agent" }) },
   openCreateIssueWithPreference: vi.fn(),
 }));
-vi.mock("@multica/core/issues/stores/draft-store", () => ({ useIssueDraftStore: () => false }));
-vi.mock("@multica/core/modals", () => ({ useModalStore: { getState: () => ({ modal: null, open: vi.fn() }) } }));
-vi.mock("@multica/core/pins/mutations", () => ({ useDeletePin: () => ({ mutate: deletePin }), useReorderPins: () => ({ mutate: vi.fn() }) }));
-vi.mock("@multica/core/pins/queries", () => ({ pinListOptions: () => ({ queryKey: ["pins"] }) }));
-vi.mock("@multica/core/projects/queries", () => ({ projectDetailOptions: () => ({ queryKey: ["project"] }) }));
-vi.mock("@multica/core/workspace/queries", () => ({
+vi.mock("@inkway/core/issues/stores/draft-store", () => ({ useIssueDraftStore: () => false }));
+vi.mock("@inkway/core/modals", () => ({ useModalStore: { getState: () => ({ modal: null, open: vi.fn() }) } }));
+vi.mock("@inkway/core/pins/mutations", () => ({ useDeletePin: () => ({ mutate: deletePin }), useReorderPins: () => ({ mutate: vi.fn() }) }));
+vi.mock("@inkway/core/pins/queries", () => ({ pinListOptions: () => ({ queryKey: ["pins"] }) }));
+vi.mock("@inkway/core/projects/queries", () => ({ projectDetailOptions: () => ({ queryKey: ["project"] }) }));
+vi.mock("@inkway/core/workspace/queries", () => ({
   myInvitationListOptions: () => ({ queryKey: ["invitations"] }),
   workspaceKeys: { myInvitations: () => ["invitations"] },
   workspaceListOptions: () => ({ queryKey: ["workspaces"] }),
@@ -203,7 +192,6 @@ vi.mock("@tanstack/react-query", async (importOriginal) => ({
     if (queryKey[0] === "issue") return detail.current;
     if (queryKey[0] === "inbox" && queryKey[1] === "unread-summary") return { data: summary.current };
     if (queryKey[0] === "workspaces") return { data: workspaces.current };
-    if (queryKey[0] === "chat" && queryKey[2] === "sessions") return { data: chatSessions.current };
     return { data: [] };
   },
   useQueryClient: () => ({ fetchQuery: vi.fn(), invalidateQueries: invitationApi.invalidateQueries }),
@@ -390,7 +378,7 @@ describe("workspace-switcher dropdown per-workspace dot", () => {
 });
 
 describe("navigation item presentation", () => {
-  it("keeps Analytics and Settings styled like the other nav items", () => {
+  it("keeps Inks and Settings styled like the other nav items", () => {
     const { container } = render(<AppSidebar />);
     const referenceClassName = container.querySelector(
       'button[data-href="/acme/issues"]',
@@ -398,7 +386,7 @@ describe("navigation item presentation", () => {
 
     expect(referenceClassName).toBeTruthy();
 
-    for (const href of ["/acme/usage", "/acme/settings"]) {
+    for (const href of ["/acme/inks", "/acme/settings"]) {
       expect(container.querySelector(`button[data-href="${href}"]`)?.className).toBe(
         referenceClassName,
       );
@@ -406,100 +394,40 @@ describe("navigation item presentation", () => {
   });
 });
 
-describe("personal nav — Chat", () => {
+describe("Inkway alpha primary nav", () => {
   beforeEach(() => {
-    chatSessions.current = [];
     summary.current = [];
     navigation.current = { pathname: "/acme/issues" };
-    chatStore.current = { activeSessionId: null, isOpen: false };
-    appForeground.current = true;
   });
 
-  // The mocked SidebarMenuButton exposes the AppLink target as `data-href`
-  // and renders the label + badge as its children.
-  const chatNav = (container: HTMLElement) =>
-    container.querySelector<HTMLElement>('button[data-href="/acme/chat"]');
-  const chatBadge = (container: HTMLElement) =>
-    chatNav(container)?.querySelector("number-flow-react") ?? null;
+  it("renders Issues, Agents, Providers, Inks, Inbox, and Settings links", () => {
+    const { container } = render(<AppSidebar />);
+    for (const href of ["/acme/issues", "/acme/agents", "/acme/runtimes", "/acme/inks", "/acme/inbox", "/acme/settings"]) {
+      expect(container.querySelector(`button[data-href="${href}"]`)).not.toBeNull();
+    }
+    expect(container.querySelector('button[data-href="/acme/runtimes"]')?.textContent).toMatch(/Providers/);
+  });
 
-  it("keeps persistent Inbox and Chat counters static", () => {
+  it("links Inks to the workspace inks route", () => {
+    const { container } = render(<AppSidebar />);
+    expect(container.querySelector('button[data-href="/acme/inks"]')?.textContent).toMatch(/Inks/);
+  });
+
+  it("does not expose Chat, My Issues, Projects, Autopilot, Squads, Analytics, or Skills in the sidebar", () => {
+    const { container } = render(<AppSidebar />);
+    for (const href of ["/acme/chat", "/acme/my-issues", "/acme/projects", "/acme/autopilots", "/acme/squads", "/acme/usage", "/acme/skills"]) {
+      expect(container.querySelector(`button[data-href="${href}"]`)).toBeNull();
+    }
+  });
+
+  it("keeps the Inbox counter static", () => {
     summary.current = [{ workspace_id: "ws-1", count: 1 }];
-    chatSessions.current = [{ id: "chat-1", unread_count: 2 }];
     const { container } = render(<AppSidebar />);
     const inboxBadge = container
       .querySelector<HTMLElement>('button[data-href="/acme/inbox"]')
       ?.querySelector("number-flow-react") as (HTMLElement & { animated?: boolean }) | null;
-    const currentChatBadge = chatBadge(container) as (HTMLElement & { animated?: boolean }) | null;
 
     expect(inboxBadge?.animated).toBe(false);
-    expect(currentChatBadge?.animated).toBe(false);
-  });
-
-  it("renders a Chat nav link to the workspace chat route", () => {
-    const { container } = render(<AppSidebar />);
-    expect(chatNav(container)).not.toBeNull();
-  });
-
-  it("badges the Chat nav with the summed unread_count of chat sessions", () => {
-    chatSessions.current = [{ id: "a", unread_count: 3 }, { id: "b", unread_count: 2 }, { id: "c", unread_count: 0 }];
-    const { container } = render(<AppSidebar />);
-    expect(chatBadge(container)).toHaveAttribute("aria-label", "5");
-  });
-
-  it("shows no Chat unread badge when every session is read", () => {
-    chatSessions.current = [{ id: "a", unread_count: 0 }, { id: "b" }];
-    const { container } = render(<AppSidebar />);
-    expect(chatBadge(container)).toBeNull();
-  });
-
-  it("excludes the session being viewed on the chat page from the badge", () => {
-    // The thread list zeroes the open session's row badge; the aggregate
-    // must follow, or a reply landing in the open conversation flashes a
-    // count with no matching row.
-    chatSessions.current = [{ id: "a", unread_count: 2 }, { id: "b", unread_count: 3 }];
-    navigation.current = { pathname: "/acme/chat" };
-    chatStore.current = { activeSessionId: "a", isOpen: false };
-    const { container } = render(<AppSidebar />);
-    expect(chatBadge(container)).toHaveAttribute("aria-label", "3");
-  });
-
-  it("excludes the viewed session when the floating chat window is open off-route", () => {
-    chatSessions.current = [{ id: "a", unread_count: 2 }, { id: "b", unread_count: 3 }];
-    navigation.current = { pathname: "/acme/issues" };
-    chatStore.current = { activeSessionId: "a", isOpen: true };
-    const { container } = render(<AppSidebar />);
-    expect(chatBadge(container)).toHaveAttribute("aria-label", "3");
-  });
-
-  it("still counts a remembered selection when no chat surface is showing it", () => {
-    // activeSessionId persists after the chat page closes; with both
-    // surfaces closed nothing will auto mark-read, so the badge must count.
-    chatSessions.current = [{ id: "a", unread_count: 2 }, { id: "b", unread_count: 3 }];
-    navigation.current = { pathname: "/acme/issues" };
-    chatStore.current = { activeSessionId: "a", isOpen: false };
-    const { container } = render(<AppSidebar />);
-    expect(chatBadge(container)).toHaveAttribute("aria-label", "5");
-  });
-
-  it("counts the active session while the floating window is open but the app is backgrounded", () => {
-    // A reply landing while the app is not in the foreground is NOT auto
-    // marked-read (MUL-4485), so its unread must still badge — otherwise the
-    // notification is silently eaten while the user is away.
-    chatSessions.current = [{ id: "a", unread_count: 2 }, { id: "b", unread_count: 3 }];
-    navigation.current = { pathname: "/acme/issues" };
-    chatStore.current = { activeSessionId: "a", isOpen: true };
-    appForeground.current = false;
-    const { container } = render(<AppSidebar />);
-    expect(chatBadge(container)).toHaveAttribute("aria-label", "5");
-  });
-
-  it("counts the active session on the chat route while the app is backgrounded", () => {
-    chatSessions.current = [{ id: "a", unread_count: 2 }, { id: "b", unread_count: 3 }];
-    navigation.current = { pathname: "/acme/chat" };
-    chatStore.current = { activeSessionId: "a", isOpen: false };
-    appForeground.current = false;
-    const { container } = render(<AppSidebar />);
-    expect(chatBadge(container)).toHaveAttribute("aria-label", "5");
   });
 });
 

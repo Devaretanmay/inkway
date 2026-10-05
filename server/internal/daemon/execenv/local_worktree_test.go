@@ -55,7 +55,7 @@ func newTestRepo(t *testing.T) string {
 }
 
 func buildTestRepoTemplate() (string, error) {
-	dir, err := os.MkdirTemp("", "multica-test-repo")
+	dir, err := os.MkdirTemp("", "inkway-test-repo")
 	if err != nil {
 		return "", err
 	}
@@ -478,7 +478,7 @@ func TestWorktreeModeDeliversBranchWithoutSidecars(t *testing.T) {
 	if !strings.Contains(files, "real-change.txt") {
 		t.Errorf("branch is missing the agent's work:\n%s", files)
 	}
-	for _, sidecar := range []string{".agent_context", ".multica", "CLAUDE.md"} {
+	for _, sidecar := range []string{".agent_context", ".inkway", "CLAUDE.md"} {
 		if strings.Contains(files, sidecar) {
 			t.Errorf("sidecar %q leaked into the delivered branch:\n%s", sidecar, files)
 		}
@@ -567,19 +567,19 @@ func TestFinalizeKeepsWorktreeWhenCommitFails(t *testing.T) {
 	}
 }
 
-// An in_place task on the same directory leaves .agent_context/ and .multica/
+// An in_place task on the same directory leaves .agent_context/ and .inkway/
 // in the user's tree while it runs. A concurrent worktree snapshot sees them as
 // untracked files; copying them would hand this task another issue's brief and
 // commit it to the branch.
-func TestPrepareLocalWorktreeSkipsMulticaSidecars(t *testing.T) {
+func TestPrepareLocalWorktreeSkipsInkwaySidecars(t *testing.T) {
 	t.Parallel()
 	repo := newTestRepo(t)
 	writeFile(t, filepath.Join(repo, ".agent_context", "issue_context.md"), "OTHER issue's brief\n")
-	writeFile(t, filepath.Join(repo, ".multica", "project", "resources.json"), "{}\n")
+	writeFile(t, filepath.Join(repo, ".inkway", "project", "resources.json"), "{}\n")
 	// An in_place resource may point at a SUBDIRECTORY of this repo, in which
 	// case its sidecars sit below that subdirectory, not at the repo root.
 	writeFile(t, filepath.Join(repo, "services", "api", ".agent_context", "issue_context.md"), "yet another issue's brief\n")
-	writeFile(t, filepath.Join(repo, "services", "api", ".multica", "task.json"), "{}\n")
+	writeFile(t, filepath.Join(repo, "services", "api", ".inkway", "task.json"), "{}\n")
 	writeFile(t, filepath.Join(repo, "real-untracked.txt"), "user's own file\n")
 	writeFile(t, filepath.Join(repo, "services", "api", "notes.txt"), "user's nested file\n")
 
@@ -588,14 +588,14 @@ func TestPrepareLocalWorktreeSkipsMulticaSidecars(t *testing.T) {
 	if _, err := os.Stat(filepath.Join(wt.Path, ".agent_context")); !os.IsNotExist(err) {
 		t.Error("another task's .agent_context was copied into this worktree")
 	}
-	if _, err := os.Stat(filepath.Join(wt.Path, ".multica")); !os.IsNotExist(err) {
-		t.Error("another task's .multica was copied into this worktree")
+	if _, err := os.Stat(filepath.Join(wt.Path, ".inkway")); !os.IsNotExist(err) {
+		t.Error("another task's .inkway was copied into this worktree")
 	}
 	if _, err := os.Stat(filepath.Join(wt.Path, "services", "api", ".agent_context")); !os.IsNotExist(err) {
 		t.Error("a subdirectory task's .agent_context was copied into this worktree")
 	}
-	if _, err := os.Stat(filepath.Join(wt.Path, "services", "api", ".multica")); !os.IsNotExist(err) {
-		t.Error("a subdirectory task's .multica was copied into this worktree")
+	if _, err := os.Stat(filepath.Join(wt.Path, "services", "api", ".inkway")); !os.IsNotExist(err) {
+		t.Error("a subdirectory task's .inkway was copied into this worktree")
 	}
 	if got := readFile(t, filepath.Join(wt.Path, "real-untracked.txt")); got != "user's own file\n" {
 		t.Errorf("the user's own untracked file was not replayed: %q", got)
@@ -695,7 +695,7 @@ func TestPrepareWorktreeModeUsesPerIssueCodexSessionStore(t *testing.T) {
 }
 
 // The daemon runs its sidecar cleanup before Finalize commits. If that cleanup
-// fails, committing anyway would deliver a branch whose content is Multica's
+// fails, committing anyway would deliver a branch whose content is Inkway's
 // own runtime files — the exact leak this mode promises to prevent. The abort
 // must therefore stop the commit AND keep the worktree, since the agent's work
 // is still in it.
@@ -1312,11 +1312,11 @@ func TestPrepareLocalWorktreePrunesSnapshotsOfDeletedBranches(t *testing.T) {
 
 // The snapshot is the user's directory, not the daemon's view of it: a sidecar
 // left in their tree by a concurrent in_place task must never reach the branch.
-func TestCaptureUserSnapshotExcludesMulticaSidecars(t *testing.T) {
+func TestCaptureUserSnapshotExcludesInkwaySidecars(t *testing.T) {
 	t.Parallel()
 	repo := newTestRepo(t)
 	writeFile(t, filepath.Join(repo, ".agent_context", "brief.md"), "another task's brief\n")
-	writeFile(t, filepath.Join(repo, "sub", ".multica", "state.json"), "{}\n")
+	writeFile(t, filepath.Join(repo, "sub", ".inkway", "state.json"), "{}\n")
 	writeFile(t, filepath.Join(repo, "real.txt"), "the user's file\n")
 
 	head := gitRun(t, repo, "rev-parse", "HEAD")
@@ -1325,7 +1325,7 @@ func TestCaptureUserSnapshotExcludesMulticaSidecars(t *testing.T) {
 		t.Fatalf("captureUserSnapshot: %v", err)
 	}
 	listed := gitRun(t, repo, "ls-tree", "-r", "--name-only", snapshot)
-	for _, unwanted := range []string{".agent_context/brief.md", "sub/.multica/state.json"} {
+	for _, unwanted := range []string{".agent_context/brief.md", "sub/.inkway/state.json"} {
 		if strings.Contains(listed, unwanted) {
 			t.Errorf("snapshot carries the sidecar %s:\n%s", unwanted, listed)
 		}
@@ -1377,7 +1377,7 @@ func TestBranchRecordRoundTrips(t *testing.T) {
 	}
 }
 
-// Ownership is not a property of the NAME. A branch Multica delivered, that the
+// Ownership is not a property of the NAME. A branch Inkway delivered, that the
 // user then deleted and recreated for something of their own, keeps matching
 // the recorded owner — and there is no prepare in between for the orphan sweep
 // to notice the gap. Only the recorded checkpoint distinguishes them.

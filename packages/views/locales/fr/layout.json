@@ -1,6 +1,8 @@
 {
   "nav": {
     "inbox": "Boîte de réception",
+    "providers": "Providers",
+    "fastpaths": "Inks",
     "chat": "Discussion",
     "my_issues": "Mes tâches",
     "issues": "Tâches",
@@ -12,6 +14,36 @@
     "runtimes": "Runtimes",
     "skills": "Skills",
     "settings": "Paramètres"
+  },
+  "fastpaths": {
+    "title": "Inks",
+    "empty_heading": "No Inks connected",
+    "empty_body": "No Inks yet. Once Inkway is connected, repeated agent decisions will move through Learning, Shadow and Active as they are independently verified against real outcomes.",
+    "stage_learning": "Learning",
+    "stage_shadow": "Shadow",
+    "stage_active": "Active",
+    "stage_note": "Explanatory only. Inkway is not connected, so there is no Ink data to show.",
+    "subtitle": "Verified local decisions for common agent tasks.",
+    "stage_learning_detail": "Collect decision and outcome evidence from real agent runs. Nothing is served locally yet.",
+    "stage_shadow_detail": "Compare local decisions against the cloud decisions they would have replaced.",
+    "stage_active_detail": "Serve a verified decision locally, and fall back the moment it stops matching reality.",
+    "loading": "Chargement des données Ink…",
+    "load_error": "Impossible de charger les données Ink.",
+    "observations": "Observations",
+    "fast_served": "Servis par Ink",
+    "coverage": "Couverture",
+    "false_serves": "Services erronés",
+    "last_maintenance": "Dernière maintenance",
+    "runtime": "Runtime",
+    "connected": "Connecté",
+    "degraded": "Dégradé",
+    "unavailable": "Indisponible",
+    "candidate": "Candidat",
+    "demoted": "Rétrogradé",
+    "retired": "Retiré",
+    "updated": "Mis à jour",
+    "verified_outcomes": "Résultats vérifiés",
+    "model_calls_avoided": "Appels de modèle évités"
   },
   "tab": {
     "issue": "Tâche",
@@ -53,7 +85,7 @@
     "new_issue_shortcut": "C",
     "pinned_label": "Épinglés",
     "work_group": "Travail",
-    "ai_team_group": "Équipe IA",
+    "ai_team_group": "Travail IA",
     "show_more_pins": "Afficher {{count}} de plus…",
     "show_fewer_pins": "Afficher moins",
     "unread_overflow": "99+",
@@ -61,5 +93,6 @@
       "title": "Rejoignez notre Discord",
       "dismiss": "Ignorer"
     }
-  }
+  },
+  "brand_name": "Inkway"
 }

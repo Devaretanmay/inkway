@@ -2,10 +2,10 @@
 
 import { useEffect, useMemo, useState, type CSSProperties, type ReactNode } from "react";
 import { LayoutGrid, MessageSquareText, X } from "lucide-react";
-import type { DeliverableFile } from "@multica/core/attachments/deliverables";
-import type { TimelineEntry } from "@multica/core/types";
-import { useActorName } from "@multica/core/workspace/hooks";
-import { Dialog, DialogContent, DialogTitle } from "@multica/ui/components/ui/dialog";
+import type { DeliverableFile } from "@inkway/core/attachments/deliverables";
+import type { TimelineEntry } from "@inkway/core/types";
+import { useActorName } from "@inkway/core/workspace/hooks";
+import { Dialog, DialogContent, DialogTitle } from "@inkway/ui/components/ui/dialog";
 import { useLocale, useT, useTimeAgo } from "../../../i18n";
 import { ActorAvatar } from "../../../common/actor-avatar";
 import { formatBytes } from "../../../common/format-bytes";

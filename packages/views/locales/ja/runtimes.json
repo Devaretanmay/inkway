@@ -1,6 +1,6 @@
 {
   "page": {
-    "title": "ランタイム",
+    "title": "プロバイダー",
     "tagline": "エージェントの CLI セッションを実行するマシンとクラウドワーカーです。",
     "learn_more": "詳しく見る →",
     "connect_remote": "コンピュータを追加",
@@ -13,7 +13,7 @@
     "filter_all_description": "このビューのすべてのランタイム",
     "empty": {
       "title": "まだランタイムがありません",
-      "hint": "デスクトップ版はこのコンピュータを自動検出します。他のコンピュータはここで接続できます。"
+      "hint": "このコンピュータで Claude Code、Codex、または OpenCode を接続してください。API プロバイダーは「プロバイダー」ページで設定できます。"
     },
     "no_matches": {
       "title": "一致する結果なし",
@@ -25,7 +25,19 @@
     "bootstrapping": {
       "title": "ローカルランタイムを起動中…",
       "hint": "ワークスペースに接続中..."
-    }
+    },
+    "local_tools": "ローカルツール",
+    "api_providers": "API プロバイダー",
+    "detected": "検出済み",
+    "not_detected_on": "{{location}} では未検出",
+    "ready": "準備完了",
+    "unavailable": "利用不可",
+    "connect_a_computer_to_check": "確認するにはコンピュータを接続してください",
+    "this_computer": "このコンピュータ",
+    "connected_computers": "接続済みコンピュータ",
+    "browser_credentials_unavailable": "API キーを安全に接続するには Inkway Desktop を開いてください。このブラウザーから OS の資格情報ストアにはアクセスできません。",
+    "local_credential_status_unavailable": "ブラウザーではローカル認証情報の状態を確認できません",
+    "connect_in_desktop": "Desktop で接続"
   },
   "mika_setup": {
     "title": "ランタイムの準備ができました。Mika と始めましょう。",
@@ -189,7 +201,7 @@
   "connect": {
     "title": "コンピュータを追加",
     "description": "追加したいコンピュータで、この 2 つのコマンドを実行してください。デーモンがオンラインになった瞬間に検出します。",
-    "step1_label": "Multica CLI をインストール",
+    "step1_label": "Inkway CLI をインストール",
     "platform_group": "プラットフォームを選択",
     "platform_macos_linux": "macOS / Linux",
     "platform_windows": "Windows",
@@ -253,11 +265,11 @@
     "cli_version_label": "CLI バージョン:",
     "version_unknown": "不明",
     "managed_by_desktop": "デスクトップで管理",
-    "managed_by_desktop_title": "CLI バイナリは Multica Desktop で管理されています。CLI をアップグレードするには Desktop を更新してください。",
+    "managed_by_desktop_title": "CLI バイナリは Inkway Desktop で管理されています。CLI をアップグレードするには Desktop を更新してください。",
     "read_only": "読み取り専用",
     "read_only_title": "CLI を更新できるのは、ランタイムの所有者とワークスペース管理者のみです。",
     "local_build": "ローカルビルド",
-    "local_build_title": "このランタイムはリリース版ではないバージョンを報告しているため、Multica はアップグレードの有無を判断できません。マシン上で直接更新してください。",
+    "local_build_title": "このランタイムはリリース版ではないバージョンを報告しているため、Inkway はアップグレードの有無を判断できません。マシン上で直接更新してください。",
     "latest": "最新",
     "available": "利用可能",
     "action": "更新",
@@ -328,7 +340,7 @@
     "builtin_section_aria": "サポートされている組み込みプロトコルファミリー",
     "builtin_reference": "参考",
     "empty_title": "最初のカスタムランタイムを作成",
-    "empty_description": "ベースプロトコルファミリーを選び、Multica が実行するコマンドを指定します。",
+    "empty_description": "ベースプロトコルファミリーを選び、Inkway が実行するコマンドを指定します。",
     "badge_builtin": "組み込み",
     "badge_custom": "カスタム",
     "badge_disabled": "無効",

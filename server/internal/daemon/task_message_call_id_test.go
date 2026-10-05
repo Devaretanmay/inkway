@@ -8,7 +8,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/multica-ai/multica/server/pkg/agent"
+	"github.com/Devaretanmay/inkway/server/pkg/agent"
 )
 
 func TestExecuteAndDrain_ScopesToolCallIdentity(t *testing.T) {

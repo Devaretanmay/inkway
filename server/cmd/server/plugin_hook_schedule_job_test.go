@@ -16,13 +16,13 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/multica-ai/multica/server/internal/featureflags"
-	"github.com/multica-ai/multica/server/internal/scheduler"
-	"github.com/multica-ai/multica/server/internal/service"
-	"github.com/multica-ai/multica/server/internal/util"
-	db "github.com/multica-ai/multica/server/pkg/db/generated"
-	"github.com/multica-ai/multica/server/pkg/featureflag"
-	"github.com/multica-ai/multica/server/pkg/plugincontract"
+	"github.com/Devaretanmay/inkway/server/internal/featureflags"
+	"github.com/Devaretanmay/inkway/server/internal/scheduler"
+	"github.com/Devaretanmay/inkway/server/internal/service"
+	"github.com/Devaretanmay/inkway/server/internal/util"
+	db "github.com/Devaretanmay/inkway/server/pkg/db/generated"
+	"github.com/Devaretanmay/inkway/server/pkg/featureflag"
+	"github.com/Devaretanmay/inkway/server/pkg/plugincontract"
 )
 
 type receivedScheduledHook struct {
@@ -67,9 +67,9 @@ func TestPluginHookScheduleTwoReplicasRetryWithStableDelivery(t *testing.T) {
 		mu.Unlock()
 		if err := service.VerifyHookSignature(
 			secret,
-			r.Header.Get("X-Multica-Timestamp"),
+			r.Header.Get("X-Inkway-Timestamp"),
 			raw,
-			r.Header.Get("X-Multica-Signature"),
+			r.Header.Get("X-Inkway-Signature"),
 			time.Now(),
 		); err != nil {
 			mu.Lock()

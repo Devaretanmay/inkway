@@ -2,11 +2,11 @@
 
 import { useState, type ReactNode } from "react";
 import { Check, Copy, Terminal } from "lucide-react";
-import { CliInstallCommand } from "@multica/views/common/cli-install-command";
-import { copyText } from "@multica/ui/lib/clipboard";
+import { CliInstallCommand } from "@inkway/views/common/cli-install-command";
+import { copyText } from "@inkway/ui/lib/clipboard";
 import { useLocale } from "../../i18n";
 
-const SETUP_CMD = "multica setup";
+const SETUP_CMD = "inkway setup";
 
 /**
  * The landing palette bypasses the product tokens, so the shared platform

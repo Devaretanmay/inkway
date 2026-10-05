@@ -5,10 +5,10 @@ import (
 	"log/slog"
 
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/multica-ai/multica/server/internal/service"
-	db "github.com/multica-ai/multica/server/pkg/db/generated"
-	"github.com/multica-ai/multica/server/pkg/dbid"
-	"github.com/multica-ai/multica/server/pkg/protocol"
+	"github.com/Devaretanmay/inkway/server/internal/service"
+	db "github.com/Devaretanmay/inkway/server/pkg/db/generated"
+	"github.com/Devaretanmay/inkway/server/pkg/dbid"
+	"github.com/Devaretanmay/inkway/server/pkg/protocol"
 )
 
 // noteRuntimeUnusable records, on the issue itself, that a trigger was refused

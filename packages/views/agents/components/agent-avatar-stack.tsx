@@ -1,9 +1,9 @@
 "use client";
 
-import { ActorAvatar as ActorAvatarBase } from "@multica/ui/components/common/actor-avatar";
-import { AVATAR_SIZE_PX, type AvatarSize } from "@multica/ui/lib/avatar-size";
-import { useActorName } from "@multica/core/workspace/hooks";
-import { cn } from "@multica/ui/lib/utils";
+import { ActorAvatar as ActorAvatarBase } from "@inkway/ui/components/common/actor-avatar";
+import { AVATAR_SIZE_PX, type AvatarSize } from "@inkway/ui/lib/avatar-size";
+import { useActorName } from "@inkway/core/workspace/hooks";
+import { cn } from "@inkway/ui/lib/utils";
 import { useT } from "../../i18n";
 
 interface AgentAvatarStackProps {

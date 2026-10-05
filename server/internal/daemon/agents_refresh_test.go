@@ -15,7 +15,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/multica-ai/multica/server/pkg/agent"
+	"github.com/Devaretanmay/inkway/server/pkg/agent"
 )
 
 // The loop backs off whenever a round cannot shrink the missing-runtime set,
@@ -119,7 +119,7 @@ func TestDshRuntimeProfileMismatch(t *testing.T) {
 	}
 
 	// Installing the profile makes the two agree.
-	dir := filepath.Join(home, "profiles", dshMulticaProfileName)
+	dir := filepath.Join(home, "profiles", dshInkwayProfileName)
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		t.Fatal(err)
 	}

@@ -4,9 +4,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { AlertTriangle, Check, Loader2, Plug, RefreshCw, Trash2 } from "lucide-react";
-import { Button } from "@multica/ui/components/ui/button";
-import { Card, CardContent } from "@multica/ui/components/ui/card";
-import { Input } from "@multica/ui/components/ui/input";
+import { Button } from "@inkway/ui/components/ui/button";
+import { Card, CardContent } from "@inkway/ui/components/ui/card";
+import { Input } from "@inkway/ui/components/ui/input";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,14 +16,14 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@multica/ui/components/ui/alert-dialog";
-import { api } from "@multica/core/api";
+} from "@inkway/ui/components/ui/alert-dialog";
+import { api } from "@inkway/core/api";
 import {
   composioConnectionsOptions,
   composioKeys,
   composioToolkitsOptions,
-} from "@multica/core/composio";
-import type { ComposioToolkit } from "@multica/core/types";
+} from "@inkway/core/composio";
+import type { ComposioToolkit } from "@inkway/core/types";
 import { ComposioToolkitLogo } from "../../common/composio-toolkit-logo";
 import { useT, useTimeAgo } from "../../i18n";
 import { useNavigation } from "../../navigation";

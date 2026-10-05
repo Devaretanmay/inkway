@@ -11,7 +11,7 @@ import pg from "pg";
 // back to localhost. dotenv sets unset-vs-empty both as "" — treating them
 // the same matches user intent.
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || `http://localhost:${process.env.PORT || "8080"}`;
-const DATABASE_URL = process.env.DATABASE_URL ?? "postgres://multica:multica@localhost:5432/multica?sslmode=disable";
+const DATABASE_URL = process.env.DATABASE_URL ?? "postgres://inkway:inkway@localhost:5432/inkway?sslmode=disable";
 
 interface TestWorkspace {
   id: string;
@@ -81,7 +81,7 @@ export class TestApiClient {
         throw new Error(`No verification code found for ${email}`);
       }
 
-      const configuredDevCode = process.env.MULTICA_DEV_VERIFICATION_CODE?.trim();
+      const configuredDevCode = process.env.INKWAY_DEV_VERIFICATION_CODE?.trim();
       const code = configuredDevCode || result.rows[0].code;
 
       // Step 3: Verify code to get JWT
@@ -179,6 +179,25 @@ export class TestApiClient {
       );
       if (result.rowCount !== 1) {
         throw new Error(`Failed to mark E2E user onboarded: ${this.email}`);
+      }
+    } finally {
+      await client.end();
+    }
+  }
+
+  async markUserUnonboarded() {
+    if (!this.email) {
+      throw new Error("Cannot reset E2E user onboarding before login");
+    }
+    const client = new pg.Client(DATABASE_URL);
+    await client.connect();
+    try {
+      const result = await client.query(
+        `UPDATE "user" SET onboarded_at = NULL, starter_content_state = NULL WHERE email = $1`,
+        [this.email],
+      );
+      if (result.rowCount !== 1) {
+        throw new Error("Failed to reset E2E user onboarding state");
       }
     } finally {
       await client.end();

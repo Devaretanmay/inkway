@@ -1,13 +1,13 @@
 "use client";
-import { useIssueStatuses } from "@multica/core/issue-statuses/hooks";
+import { useIssueStatuses } from "@inkway/core/issue-statuses/hooks";
 
-import { issueStatusCategory } from "@multica/core/issues";
+import { issueStatusCategory } from "@inkway/core/issues";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { cn } from "@multica/ui/lib/utils";
-import { useScrollFade } from "@multica/ui/hooks/use-scroll-fade";
+import { cn } from "@inkway/ui/lib/utils";
+import { useScrollFade } from "@inkway/ui/hooks/use-scroll-fade";
 import { AppLink, useNavigation } from "../navigation";
 import { HelpLauncher } from "./help-launcher";
-import { JoinDiscordCard } from "./join-discord-card";
+import { InkwayIcon } from "@inkway/ui/components/common/inkway-icon";
 import {
   DndContext,
   PointerSensor,
@@ -28,13 +28,13 @@ import { Layers,
   X,
 } from "lucide-react";
 import { WorkspaceAvatar } from "../workspace/workspace-avatar";
-import { ActorAvatar } from "@multica/ui/components/common/actor-avatar";
-import { Tooltip, TooltipTrigger, TooltipContent } from "@multica/ui/components/ui/tooltip";
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@multica/ui/components/ui/collapsible";
-import { CappedNumberFlow } from "@multica/ui/components/ui/number-flow";
+import { ActorAvatar } from "@inkway/ui/components/common/actor-avatar";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@inkway/ui/components/ui/tooltip";
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@inkway/ui/components/ui/collapsible";
+import { CappedNumberFlow } from "@inkway/ui/components/ui/number-flow";
 import { StatusIcon } from "../issues/components/status-icon";
-import { useIssueDraftStore } from "@multica/core/issues/stores/draft-store";
-import { openCreateIssueWithPreference } from "@multica/core/issues/stores/create-mode-store";
+import { useIssueDraftStore } from "@inkway/core/issues/stores/draft-store";
+import { openCreateIssueWithPreference } from "@inkway/core/issues/stores/create-mode-store";
 import {
   Sidebar,
   SidebarContent,
@@ -48,7 +48,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
   useSidebar,
-} from "@multica/ui/components/ui/sidebar";
+} from "@inkway/ui/components/ui/sidebar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -57,37 +57,33 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@multica/ui/components/ui/dropdown-menu";
-import { useAuthStore } from "@multica/core/auth";
-import { issueViewDetailOptions } from "@multica/core/issue-views/queries";
+} from "@inkway/ui/components/ui/dropdown-menu";
+import { useAuthStore } from "@inkway/core/auth";
+import { issueViewDetailOptions } from "@inkway/core/issue-views/queries";
 import {
   issueViewContainerKey,
   useActiveIssueViewStore,
-} from "@multica/core/issue-views/active-view-store";
-import { useCurrentWorkspace, useWorkspacePaths, paths } from "@multica/core/paths";
-import { workspaceListOptions, myInvitationListOptions, workspaceKeys } from "@multica/core/workspace/queries";
-import { resolvePublicFileUrl } from "@multica/core/workspace/avatar-url";
+} from "@inkway/core/issue-views/active-view-store";
+import { useCurrentWorkspace, useWorkspacePaths, paths } from "@inkway/core/paths";
+import { workspaceListOptions, myInvitationListOptions, workspaceKeys } from "@inkway/core/workspace/queries";
+import { resolvePublicFileUrl } from "@inkway/core/workspace/avatar-url";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { inboxUnreadSummaryOptions, useInboxUnreadCount, hasOtherWorkspaceUnread, unreadWorkspaceIds } from "@multica/core/inbox/queries";
-import { chatSessionsOptions } from "@multica/core/chat/queries";
-import { countUnreadChatMessages } from "@multica/core/chat/unread";
-import { useChatStore } from "@multica/core/chat";
-import { api, ApiError } from "@multica/core/api";
-import { useConfigStore } from "@multica/core/config";
-import { pinListOptions } from "@multica/core/pins/queries";
-import { useDeletePin, useReorderPins } from "@multica/core/pins/mutations";
-import { issueDetailOptions } from "@multica/core/issues/queries";
-import { projectDetailOptions } from "@multica/core/projects/queries";
-import type { PinnedItem } from "@multica/core/types";
+import { inboxUnreadSummaryOptions, useInboxUnreadCount, hasOtherWorkspaceUnread, unreadWorkspaceIds } from "@inkway/core/inbox/queries";
+import { api, ApiError } from "@inkway/core/api";
+import { useConfigStore } from "@inkway/core/config";
+import { pinListOptions } from "@inkway/core/pins/queries";
+import { useDeletePin, useReorderPins } from "@inkway/core/pins/mutations";
+import { issueDetailOptions } from "@inkway/core/issues/queries";
+import { projectDetailOptions } from "@inkway/core/projects/queries";
+import type { PinnedItem } from "@inkway/core/types";
 import { useLogout } from "../auth";
 import { ProjectIcon } from "../projects/components/project-icon";
 import { routeIconForPath } from "./route-icon-components";
 import { useT } from "../i18n";
 import {
   useShortcut,
-} from "@multica/core/shortcuts";
+} from "@inkway/core/shortcuts";
 import { ShortcutKeycaps } from "../common/shortcut-keycaps";
-import { useAppForeground } from "../common/use-app-foreground";
 
 // Top-level nav items stay active when the user is on a child route
 // (e.g. "Projects" stays lit on /:slug/projects/:id). Pinned items keep
@@ -113,6 +109,7 @@ const PINNED_PREVIEW_LIMIT = 5;
 // Only parameterless paths are valid nav destinations.
 type NavKey =
   | "inbox"
+  | "inks"
   | "chat"
   | "myIssues"
   | "issues"
@@ -129,6 +126,8 @@ type NavKey =
 // icons derived from the destination path via routeIconForPath.
 type NavLabelKey =
   | "inbox"
+  | "providers"
+  | "fastpaths"
   | "chat"
   | "my_issues"
   | "issues"
@@ -144,27 +143,22 @@ type NavLabelKey =
 // Nav icons are NOT declared here: they are derived from each item's
 // destination path at render time, so the sidebar and the desktop tab bar
 // always agree. See route-icon-components.tsx.
+// Inkway primary nav: Issues, Agents, Providers, Inks, Inbox, Settings.
+// Removed from the sidebar (routes stay mounted): chat, myIssues,
+// projects, autopilots, squads, usage, skills.
 const personalNav: { key: NavKey; labelKey: NavLabelKey }[] = [
-  { key: "inbox", labelKey: "inbox" },
-  { key: "myIssues", labelKey: "my_issues" },
-  { key: "chat", labelKey: "chat" },
-];
-
-const workNav: { key: NavKey; labelKey: NavLabelKey }[] = [
   { key: "issues", labelKey: "issues" },
-  { key: "projects", labelKey: "projects" },
-  { key: "autopilots", labelKey: "autopilots" },
+  { key: "agents", labelKey: "agents" },
+  { key: "runtimes", labelKey: "providers" },
+  { key: "inks", labelKey: "fastpaths" },
+  { key: "inbox", labelKey: "inbox" },
 ];
 
-const aiTeamNav: { key: NavKey; labelKey: NavLabelKey }[] = [
-  { key: "agents", labelKey: "agents" },
-  { key: "squads", labelKey: "squads" },
-  { key: "skills", labelKey: "skills" },
-  { key: "runtimes", labelKey: "runtimes" },
-];
+const workNav: { key: NavKey; labelKey: NavLabelKey }[] = [];
+
+const aiTeamNav: { key: NavKey; labelKey: NavLabelKey }[] = [];
 
 const utilityNav: { key: NavKey; labelKey: NavLabelKey }[] = [
-  { key: "usage", labelKey: "usage" },
   { key: "settings", labelKey: "settings" },
 ];
 
@@ -461,35 +455,6 @@ export function AppSidebar({ topSlot, searchSlot, headerClassName, headerStyle }
   // for the switcher dot, so the count costs no request of its own — it used
   // to download the whole inbox list here just to count it (MUL-6967).
   const unreadCount = useInboxUnreadCount(wsId);
-  // Chat tab unread badge: IM-style total of unread *messages* across chat
-  // threads (countUnreadChatMessages is the shared definition — mobile's tab
-  // badge derives from the same function, keeping the platforms in agreement).
-  const { data: chatSessions = [] } = useQuery({
-    ...chatSessionsOptions(wsId ?? ""),
-    enabled: !!wsId,
-  });
-  // The session the user is reading right now must not count: the thread list
-  // renders its row badge as 0 (auto mark-read is about to clear it), and a
-  // reply landing in the open conversation would otherwise flash a sidebar
-  // count with no matching row. "Reading right now" = a session is active, a
-  // chat surface is actually showing it (chat page route or the floating
-  // window), AND the app is in the foreground. When the app is backgrounded,
-  // auto mark-read is suppressed (MUL-4485) so the reply stays unread — the
-  // badge must count it, or the notification is silently eaten while the user
-  // is away. A remembered selection while both surfaces are closed also still
-  // counts, for the same reason.
-  const activeChatSessionId = useChatStore((s) => s.activeSessionId);
-  const floatingChatOpen = useChatStore((s) => s.isOpen);
-  const appForeground = useAppForeground();
-  const chatHref = p.chat();
-  const viewedChatSessionId =
-    appForeground && (floatingChatOpen || isNavActive(pathname, chatHref))
-      ? activeChatSessionId
-      : null;
-  const chatUnreadCount = React.useMemo(
-    () => countUnreadChatMessages(chatSessions, viewedChatSessionId),
-    [chatSessions, viewedChatSessionId],
-  );
   // Cross-workspace unread summary backs the workspace-switcher dot. One
   // shared cache entry across workspaces; gated on an active workspace since
   // the endpoint resolves through the workspace-member middleware.
@@ -614,6 +579,10 @@ export function AppSidebar({ topSlot, searchSlot, headerClassName, headerStyle }
         {topSlot}
         {/* Workspace Switcher */}
         <SidebarHeader className={cn("py-3", headerClassName)} style={headerStyle}>
+          <div className="flex items-center gap-2 px-2 pb-1 font-serif text-title-lg font-semibold tracking-tight">
+            <InkwayIcon className="size-5 text-primary" noSpin />
+            <span>{t(($) => $.brand_name)}</span>
+          </div>
           <SidebarMenu>
             <SidebarMenuItem>
               <DropdownMenu>
@@ -631,7 +600,7 @@ export function AppSidebar({ topSlot, searchSlot, headerClassName, headerStyle }
                         )}
                       </span>
                       <span className="flex-1 truncate font-medium">
-                        {workspace?.name ?? "Multica"}
+                        {workspace?.name ?? "Inkway"}
                       </span>
                       <ChevronDown className="size-3 text-muted-foreground" />
                     </SidebarMenuButton>
@@ -776,7 +745,7 @@ export function AppSidebar({ topSlot, searchSlot, headerClassName, headerStyle }
                 {personalNav.map((item) => {
                   const href = p[item.key]();
                   const Icon = routeIconForPath(href);
-                  const isActive = isNavActive(pathname, href);
+                  const isActive = !isActivePinnedRoute && isNavActive(pathname, href);
                   return (
                     <SidebarMenuItem key={item.key}>
                       <SidebarMenuButton
@@ -789,13 +758,6 @@ export function AppSidebar({ topSlot, searchSlot, headerClassName, headerStyle }
                         {item.key === "inbox" && unreadCount > 0 && (
                           <CappedNumberFlow
                             value={unreadCount}
-                            animated={false}
-                            className="ml-auto text-caption"
-                          />
-                        )}
-                        {item.key === "chat" && chatUnreadCount > 0 && (
-                          <CappedNumberFlow
-                            value={chatUnreadCount}
                             animated={false}
                             className="ml-auto text-caption"
                           />
@@ -857,7 +819,7 @@ export function AppSidebar({ topSlot, searchSlot, headerClassName, headerStyle }
             </Collapsible>
           )}
 
-          <SidebarGroup>
+          {workNav.length > 0 && <SidebarGroup>
             <SidebarGroupLabel>{t(($) => $.sidebar.work_group)}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu className="gap-0.5">
@@ -880,9 +842,9 @@ export function AppSidebar({ topSlot, searchSlot, headerClassName, headerStyle }
                 })}
               </SidebarMenu>
             </SidebarGroupContent>
-          </SidebarGroup>
+          </SidebarGroup>}
 
-          <SidebarGroup>
+          {aiTeamNav.length > 0 && <SidebarGroup>
             <SidebarGroupLabel>{t(($) => $.sidebar.ai_team_group)}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu className="gap-0.5">
@@ -905,7 +867,7 @@ export function AppSidebar({ topSlot, searchSlot, headerClassName, headerStyle }
                 })}
               </SidebarMenu>
             </SidebarGroupContent>
-          </SidebarGroup>
+          </SidebarGroup>}
         </SidebarContent>
 
         <SidebarFooter className="p-2">
@@ -927,10 +889,7 @@ export function AppSidebar({ topSlot, searchSlot, headerClassName, headerStyle }
               );
             })}
           </SidebarMenu>
-          {/* Discord fills the strip while visible; once dismissed, help
-              aligns with the navigation icons above. */}
           <div className="flex items-center gap-1">
-            <JoinDiscordCard />
             <HelpLauncher />
           </div>
         </SidebarFooter>

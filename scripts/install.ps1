@@ -1,10 +1,10 @@
-# Multica installer for Windows - one command to get started.
+# Inkway installer for Windows - one command to get started.
 #
 # Install CLI (default): connects to multica.ai
-#   irm https://raw.githubusercontent.com/multica-ai/multica/main/scripts/install.ps1 | iex
+#   irm https://raw.githubusercontent.com/inkway-ai/inkway/main/scripts/install.ps1 | iex
 #
-# Self-host: starts a local Multica server + installs CLI + configures
-#   $env:MULTICA_MODE="local"; irm https://raw.githubusercontent.com/multica-ai/multica/main/scripts/install.ps1 | iex
+# Self-host: starts a local Inkway server + installs CLI + configures
+#   $env:INKWAY_MODE="local"; irm https://raw.githubusercontent.com/inkway-ai/inkway/main/scripts/install.ps1 | iex
 #
 
 $ErrorActionPreference = "Stop"
@@ -12,10 +12,10 @@ $ErrorActionPreference = "Stop"
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
-$RepoUrl       = "https://github.com/multica-ai/multica.git"
-$RepoWebUrl    = "https://github.com/multica-ai/multica"
-$DefaultInstallDir = Join-Path $env:USERPROFILE ".multica\server"
-$InstallDir    = if ($env:MULTICA_INSTALL_DIR) { $env:MULTICA_INSTALL_DIR } else { $DefaultInstallDir }
+$RepoUrl       = "https://github.com/inkway-ai/inkway.git"
+$RepoWebUrl    = "https://github.com/inkway-ai/inkway"
+$DefaultInstallDir = Join-Path $env:USERPROFILE ".inkway\server"
+$InstallDir    = if ($env:INKWAY_INSTALL_DIR) { $env:INKWAY_INSTALL_DIR } else { $DefaultInstallDir }
 
 # Host ports Compose reported after `up -d`; set by Setup-Server and reused by
 # the summary so the health check and the printed URLs cannot diverge.
@@ -86,7 +86,7 @@ function Get-ComposePublishedPort {
 
 function Get-LatestVersion {
     try {
-        $release = Invoke-RestMethod -Uri "https://api.github.com/repos/multica-ai/multica/releases/latest" -ErrorAction Stop
+        $release = Invoke-RestMethod -Uri "https://api.github.com/repos/inkway-ai/inkway/releases/latest" -ErrorAction Stop
         return $release.tag_name
     } catch {
         return $null
@@ -94,8 +94,8 @@ function Get-LatestVersion {
 }
 
 function Get-SelfHostRef {
-    if ($env:MULTICA_SELFHOST_REF) {
-        return $env:MULTICA_SELFHOST_REF
+    if ($env:INKWAY_SELFHOST_REF) {
+        return $env:INKWAY_SELFHOST_REF
     }
 
     $latest = Get-LatestVersion
@@ -216,7 +216,7 @@ function Get-WindowsCliArch {
 
 function Get-InstalledCliVersion {
     try {
-        $firstLine = multica version 2>$null | Select-Object -First 1
+        $firstLine = inkway version 2>$null | Select-Object -First 1
         if ("$firstLine" -match '\b(v?\d+(?:\.\d+)+)\b') {
             $version = $Matches[1]
             if ($version -notlike 'v*') {
@@ -233,10 +233,10 @@ function Get-InstalledCliVersion {
 # CLI Installation
 # ---------------------------------------------------------------------------
 function Install-CliBinary {
-    Write-Info "Installing Multica CLI from GitHub Releases..."
+    Write-Info "Installing Inkway CLI from GitHub Releases..."
 
     if (-not [Environment]::Is64BitOperatingSystem) {
-        Write-Fail "Multica requires a 64-bit Windows installation."
+        Write-Fail "Inkway requires a 64-bit Windows installation."
     }
 
     $arch = Get-WindowsCliArch
@@ -247,22 +247,22 @@ function Install-CliBinary {
     }
 
     $version = $latest.TrimStart('v')
-    $url = "https://github.com/multica-ai/multica/releases/download/$latest/multica-cli-$version-windows-$arch.zip"
-    $tmpDir = Join-Path ([System.IO.Path]::GetTempPath()) "multica-install"
+    $url = "https://github.com/inkway-ai/inkway/releases/download/$latest/inkway-cli-$version-windows-$arch.zip"
+    $tmpDir = Join-Path ([System.IO.Path]::GetTempPath()) "inkway-install"
 
     if (Test-Path $tmpDir) { Remove-Item $tmpDir -Recurse -Force }
     New-Item -ItemType Directory -Path $tmpDir | Out-Null
 
     Write-Info "Downloading $url ..."
     try {
-        Invoke-WebRequest -Uri $url -OutFile (Join-Path $tmpDir "multica.zip") -UseBasicParsing
+        Invoke-WebRequest -Uri $url -OutFile (Join-Path $tmpDir "inkway.zip") -UseBasicParsing
     } catch {
         Remove-Item $tmpDir -Recurse -Force
         Write-Fail "Failed to download CLI binary: $_"
     }
 
     # Verify SHA256 checksum
-    $checksumUrl = "https://github.com/multica-ai/multica/releases/download/$latest/checksums.txt"
+    $checksumUrl = "https://github.com/inkway-ai/inkway/releases/download/$latest/checksums.txt"
     try {
         $checksums = Invoke-WebRequest -Uri $checksumUrl -UseBasicParsing -ErrorAction Stop
         $checksumContent = if ($checksums.Content -is [byte[]]) {
@@ -270,10 +270,10 @@ function Install-CliBinary {
         } else {
             [string]$checksums.Content
         }
-        $zipFile = Join-Path $tmpDir "multica.zip"
+        $zipFile = Join-Path $tmpDir "inkway.zip"
         $actualHash = (Get-FileHash -Path $zipFile -Algorithm SHA256).Hash.ToLower()
-        $releaseAsset = "multica-cli-$version-windows-$arch.zip"
-        $legacyAsset = "multica_windows_$arch.zip"
+        $releaseAsset = "inkway-cli-$version-windows-$arch.zip"
+        $legacyAsset = "inkway_windows_$arch.zip"
         $expectedLine = ($checksumContent -split "`r?`n") |
             Where-Object {
                 $_ -match [regex]::Escape($releaseAsset) -or
@@ -294,27 +294,27 @@ function Install-CliBinary {
         Write-Warn "Could not download checksums.txt - skipping verification."
     }
 
-    Expand-Archive -Path (Join-Path $tmpDir "multica.zip") -DestinationPath $tmpDir -Force
+    Expand-Archive -Path (Join-Path $tmpDir "inkway.zip") -DestinationPath $tmpDir -Force
 
-    $binDir = Join-Path $env:USERPROFILE ".multica\bin"
+    $binDir = Join-Path $env:USERPROFILE ".inkway\bin"
     if (-not (Test-Path $binDir)) {
         New-Item -ItemType Directory -Path $binDir -Force | Out-Null
     }
 
-    $exeSrc = Join-Path $tmpDir "multica.exe"
+    $exeSrc = Join-Path $tmpDir "inkway.exe"
     if (-not (Test-Path $exeSrc)) {
-        $exeSrc = Get-ChildItem -Path $tmpDir -Filter "multica.exe" -Recurse | Select-Object -First 1 -ExpandProperty FullName
+        $exeSrc = Get-ChildItem -Path $tmpDir -Filter "inkway.exe" -Recurse | Select-Object -First 1 -ExpandProperty FullName
     }
     if (-not $exeSrc -or -not (Test-Path $exeSrc)) {
         Remove-Item $tmpDir -Recurse -Force
-        Write-Fail "multica.exe not found in downloaded archive."
+        Write-Fail "inkway.exe not found in downloaded archive."
     }
 
-    Copy-Item $exeSrc (Join-Path $binDir "multica.exe") -Force
+    Copy-Item $exeSrc (Join-Path $binDir "inkway.exe") -Force
     Remove-Item $tmpDir -Recurse -Force
 
     Add-ToUserPath $binDir
-    Write-Ok "Multica CLI installed to $binDir\multica.exe"
+    Write-Ok "Inkway CLI installed to $binDir\inkway.exe"
 }
 
 function Add-ToUserPath {
@@ -333,7 +333,7 @@ function Add-ToUserPath {
 }
 
 function Install-Cli {
-    if (Test-CommandExists "multica") {
+    if (Test-CommandExists "inkway") {
         $currentVer = Get-InstalledCliVersion
         $latestVer = Get-LatestVersion
 
@@ -350,22 +350,22 @@ function Install-Cli {
         }
 
         if ($isUpToDate) {
-            Write-Ok "Multica CLI is up to date ($currentVer)"
+            Write-Ok "Inkway CLI is up to date ($currentVer)"
             return
         }
 
-        Write-Info "Multica CLI $currentVer installed, latest is $latestVer - upgrading..."
+        Write-Info "Inkway CLI $currentVer installed, latest is $latestVer - upgrading..."
         Install-CliBinary
 
         $newVer = Get-InstalledCliVersion
-        Write-Ok "Multica CLI upgraded ($currentVer -> $newVer)"
+        Write-Ok "Inkway CLI upgraded ($currentVer -> $newVer)"
         return
     }
 
     Install-CliBinary
 
-    if (-not (Test-CommandExists "multica")) {
-        Write-Fail "CLI installed but 'multica' not found on PATH. Restart your terminal and try again."
+    if (-not (Test-CommandExists "inkway")) {
+        Write-Fail "CLI installed but 'inkway' not found on PATH. Restart your terminal and try again."
     }
 }
 
@@ -375,12 +375,12 @@ function Install-Cli {
 function Test-Docker {
     if (-not (Test-CommandExists "docker")) {
         Write-Fail @"
-Docker is not installed. Multica self-hosting requires Docker and Docker Compose.
+Docker is not installed. Inkway self-hosting requires Docker and Docker Compose.
 
 Install Docker Desktop for Windows:
   https://docs.docker.com/desktop/install/windows-install/
 
-After installing Docker, re-run this script with `$env:MULTICA_MODE="local"`.
+After installing Docker, re-run this script with `$env:INKWAY_MODE="local"`.
 "@
     }
 
@@ -397,7 +397,7 @@ After installing Docker, re-run this script with `$env:MULTICA_MODE="local"`.
 # Server setup (self-host / local)
 # ---------------------------------------------------------------------------
 function Install-Server {
-    Write-Info "Setting up Multica server..."
+    Write-Info "Setting up Inkway server..."
     $serverRef = Get-SelfHostRef
     Write-Info "Using self-host assets from $serverRef..."
 
@@ -405,7 +405,7 @@ function Install-Server {
         Write-Info "Updating existing installation at $InstallDir..."
         Write-Warn "Any local changes in $InstallDir will be overwritten."
     } else {
-        Write-Info "Cloning Multica repository..."
+        Write-Info "Cloning Inkway repository..."
         if (-not (Test-CommandExists "git")) {
             Write-Fail "Git is not installed. Please install git and re-run."
         }
@@ -439,9 +439,9 @@ function Install-Server {
         Write-Ok "Using existing .env"
     }
 
-    Write-Info "Pulling official Multica images..."
+    Write-Info "Pulling official Inkway images..."
     Pull-OfficialSelfHostImages
-    Write-Info "Starting Multica services (this may take a few minutes on first run)..."
+    Write-Info "Starting Inkway services (this may take a few minutes on first run)..."
     docker compose -f docker-compose.selfhost.yml up -d
 
     # Read the ports Compose actually published, once, and reuse them for both
@@ -468,7 +468,7 @@ function Install-Server {
     }
 
     if ($ready) {
-        Write-Ok "Multica server is running"
+        Write-Ok "Inkway server is running"
     } else {
         Write-Warn "Server is still starting. Check logs with:"
         Write-Host "  cd $InstallDir; docker compose -f docker-compose.selfhost.yml logs"
@@ -483,23 +483,23 @@ function Install-Server {
 # ---------------------------------------------------------------------------
 function Start-DefaultInstall {
     Write-Host ""
-    Write-Host "  Multica - Installer" -ForegroundColor White
+    Write-Host "  Inkway - Installer" -ForegroundColor White
     Write-Host ""
 
     Install-Cli
 
     Write-Host ""
     Write-Host "  ============================================" -ForegroundColor Green
-    Write-Host "  [OK] Multica CLI is ready!" -ForegroundColor Green
+    Write-Host "  [OK] Inkway CLI is ready!" -ForegroundColor Green
     Write-Host "  ============================================" -ForegroundColor Green
     Write-Host ""
     Write-Host "  Next: configure your environment"
     Write-Host ""
-    Write-Host "     multica setup               " -NoNewline; Write-Host "# Connect to Multica Cloud (multica.ai)" -ForegroundColor DarkGray
-    Write-Host "     multica setup self-host      " -NoNewline; Write-Host "# Connect to a self-hosted server" -ForegroundColor DarkGray
+    Write-Host "     inkway setup               " -NoNewline; Write-Host "# Connect to Inkway Cloud (multica.ai)" -ForegroundColor DarkGray
+    Write-Host "     inkway setup self-host      " -NoNewline; Write-Host "# Connect to a self-hosted server" -ForegroundColor DarkGray
     Write-Host ""
     Write-Host "  Self-hosting? Install the server first:"
-    Write-Host '     $env:MULTICA_MODE="with-server"; irm https://raw.githubusercontent.com/multica-ai/multica/main/scripts/install.ps1 | iex'
+    Write-Host '     $env:INKWAY_MODE="with-server"; irm https://raw.githubusercontent.com/inkway-ai/inkway/main/scripts/install.ps1 | iex'
     Write-Host ""
 }
 
@@ -508,7 +508,7 @@ function Start-DefaultInstall {
 # ---------------------------------------------------------------------------
 function Start-LocalInstall {
     Write-Host ""
-    Write-Host "  Multica - Self-Host Installer" -ForegroundColor White
+    Write-Host "  Inkway - Self-Host Installer" -ForegroundColor White
     Write-Host "  Provisioning server infrastructure + installing CLI"
     Write-Host ""
 
@@ -518,7 +518,7 @@ function Start-LocalInstall {
 
     Write-Host ""
     Write-Host "  ============================================" -ForegroundColor Green
-    Write-Host "  [OK] Multica server is running and CLI is ready!" -ForegroundColor Green
+    Write-Host "  [OK] Inkway server is running and CLI is ready!" -ForegroundColor Green
     Write-Host "  ============================================" -ForegroundColor Green
     Write-Host ""
     Write-Host "  Frontend:  http://localhost:$($script:SelfHostFrontendPort)"
@@ -527,13 +527,13 @@ function Start-LocalInstall {
     Write-Host ""
     Write-Host "  Next: configure your CLI to connect"
     Write-Host ""
-    Write-Host "     multica setup self-host  " -NoNewline; Write-Host "# Configure + authenticate + start daemon" -ForegroundColor DarkGray
+    Write-Host "     inkway setup self-host  " -NoNewline; Write-Host "# Configure + authenticate + start daemon" -ForegroundColor DarkGray
     Write-Host ""
     Write-Host "  Login: configure RESEND_API_KEY in .env for email codes,"
     Write-Host "  or read the generated code from backend logs when Resend is unset."
     Write-Host ""
     Write-Host "  To stop all services:"
-    Write-Host '     $env:MULTICA_MODE="stop"; irm https://raw.githubusercontent.com/multica-ai/multica/main/scripts/install.ps1 | iex'
+    Write-Host '     $env:INKWAY_MODE="stop"; irm https://raw.githubusercontent.com/inkway-ai/inkway/main/scripts/install.ps1 | iex'
     Write-Host ""
 }
 
@@ -542,7 +542,7 @@ function Start-LocalInstall {
 # ---------------------------------------------------------------------------
 function Start-Stop {
     Write-Host ""
-    Write-Info "Stopping Multica services..."
+    Write-Info "Stopping Inkway services..."
 
     if (Test-Path $InstallDir) {
         Push-Location $InstallDir
@@ -554,12 +554,12 @@ function Start-Stop {
         }
         Pop-Location
     } else {
-        Write-Warn "No Multica installation found at $InstallDir"
+        Write-Warn "No Inkway installation found at $InstallDir"
     }
 
-    if (Test-CommandExists "multica") {
+    if (Test-CommandExists "inkway") {
         try {
-            multica daemon stop 2>$null
+            inkway daemon stop 2>$null
             Write-Ok "Daemon stopped"
         } catch {}
     }
@@ -570,7 +570,7 @@ function Start-Stop {
 # ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
-$mode = if ($env:MULTICA_MODE) { $env:MULTICA_MODE.ToLower() } else { "default" }
+$mode = if ($env:INKWAY_MODE) { $env:INKWAY_MODE.ToLower() } else { "default" }
 
 switch ($mode) {
     "with-server" { Start-LocalInstall }

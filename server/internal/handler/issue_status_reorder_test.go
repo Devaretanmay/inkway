@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/multica-ai/multica/server/internal/issuestatus"
-	"github.com/multica-ai/multica/server/internal/testutil"
-	db "github.com/multica-ai/multica/server/pkg/db/generated"
+	"github.com/Devaretanmay/inkway/server/internal/issuestatus"
+	"github.com/Devaretanmay/inkway/server/internal/testutil"
+	db "github.com/Devaretanmay/inkway/server/pkg/db/generated"
 )
 
 // insertCustomStatus adds one custom status directly, returning its id.

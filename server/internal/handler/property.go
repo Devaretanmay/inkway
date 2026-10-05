@@ -18,11 +18,11 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/multica-ai/multica/server/internal/issueproperty"
-	"github.com/multica-ai/multica/server/internal/logger"
-	"github.com/multica-ai/multica/server/internal/util"
-	db "github.com/multica-ai/multica/server/pkg/db/generated"
-	"github.com/multica-ai/multica/server/pkg/protocol"
+	"github.com/Devaretanmay/inkway/server/internal/issueproperty"
+	"github.com/Devaretanmay/inkway/server/internal/logger"
+	"github.com/Devaretanmay/inkway/server/internal/util"
+	db "github.com/Devaretanmay/inkway/server/pkg/db/generated"
+	"github.com/Devaretanmay/inkway/server/pkg/protocol"
 )
 
 // Custom issue properties (MUL-4463): workspace-level typed property

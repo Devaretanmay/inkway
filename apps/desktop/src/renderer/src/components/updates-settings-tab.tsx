@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { AlertCircle, ArrowDownToLine, Check, Loader2 } from "lucide-react";
-import { Button } from "@multica/ui/components/ui/button";
-import { Switch } from "@multica/ui/components/ui/switch";
-import { useT } from "@multica/views/i18n";
-import { SettingsCard, SettingsRow, SettingsTab } from "@multica/views/settings";
+import { Button } from "@inkway/ui/components/ui/button";
+import { Switch } from "@inkway/ui/components/ui/switch";
+import { useT } from "@inkway/views/i18n";
+import { SettingsCard, SettingsRow, SettingsTab } from "@inkway/views/settings";
 import { toast } from "sonner";
 
 type CheckState =

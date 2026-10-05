@@ -15,8 +15,8 @@ import {
   profileUserIdPath,
 } from "./daemon-profile";
 
-const MULTICA_DIR = join(homedir(), ".multica");
-const DEFAULT_CLI_CONFIG = join(MULTICA_DIR, "config.json");
+const INKWAY_DIR = join(homedir(), ".inkway");
+const DEFAULT_CLI_CONFIG = join(INKWAY_DIR, "config.json");
 
 describe("deriveProfileName", () => {
   it("names the profile after the target host", () => {
@@ -38,7 +38,7 @@ describe("deriveProfileName", () => {
 
 describe("profile paths", () => {
   it("always resolves under profiles/<name>", () => {
-    const dir = join(MULTICA_DIR, "profiles", "desktop-api.multica.ai");
+    const dir = join(INKWAY_DIR, "profiles", "desktop-api.multica.ai");
     expect(profileDir("desktop-api.multica.ai")).toBe(dir);
     expect(profileConfigPath("desktop-api.multica.ai")).toBe(
       join(dir, "config.json"),
@@ -54,7 +54,7 @@ describe("profile paths", () => {
     );
   });
 
-  // Regression: an unresolved profile used to resolve to ~/.multica, so Desktop
+  // Regression: an unresolved profile used to resolve to ~/.inkway, so Desktop
   // could overwrite server_url and token in the user's own CLI config. #6399.
   it("refuses to build a path for an unresolved profile", () => {
     expect(() => profileDir("")).toThrow(/unresolved/);

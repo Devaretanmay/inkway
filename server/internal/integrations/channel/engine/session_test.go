@@ -11,9 +11,9 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgtype"
 
-	"github.com/multica-ai/multica/server/internal/channelmedia"
-	"github.com/multica-ai/multica/server/internal/integrations/channel"
-	db "github.com/multica-ai/multica/server/pkg/db/generated"
+	"github.com/Devaretanmay/inkway/server/internal/channelmedia"
+	"github.com/Devaretanmay/inkway/server/internal/integrations/channel"
+	db "github.com/Devaretanmay/inkway/server/pkg/db/generated"
 )
 
 // uid builds a deterministic, valid pgtype.UUID from a single byte so tests can

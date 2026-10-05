@@ -9,10 +9,10 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/multica-ai/multica/server/internal/daemonws"
-	"github.com/multica-ai/multica/server/internal/events"
-	db "github.com/multica-ai/multica/server/pkg/db/generated"
-	"github.com/multica-ai/multica/server/pkg/protocol"
+	"github.com/Devaretanmay/inkway/server/internal/daemonws"
+	"github.com/Devaretanmay/inkway/server/internal/events"
+	db "github.com/Devaretanmay/inkway/server/pkg/db/generated"
+	"github.com/Devaretanmay/inkway/server/pkg/protocol"
 )
 
 // fakeLivenessStore lets tests drive every Available / Touch / IsAliveBatch

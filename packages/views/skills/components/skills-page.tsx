@@ -17,22 +17,22 @@ import type {
   MemberWithUser,
   Skill,
   SkillSummary,
-} from "@multica/core/types";
+} from "@inkway/core/types";
 import { useQuery } from "@tanstack/react-query";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { useAuthStore } from "@multica/core/auth";
-import { useWorkspaceId } from "@multica/core/hooks";
-import { useWorkspacePaths } from "@multica/core/paths";
+import { useAuthStore } from "@inkway/core/auth";
+import { useWorkspaceId } from "@inkway/core/hooks";
+import { useWorkspacePaths } from "@inkway/core/paths";
 import {
   agentListOptions,
   memberListOptions,
   selectSkillAssignments,
   skillListOptions,
-} from "@multica/core/workspace/queries";
-import { runtimeDisplayLabel, runtimeListOptions } from "@multica/core/runtimes";
-import { resolvePublicFileUrl } from "@multica/core/workspace/avatar-url";
-import { Button } from "@multica/ui/components/ui/button";
-import { Checkbox } from "@multica/ui/components/ui/checkbox";
+} from "@inkway/core/workspace/queries";
+import { runtimeDisplayLabel, runtimeListOptions } from "@inkway/core/runtimes";
+import { resolvePublicFileUrl } from "@inkway/core/workspace/avatar-url";
+import { Button } from "@inkway/ui/components/ui/button";
+import { Checkbox } from "@inkway/ui/components/ui/checkbox";
 import {
   LIST_GRID_BOTTOM_CLEARANCE,
   ListGrid,
@@ -42,14 +42,14 @@ import {
   ListGridHeaderCell,
   ListGridRow,
   type ListGridSortDirection,
-} from "@multica/ui/components/ui/list-grid";
-import { Skeleton } from "@multica/ui/components/ui/skeleton";
+} from "@inkway/ui/components/ui/list-grid";
+import { Skeleton } from "@inkway/ui/components/ui/skeleton";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@multica/ui/components/ui/tooltip";
-import { ActorAvatar } from "@multica/ui/components/common/actor-avatar";
+} from "@inkway/ui/components/ui/tooltip";
+import { ActorAvatar } from "@inkway/ui/components/common/actor-avatar";
 import {
   rowLinkInteractiveProps,
   useNavigation,
@@ -69,7 +69,7 @@ import {
   DEFAULT_HIDDEN_COLUMNS,
   type SkillColumnKey,
   type SkillSortField,
-} from "@multica/core/skills/stores";
+} from "@inkway/core/skills/stores";
 import { SkillListToolbar } from "./skill-list-toolbar";
 import {
   SkillBatchToolbar,
@@ -77,7 +77,6 @@ import {
   type SkillActionsContext,
 } from "./skill-list-actions";
 import { useT, useTimeAgo } from "../../i18n";
-import { docsLocalePrefix } from "../../common/docs-locale";
 
 // Column template — single source of truth for header, rows, and skeletons.
 // Tracks: [edge 0.75rem] [checkbox 1rem] [name, only fr track]
@@ -151,7 +150,7 @@ function columnTrackVars(
 }
 
 // Sort/filter/column types and defaults live in the core view store
-// (@multica/core/skills/stores/view-store) so the persisted state and the
+// (@inkway/core/skills/stores/view-store) so the persisted state and the
 // UI share one definition. Re-exported here for the toolbar's convenience.
 export type SortField = SkillSortField;
 export { rowMatchesFilters, type SkillRow } from "./skill-list-filter";
@@ -168,17 +167,13 @@ function PageHeaderBar({
   totalCount: number;
   onCreate: () => void;
 }) {
-  const { t, i18n } = useT("skills");
+  const { t } = useT("skills");
   return (
     <CollectionPageHeader
       icon={SkillIcon}
       title={t(($) => $.page.title)}
       count={totalCount}
       description={t(($) => $.page.tagline)}
-      learnMore={{
-        href: `https://multica.ai/docs${docsLocalePrefix(i18n.language)}/skills`,
-        label: t(($) => $.page.learn_more),
-      }}
       actions={
         <CollectionPageHeaderAction
           icon={Plus}

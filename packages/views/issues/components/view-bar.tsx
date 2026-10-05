@@ -29,43 +29,43 @@ import {
   Settings2,
   Trash2,
 } from "lucide-react";
-import { Button } from "@multica/ui/components/ui/button";
+import { Button } from "@inkway/ui/components/ui/button";
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuSeparator,
   ContextMenuTrigger,
-} from "@multica/ui/components/ui/context-menu";
+} from "@inkway/ui/components/ui/context-menu";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@multica/ui/components/ui/dropdown-menu";
+} from "@inkway/ui/components/ui/dropdown-menu";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@multica/ui/components/ui/popover";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@multica/ui/components/ui/tooltip";
-import { cn } from "@multica/ui/lib/utils";
-import type { IssueView } from "@multica/core/api/schemas";
+} from "@inkway/ui/components/ui/popover";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@inkway/ui/components/ui/tooltip";
+import { cn } from "@inkway/ui/lib/utils";
+import type { IssueView } from "@inkway/core/api/schemas";
 import {
   canManageIssueView,
   type IssueViewScope,
-} from "@multica/core/issue-views/queries";
+} from "@inkway/core/issue-views/queries";
 import {
   applyViewBarPrefs,
   issueViewPreferenceOptions,
   useUpdateIssueViewPreference,
   EMPTY_VIEW_BAR_PREFS,
-} from "@multica/core/issue-views/preferences";
-import { useDeleteIssueView } from "@multica/core/issue-views/mutations";
-import { useAuthStore } from "@multica/core/auth";
-import { memberListOptions } from "@multica/core/workspace/queries";
-import { pinListOptions } from "@multica/core/pins/queries";
-import { useCreatePin, useDeletePin } from "@multica/core/pins/mutations";
+} from "@inkway/core/issue-views/preferences";
+import { useDeleteIssueView } from "@inkway/core/issue-views/mutations";
+import { useAuthStore } from "@inkway/core/auth";
+import { memberListOptions } from "@inkway/core/workspace/queries";
+import { pinListOptions } from "@inkway/core/pins/queries";
+import { useCreatePin, useDeletePin } from "@inkway/core/pins/mutations";
 import { useSingleRowFit } from "../../common/single-row-fit";
 import { ManageViewsDialog } from "./manage-views-dialog";
 import {

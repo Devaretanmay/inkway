@@ -3,23 +3,23 @@
 import { memo, useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react";
 import { AnimatePresence, motion, useIsPresent, useReducedMotion } from "motion/react";
 import { ChevronDown, ChevronUp, Maximize2, X } from "lucide-react";
-import { Button, buttonVariants } from "@multica/ui/components/ui/button";
+import { Button, buttonVariants } from "@inkway/ui/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@multica/ui/components/ui/tooltip";
-import { ErrorBoundary } from "@multica/ui/components/common/error-boundary";
-import { cn } from "@multica/ui/lib/utils";
-import { UI_EASE_OUT, UI_MOTION_DURATION } from "@multica/ui/lib/motion";
-import { useModalStore } from "@multica/core/modals";
-import { useWorkspacePaths } from "@multica/core/paths";
+} from "@inkway/ui/components/ui/tooltip";
+import { ErrorBoundary } from "@inkway/ui/components/common/error-boundary";
+import { cn } from "@inkway/ui/lib/utils";
+import { UI_EASE_OUT, UI_MOTION_DURATION } from "@inkway/ui/lib/motion";
+import { useModalStore } from "@inkway/core/modals";
+import { useWorkspacePaths } from "@inkway/core/paths";
 import {
   createShortcutChord,
   isEditableShortcutTarget,
   isPortalLayerShortcutTarget,
-} from "@multica/core/shortcuts";
-import { isImeComposing } from "@multica/core/utils";
+} from "@inkway/core/shortcuts";
+import { isImeComposing } from "@inkway/core/utils";
 import { AppLink } from "../../navigation";
 import { PAGE_GUTTER } from "../../layout/page-header";
 import { ShortcutKeycaps } from "../../common/shortcut-keycaps";

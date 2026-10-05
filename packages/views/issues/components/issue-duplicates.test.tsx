@@ -4,25 +4,25 @@ import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { buildIssueStatusCatalog } from "@multica/core/issue-statuses";
-import type { Issue, IssueDuplicates } from "@multica/core/types";
+import { buildIssueStatusCatalog } from "@inkway/core/issue-statuses";
+import type { Issue, IssueDuplicates } from "@inkway/core/types";
 import { renderWithI18n } from "../../test/i18n";
 
 const listIssueDuplicates = vi.fn<(id: string) => Promise<IssueDuplicates>>();
 const navigate = vi.fn();
 
-vi.mock("@multica/core/api", () => ({
+vi.mock("@inkway/core/api", () => ({
   api: {
     listIssueDuplicates: (id: string) => listIssueDuplicates(id),
   },
 }));
-vi.mock("@multica/core/hooks", () => ({
+vi.mock("@inkway/core/hooks", () => ({
   useWorkspaceId: () => "workspace-1",
 }));
-vi.mock("@multica/core/paths", () => ({
+vi.mock("@inkway/core/paths", () => ({
   useWorkspacePaths: () => ({ issueDetail: (id: string) => `/acme/issues/${id}` }),
 }));
-vi.mock("@multica/core/issue-statuses/hooks", () => ({
+vi.mock("@inkway/core/issue-statuses/hooks", () => ({
   useIssueStatuses: () => buildIssueStatusCatalog(undefined),
 }));
 vi.mock("../../common/actor-avatar", () => ({

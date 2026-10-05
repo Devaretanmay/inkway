@@ -2,8 +2,8 @@ import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { I18nProvider } from "@multica/core/i18n/react";
-import { useWelcomeStore } from "@multica/core/onboarding";
+import { I18nProvider } from "@inkway/core/i18n/react";
+import { useWelcomeStore } from "@inkway/core/onboarding";
 import enCommon from "../locales/en/common.json";
 import enOnboarding from "../locales/en/onboarding.json";
 import {
@@ -26,7 +26,7 @@ const mockUser = {
   updated_at: "",
 };
 
-vi.mock("@multica/core/auth", () => ({
+vi.mock("@inkway/core/auth", () => ({
   useAuthStore: Object.assign(
     (selector?: (state: { user: typeof mockUser }) => unknown) => {
       const state = { user: mockUser };
@@ -41,9 +41,9 @@ vi.mock("@multica/core/auth", () => ({
 const mockCreateIssue = vi.fn();
 const mockGetWorkspace = vi.fn();
 
-vi.mock("@multica/core/paths", async () => {
-  const actual = await vi.importActual<typeof import("@multica/core/paths")>(
-    "@multica/core/paths",
+vi.mock("@inkway/core/paths", async () => {
+  const actual = await vi.importActual<typeof import("@inkway/core/paths")>(
+    "@inkway/core/paths",
   );
   return {
     ...actual,
@@ -55,7 +55,7 @@ vi.mock("@multica/core/paths", async () => {
   };
 });
 
-vi.mock("@multica/core/api", () => ({
+vi.mock("@inkway/core/api", () => ({
   api: {
     createIssue: (...args: unknown[]) => mockCreateIssue(...args),
     getWorkspace: (...args: unknown[]) => mockGetWorkspace(...args),
@@ -142,18 +142,18 @@ describe("WelcomeAfterOnboarding", () => {
 
     expect(screen.getByText(/Setting up your workspace/i)).toBeInTheDocument();
     await waitFor(() => {
-      expect(screen.getByText(/Welcome to Multica/i)).toBeInTheDocument();
+      expect(screen.getByText(/Welcome to Inkway/i)).toBeInTheDocument();
     });
 
     expect(mockCreateIssue).toHaveBeenCalledTimes(1);
     expect(mockCreateIssue.mock.calls[0]![0]).toMatchObject({
-      title: "Connect a runtime to start with Mika",
+      title: "Connect a tool to get started",
       status: "in_progress",
       assignee_type: "member",
       assignee_id: "user-1",
     });
     expect(mockCreateIssue.mock.calls[0]![0].description).toContain(
-      "Start with Mika",
+      "Local tools",
     );
 
     fireEvent.click(screen.getByRole("button", { name: /got it/i }));
@@ -193,7 +193,7 @@ describe("WelcomeAfterOnboarding", () => {
 
     fireEvent.click(await screen.findByRole("button", { name: /try again/i }));
 
-    expect(await screen.findByText(/Welcome to Multica/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Welcome to Inkway/i)).toBeInTheDocument();
     expect(mockCreateIssue).toHaveBeenCalledTimes(2);
   });
 

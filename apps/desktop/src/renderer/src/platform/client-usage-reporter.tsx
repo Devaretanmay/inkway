@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useRef } from "react";
-import { api } from "@multica/core/api";
-import { useAuthStore } from "@multica/core/auth";
-import { getOrCreateInstallId, utcDay } from "@multica/core/client-usage";
-import { defaultStorage } from "@multica/core/platform";
+import { api } from "@inkway/core/api";
+import { useAuthStore } from "@inkway/core/auth";
+import { getOrCreateInstallId, utcDay } from "@inkway/core/client-usage";
+import { defaultStorage } from "@inkway/core/platform";
 import type { LocalRuntimeProbe } from "../../../shared/daemon-types";
 
-const LAST_RUNTIME_PREFIX = "multica_runtime_probe_last_reported";
+const LAST_RUNTIME_PREFIX = "inkway_runtime_probe_last_reported";
 
 export function runtimeProbeSignature(probe: LocalRuntimeProbe): string {
   if (probe.probeResult === "error") return "error";

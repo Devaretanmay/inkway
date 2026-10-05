@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/multica-ai/multica/server/pkg/skillbundle"
+	"github.com/Devaretanmay/inkway/server/pkg/skillbundle"
 )
 
 func TestSkillBundleResolveTimeout(t *testing.T) {

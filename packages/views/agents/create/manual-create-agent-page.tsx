@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useWorkspaceId } from "@multica/core/hooks";
-import { useWorkspacePaths } from "@multica/core/paths";
-import { runtimeDisplayLabel } from "@multica/core/runtimes";
-import { agentListOptions } from "@multica/core/workspace/queries";
+import { useWorkspaceId } from "@inkway/core/hooks";
+import { useWorkspacePaths } from "@inkway/core/paths";
+import { isNativeAgentConfigReady } from "@inkway/core/agents";
+import { runtimeDisplayLabel } from "@inkway/core/runtimes";
+import { agentListOptions } from "@inkway/core/workspace/queries";
 import { useBackOrReplace, useNavigation } from "../../navigation";
 import { useT } from "../../i18n";
 import { AgentConfigurationPanel } from "./agent-configuration-panel";
@@ -90,7 +91,7 @@ export function ManualCreateAgentPage() {
   });
 
   const canCreate =
-    form.draft.name.trim().length > 0 && form.draftReady && !submit.creating;
+    form.draft.name.trim().length > 0 && isNativeAgentConfigReady(form.draft) && form.draftReady && !submit.creating;
 
   return (
     <AgentCreateShell
@@ -104,11 +105,7 @@ export function ManualCreateAgentPage() {
             : t(($) => $.creation_studio.title)
       }
       step={t(($) => $.creation_studio.step_configure)}
-      // A duplicate arrives from the agents list, not from the chooser, so it
-      // returns to where it came from instead of offering a method to pick.
-      onBack={() =>
-        backOrReplace(duplicateId ? paths.agents() : paths.newAgent())
-      }
+      onBack={() => backOrReplace(paths.agents())}
       chips={
         <>
           <AgentCreateChip>

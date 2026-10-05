@@ -1,10 +1,10 @@
 import { useTranslation } from "react-i18next";
-import { Markdown } from "@multica/ui/markdown";
-import { Button } from "@multica/ui/components/ui/button";
-import buttonEn from "@multica/ui/docs/button.md?raw";
-import buttonZh from "@multica/ui/docs/button.zh.md?raw";
-import dialogEn from "@multica/ui/docs/dialog.md?raw";
-import dialogZh from "@multica/ui/docs/dialog.zh.md?raw";
+import { Markdown } from "@inkway/ui/markdown";
+import { Button } from "@inkway/ui/components/ui/button";
+import buttonEn from "@inkway/ui/docs/button.md?raw";
+import buttonZh from "@inkway/ui/docs/button.zh.md?raw";
+import dialogEn from "@inkway/ui/docs/dialog.md?raw";
+import dialogZh from "@inkway/ui/docs/dialog.zh.md?raw";
 
 const rules = {
   button: { en: buttonEn, zh: buttonZh },

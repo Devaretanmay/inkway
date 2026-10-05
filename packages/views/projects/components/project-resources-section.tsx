@@ -17,33 +17,33 @@ import {
   useCreateProjectResource,
   useDeleteProjectResource,
   useUpdateProjectResource,
-} from "@multica/core/projects";
-import { splitGithubUrlRef } from "@multica/core/github";
-import { useWorkspaceId } from "@multica/core/hooks";
-import { useCurrentWorkspace } from "@multica/core/paths";
+} from "@inkway/core/projects";
+import { splitGithubUrlRef } from "@inkway/core/github";
+import { useWorkspaceId } from "@inkway/core/hooks";
+import { useCurrentWorkspace } from "@inkway/core/paths";
 import type {
   GithubRepoResourceRef,
   LocalDirectoryExecutionMode,
   LocalDirectoryResourceRef,
   ProjectResource,
-} from "@multica/core/types";
+} from "@inkway/core/types";
 import {
   runtimeAdvertisesLocalWorktree,
   runtimeListOptions,
-} from "@multica/core/runtimes";
-import { useConfigStore } from "@multica/core/config";
-import { Badge } from "@multica/ui/components/ui/badge";
-import { Button } from "@multica/ui/components/ui/button";
+} from "@inkway/core/runtimes";
+import { useConfigStore } from "@inkway/core/config";
+import { Badge } from "@inkway/ui/components/ui/badge";
+import { Button } from "@inkway/ui/components/ui/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@multica/ui/components/ui/popover";
+} from "@inkway/ui/components/ui/popover";
 import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
-} from "@multica/ui/components/ui/tooltip";
+} from "@inkway/ui/components/ui/tooltip";
 import {
   isDesktopShell,
   pickDirectory,
@@ -65,7 +65,7 @@ import { githubShortLabel } from "../../common/github-url";
 //
 // Type-dispatched at the row + add-flow level. Add a new resource_type by:
 //   (1) extending the server validator
-//   (2) extending ProjectResourceType in @multica/core/types
+//   (2) extending ProjectResourceType in @inkway/core/types
 //   (3) adding a render case in ResourceRow and an add-control here
 function isGithubRef(r: ProjectResource): r is ProjectResource & {
   resource_ref: GithubRepoResourceRef;

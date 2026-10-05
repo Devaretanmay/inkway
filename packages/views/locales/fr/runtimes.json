@@ -1,6 +1,6 @@
 {
   "page": {
-    "title": "Runtimes",
+    "title": "Fournisseurs",
     "tagline": "Machines et workers cloud qui exécutent des sessions CLI pour vos agents.",
     "learn_more": "En savoir plus →",
     "connect_remote": "Ajouter un ordinateur",
@@ -13,7 +13,7 @@
     "filter_all_description": "Tous les runtimes de cette vue",
     "empty": {
       "title": "Aucun runtime pour l'instant",
-      "hint": "Desktop détecte cet ordinateur automatiquement. Connectez d’autres ordinateurs ici."
+      "hint": "Connectez Claude Code, Codex ou OpenCode sur cet ordinateur. Configurez les fournisseurs API depuis la page Fournisseurs."
     },
     "no_matches": {
       "title": "Aucune correspondance",
@@ -25,7 +25,19 @@
     "bootstrapping": {
       "title": "Démarrage du runtime local…",
       "hint": "Connexion à l’espace de travail..."
-    }
+    },
+    "local_tools": "Outils locaux",
+    "api_providers": "Fournisseurs API",
+    "detected": "Détecté",
+    "not_detected_on": "Non détecté sur {{location}}",
+    "ready": "Prêt",
+    "unavailable": "Indisponible",
+    "connect_a_computer_to_check": "Connectez un ordinateur pour vérifier",
+    "this_computer": "cet ordinateur",
+    "connected_computers": "ordinateurs connectés",
+    "browser_credentials_unavailable": "Ouvrez Inkway Desktop pour connecter des clés API en toute sécurité sur votre ordinateur. Ce navigateur ne peut pas accéder au trousseau de clés du système.",
+    "local_credential_status_unavailable": "État des identifiants locaux indisponible dans le navigateur",
+    "connect_in_desktop": "Connecter dans Desktop"
   },
   "mika_setup": {
     "title": "Votre runtime est prêt. Commencez avec Mika.",
@@ -201,7 +213,7 @@
   "connect": {
     "title": "Ajouter un ordinateur",
     "description": "Exécutez ces deux commandes sur l'ordinateur à ajouter. Nous le détecterons dès que le daemon sera en ligne.",
-    "step1_label": "Installer le CLI Multica",
+    "step1_label": "Installer le CLI Inkway",
     "platform_group": "Choisissez votre système",
     "platform_macos_linux": "macOS / Linux",
     "platform_windows": "Windows",
@@ -265,11 +277,11 @@
     "cli_version_label": "Version du CLI :",
     "version_unknown": "inconnue",
     "managed_by_desktop": "Géré par l'application de bureau",
-    "managed_by_desktop_title": "Le binaire du CLI est géré par Multica Desktop — mettez Desktop à jour pour mettre à niveau le CLI.",
+    "managed_by_desktop_title": "Le binaire du CLI est géré par Inkway Desktop — mettez Desktop à jour pour mettre à niveau le CLI.",
     "read_only": "Lecture seule",
     "read_only_title": "Seuls les propriétaires du runtime et les administrateurs de l'espace de travail peuvent mettre le CLI à jour.",
     "local_build": "Build local",
-    "local_build_title": "Ce runtime annonce une version hors publication : Multica ne peut donc pas savoir si une mise à niveau est disponible. Mettez-le à jour depuis la machine elle-même.",
+    "local_build_title": "Ce runtime annonce une version hors publication : Inkway ne peut donc pas savoir si une mise à niveau est disponible. Mettez-le à jour depuis la machine elle-même.",
     "latest": "À jour",
     "available": "disponible",
     "action": "Mettre à jour",
@@ -341,7 +353,7 @@
     "builtin_section_aria": "Familles de protocoles intégrées prises en charge",
     "builtin_reference": "Référence",
     "empty_title": "Créez votre premier runtime personnalisé",
-    "empty_description": "Choisissez une famille de protocoles de base, puis indiquez à Multica la commande à exécuter.",
+    "empty_description": "Choisissez une famille de protocoles de base, puis indiquez à Inkway la commande à exécuter.",
     "badge_builtin": "Intégré",
     "badge_custom": "Personnalisé",
     "badge_disabled": "Désactivé",

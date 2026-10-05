@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   ChevronRight,
   Cloud,
@@ -11,38 +11,37 @@ import {
 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { useAuthStore } from "@multica/core/auth";
-import { useWorkspaceId } from "@multica/core/hooks";
-import { memberNeedsMikaSetup, useBootstrapMika } from "@multica/core/onboarding";
+import { useAuthStore } from "@inkway/core/auth";
+import { useWorkspaceId } from "@inkway/core/hooks";
+import { useBootstrapMika } from "@inkway/core/onboarding";
 import { MIKA_PLACEHOLDER_EMOJI } from "../../onboarding/components/mika-intro";
-import { useRequiredWorkspaceSlug, useWorkspacePaths } from "@multica/core/paths";
-import { agentTaskSnapshotOptions } from "@multica/core/agents";
-import { chatSessionsOptions } from "@multica/core/chat/queries";
-import { runtimeProfileListOptions } from "@multica/core/runtimes";
-import { runtimeListOptions, runtimeKeys } from "@multica/core/runtimes/queries";
-import { useWSEvent } from "@multica/core/realtime";
-import { agentListOptions } from "@multica/core/workspace/queries";
-import type { AgentRuntime } from "@multica/core/types";
-import { Button } from "@multica/ui/components/ui/button";
+import { useRequiredWorkspaceSlug, useWorkspacePaths } from "@inkway/core/paths";
+import { agentTaskSnapshotOptions } from "@inkway/core/agents";
+import { providerDisplayName, runtimeProfileListOptions } from "@inkway/core/runtimes";
+import { runtimeListOptions, runtimeKeys } from "@inkway/core/runtimes/queries";
+import { useWSEvent } from "@inkway/core/realtime";
+import { agentListOptions } from "@inkway/core/workspace/queries";
+import type { AgentRuntime } from "@inkway/core/types";
+import { Button } from "@inkway/ui/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@multica/ui/components/ui/dialog";
+} from "@inkway/ui/components/ui/dialog";
 import {
   MikaRuntimeChoice,
   type MikaRuntimeSelection,
 } from "./mika-runtime-choice";
-import { Skeleton } from "@multica/ui/components/ui/skeleton";
+import { Skeleton } from "@inkway/ui/components/ui/skeleton";
 import {
   CollectionPageHeader,
   CollectionPageHeaderAction,
   CollectionPageState,
 } from "../../layout/collection-page";
 import { PAGE_GUTTER, PAGE_RAIL, PageHeader } from "../../layout/page-header";
-import { cn } from "@multica/ui/lib/utils";
+import { cn } from "@inkway/ui/lib/utils";
 import { AppLink, useNavigation } from "../../navigation";
 import {
   getMikaOnboarding,
@@ -56,7 +55,6 @@ import { pendingRuntimeFromProfile } from "./pending-runtime";
 import { buildRuntimeMachines, type RuntimeMachine } from "./runtime-machines";
 import { HealthDot, HealthIcon, useHealthLabel } from "./shared";
 import { useT, useTimeAgo } from "../../i18n";
-import { daemonRuntimesDocsHref } from "./runtime-docs";
 
 export interface RuntimesPageProps {
   /** Desktop-only daemon id used to identify this device. */
@@ -69,6 +67,8 @@ export interface RuntimesPageProps {
   bootstrapping?: boolean;
   /** Web SaaS-only Cloud Runtime entrypoint. */
   cloudRuntimeEnabled?: boolean;
+  /** Platform implementation reuses the secure desktop credential flow. */
+  apiProviders?: ReactNode;
 }
 
 function useNowTick(intervalMs = 30_000): number {
@@ -86,7 +86,9 @@ export function RuntimesPage({
   hasLocalMachine,
   bootstrapping,
   cloudRuntimeEnabled = false,
+  apiProviders,
 }: RuntimesPageProps = {}) {
+  const { t } = useT("runtimes");
   const isAuthLoading = useAuthStore((state) => state.isLoading);
   const currentUserId = useAuthStore((state) => state.user?.id);
   const wsId = useWorkspaceId();
@@ -100,16 +102,17 @@ export function RuntimesPage({
   const { data: runtimeProfiles = [], isLoading: profilesLoading } = useQuery(
     runtimeProfileListOptions(wsId),
   );
-  const { data: agents = [], isLoading: agentsLoading } = useQuery(
+  const { data: agents = [] } = useQuery(
     agentListOptions(wsId),
   );
   const { data: snapshot = [] } = useQuery(agentTaskSnapshotOptions(wsId));
+  const localTools = useMemo(
+    () => localDaemonId ? runtimes.filter((runtime) => runtime.daemon_id === localDaemonId) : runtimes,
+    [localDaemonId, runtimes],
+  );
   // The Mika entrypoint is per member, not per workspace: the agent alone does
   // not say whether *this* member's conversation was ever opened and kicked
   // off. See memberNeedsMikaSetup.
-  const { data: chatSessions = [], isLoading: chatSessionsLoading } = useQuery(
-    chatSessionsOptions(wsId),
-  );
 
   const handleDaemonEvent = useCallback(() => {
     qc.invalidateQueries({ queryKey: runtimeKeys.all(wsId) });
@@ -172,6 +175,20 @@ export function RuntimesPage({
         onOpenCloudRuntime={() => setShowCloudRuntimeDialog(true)}
       />
 
+      <div className="px-6 pt-5"><h2 className="text-title font-semibold">{t(($) => $.page.local_tools)}</h2>
+        <div className="mt-3 grid gap-3 sm:grid-cols-3">
+          {[...new Set(["claude", "codex", "opencode", ...localTools.map((runtime) => runtime.provider)])].map((provider) => {
+            const detected = localTools.filter((runtime) => runtime.provider === provider);
+            const ready = detected.some((runtime) => runtime.status === "online");
+            const name = provider === "claude" ? "Claude Code" : provider === "codex" ? "Codex" : provider === "opencode" ? "OpenCode" : providerDisplayName(provider);
+            const location = localDaemonId ? t(($) => $.page.this_computer) : t(($) => $.page.connected_computers);
+            return <article key={provider} className="rounded-lg border border-border bg-surface p-4"><h3 className="font-medium">{name}</h3><p className="mt-1 text-caption text-muted-foreground">{detected.length ? t(($) => $.page.detected) : t(($) => $.page.not_detected_on, { location })}</p><p className={`mt-2 text-caption ${ready ? "text-success" : "text-muted-foreground"}`}>{ready ? t(($) => $.page.ready) : detected.length ? t(($) => $.page.unavailable) : t(($) => $.page.connect_a_computer_to_check)}</p></article>;
+          })}
+        </div>
+      </div>
+      <div className="px-6 py-5">
+        {apiProviders ?? <section><h2 className="text-title font-semibold">{t(($) => $.page.api_providers)}</h2><p className="mt-1 text-body text-muted-foreground">{t(($) => $.page.browser_credentials_unavailable)}</p><div className="mt-3 grid gap-3 sm:grid-cols-3">{["OpenAI", "Anthropic", "Groq"].map((name) => <article key={name} className="rounded-lg border border-border bg-surface p-4"><h3 className="font-medium">{name}</h3><p className="mt-1 text-caption text-muted-foreground">{t(($) => $.page.local_credential_status_unavailable)}</p><Button className="mt-3" variant="outline" disabled>{t(($) => $.page.connect_in_desktop)}</Button></article>)}</div></section>}
+      </div>
       {showEmpty ? (
         <div className="flex flex-1 items-center justify-center p-6">
           <EmptyState onConnectRemote={() => setShowConnectDialog(true)} />
@@ -179,17 +196,6 @@ export function RuntimesPage({
       ) : (
         <div className="min-h-0 flex-1 overflow-y-auto">
           <div className={cn(PAGE_RAIL, PAGE_GUTTER, "flex flex-col py-4 sm:py-6")}>
-            {!agentsLoading &&
-              !chatSessionsLoading &&
-              memberNeedsMikaSetup(agents, chatSessions) &&
-              runtimes.length > 0 && (
-              <MikaSetupCard
-                workspaceId={wsId}
-                runtimes={runtimes}
-                runtimesLoading={runtimesLoading}
-                currentUserId={currentUserId ?? null}
-              />
-            )}
             {(machines.length > 0 || bootstrapping) && (
               <MachineList
                 machines={machines}
@@ -229,7 +235,7 @@ export function RuntimesPage({
  * decision reached from a different entry point, so it asks the same way and
  * reuses the same two controls.
  */
-function MikaSetupCard({
+export function MikaSetupCard({
   workspaceId,
   runtimes,
   runtimesLoading,
@@ -380,17 +386,13 @@ function PageHeaderBar({
   cloudRuntimeEnabled: boolean;
   onOpenCloudRuntime: () => void;
 }) {
-  const { t, i18n } = useT("runtimes");
+  const { t } = useT("runtimes");
   return (
     <CollectionPageHeader
       icon={Server}
       title={t(($) => $.page.title)}
       count={totalCount}
       description={t(($) => $.page.tagline)}
-      learnMore={{
-        href: daemonRuntimesDocsHref(i18n.language),
-        label: t(($) => $.page.learn_more),
-      }}
       actions={
         <>
           {cloudRuntimeEnabled && (

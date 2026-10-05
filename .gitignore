@@ -45,7 +45,7 @@ server/bin/
 server/tmp/
 server/migrate
 server/daemon
-server/multica
+server/inkway
 
 # Test artifacts
 test-results/
@@ -54,7 +54,7 @@ apps/web/test-results/
 # context (agent workspace)
 .context
 .agent_context/
-.multica/
+.inkway/
 
 # local settings
 .claude/

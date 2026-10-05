@@ -493,28 +493,28 @@ func TestPrepareDirectoryMode(t *testing.T) {
 	defer env.Cleanup(true)
 
 	// Verify directory structure.
-	for _, sub := range []string{"workdir", "output", "logs", "multica-config"} {
+	for _, sub := range []string{"workdir", "output", "logs", "inkway-config"} {
 		path := filepath.Join(env.RootDir, sub)
 		if _, err := os.Stat(path); os.IsNotExist(err) {
 			t.Fatalf("expected %s to exist", path)
 		}
 	}
-	if env.MulticaConfigRoot != filepath.Join(env.RootDir, "multica-config") {
-		t.Fatalf("MulticaConfigRoot = %q, want task-local config directory", env.MulticaConfigRoot)
+	if env.InkwayConfigRoot != filepath.Join(env.RootDir, "inkway-config") {
+		t.Fatalf("InkwayConfigRoot = %q, want task-local config directory", env.InkwayConfigRoot)
 	}
-	info, err := os.Stat(env.MulticaConfigRoot)
+	info, err := os.Stat(env.InkwayConfigRoot)
 	if err != nil {
-		t.Fatalf("stat MulticaConfigRoot: %v", err)
+		t.Fatalf("stat InkwayConfigRoot: %v", err)
 	}
 	if got := info.Mode().Perm(); got != 0o700 {
-		t.Fatalf("MulticaConfigRoot mode = %o, want 700", got)
+		t.Fatalf("InkwayConfigRoot mode = %o, want 700", got)
 	}
 
 	// No Markdown sidecar: the issue id, trigger and handoff facts reach the
 	// agent through the runtime brief and the per-turn message, and the file
 	// that used to repeat them had no reader (MUL-6984). The marker below is
 	// the one sidecar with a consumer — the CLI reads it to recognise a
-	// daemon task when a sandbox strips MULTICA_* from the environment.
+	// daemon task when a sandbox strips INKWAY_* from the environment.
 	if _, err := os.Stat(filepath.Join(env.WorkDir, ".agent_context", "issue_context.md")); !os.IsNotExist(err) {
 		t.Fatalf("Prepare wrote a sidecar brief; stat err = %v, want not-exist", err)
 	}
@@ -560,7 +560,7 @@ func TestPrepareWithProjectResources(t *testing.T) {
 			{
 				ID:           "33333333-4444-5555-6666-777777777777",
 				ResourceType: "github_repo",
-				ResourceRef:  json.RawMessage(`{"url":"https://github.com/multica-ai/multica","ref":"release/v2","default_branch_hint":"main"}`),
+				ResourceRef:  json.RawMessage(`{"url":"https://github.com/Devaretanmay/inkway","ref":"release/v2","default_branch_hint":"main"}`),
 			},
 		},
 	}
@@ -578,7 +578,7 @@ func TestPrepareWithProjectResources(t *testing.T) {
 	defer env.Cleanup(true)
 
 	// resources.json should exist and decode back to what we wrote.
-	resourcesPath := filepath.Join(env.WorkDir, ".multica", "project", "resources.json")
+	resourcesPath := filepath.Join(env.WorkDir, ".inkway", "project", "resources.json")
 	raw, err := os.ReadFile(resourcesPath)
 	if err != nil {
 		t.Fatalf("failed to read resources.json: %v", err)
@@ -623,10 +623,10 @@ func TestPrepareWithProjectResources(t *testing.T) {
 		"Agent UX 2026",
 		"Always write copy in British English. Ship behind a feature flag.",
 		"GitHub repo",
-		"https://github.com/multica-ai/multica",
+		"https://github.com/Devaretanmay/inkway",
 		"checkout ref: `release/v2`",
 		"default branch hint: `main`",
-		".multica/project/resources.json",
+		".inkway/project/resources.json",
 	} {
 		if !strings.Contains(s, want) {
 			t.Errorf("CLAUDE.md missing %q", want)
@@ -741,7 +741,7 @@ func TestWriteProjectResourcesSkippedWhenNone(t *testing.T) {
 	if err := writeProjectResources(dir, TaskContextForEnv{}, nil); err != nil {
 		t.Fatalf("writeProjectResources: %v", err)
 	}
-	if _, err := os.Stat(filepath.Join(dir, ".multica", "project", "resources.json")); !os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(dir, ".inkway", "project", "resources.json")); !os.IsNotExist(err) {
 		t.Errorf("expected no resources.json to be written when project context is empty")
 	}
 }
@@ -782,7 +782,7 @@ func TestPrepareWithRepoContext(t *testing.T) {
 	}
 	for _, e := range entries {
 		name := e.Name()
-		if name != ".agent_context" && name != ".multica" && name != "CLAUDE.md" && name != ".claude" {
+		if name != ".agent_context" && name != ".inkway" && name != "CLAUDE.md" && name != ".claude" {
 			t.Errorf("unexpected entry in workdir: %s", name)
 		}
 	}
@@ -794,7 +794,7 @@ func TestPrepareWithRepoContext(t *testing.T) {
 	}
 	s := string(content)
 	for _, want := range []string{
-		"multica repo checkout",
+		"inkway repo checkout",
 		"https://github.com/org/backend",
 		"[--ref <branch-or-sha>]",
 		"https://github.com/org/frontend",
@@ -1000,8 +1000,8 @@ func TestWriteContextFilesCodebuddyNativeSkills(t *testing.T) {
 // TestReuseRefreshesSkillsWithoutDuplicating is the regression guard for
 // GitHub #3684: re-dispatching the same agent on the same issue goes through
 // the Reuse path, which must refresh skills in place rather than pile up
-// collision-free duplicates (issue-review, issue-review-multica,
-// issue-review-multica-2, …). Reuse rolls back the prior dispatch's writes
+// collision-free duplicates (issue-review, issue-review-inkway,
+// issue-review-inkway-2, …). Reuse rolls back the prior dispatch's writes
 // via its sidecar manifest before re-writing, so each skill lands at its
 // natural slug on every dispatch instead of dodging its own prior output.
 func TestReuseRefreshesSkillsWithoutDuplicating(t *testing.T) {
@@ -1049,7 +1049,7 @@ func TestReuseRefreshesSkillsWithoutDuplicating(t *testing.T) {
 		names = append(names, e.Name())
 	}
 	if len(names) != 1 || names[0] != "issue-review" {
-		t.Fatalf("after re-dispatch the skills dir = %v, want exactly [issue-review] with no -multica duplicates", names)
+		t.Fatalf("after re-dispatch the skills dir = %v, want exactly [issue-review] with no -inkway duplicates", names)
 	}
 
 	// The surviving skill keeps its natural slug in frontmatter, so the agent
@@ -1067,7 +1067,7 @@ func TestReuseRefreshesSkillsWithoutDuplicating(t *testing.T) {
 // #3716 review surfaced: a prior-dispatch agent writes a file into the
 // platform's managed skill directory. CleanupSidecars on its own would keep
 // that now-non-empty directory, leaving the canonical slug occupied so the
-// next refresh dodges to issue-review-multica. Reuse must reclaim the
+// next refresh dodges to issue-review-inkway. Reuse must reclaim the
 // platform-owned skill directory so the refreshed skill stays at its natural
 // slug.
 func TestReuseReclaimsManagedSkillDirWithStrayAgentFile(t *testing.T) {
@@ -1118,7 +1118,7 @@ func TestReuseReclaimsManagedSkillDirWithStrayAgentFile(t *testing.T) {
 		names = append(names, e.Name())
 	}
 	if len(names) != 1 || names[0] != "issue-review" {
-		t.Fatalf("after reuse with a stray agent file the skills dir = %v, want exactly [issue-review] with no -multica duplicate", names)
+		t.Fatalf("after reuse with a stray agent file the skills dir = %v, want exactly [issue-review] with no -inkway duplicate", names)
 	}
 
 	// The managed skill dir is platform-owned: reclaiming it drops the agent's
@@ -1282,9 +1282,9 @@ func TestInjectRuntimeConfigClaude(t *testing.T) {
 
 	s := string(content)
 	for _, want := range []string{
-		"Multica Agent Runtime",
-		"multica issue get",
-		"multica issue comment list",
+		"Inkway Agent Runtime",
+		"inkway issue get",
+		"inkway issue comment list",
 		// Skills are listed by on-disk slug: that is the directory
 		// writeSkillFiles creates and the only identifier the model can
 		// actually invoke (MUL-5529).
@@ -1367,9 +1367,9 @@ func TestInjectRuntimeConfigBackgroundTaskSafetyProviderAgnostic(t *testing.T) {
 				"verify readiness",
 				"URL, logs, and stop instructions",
 				"survival as best-effort, not guaranteed",
-				"Never terminate `multica` or `multica.exe` by executable name",
+				"Never terminate `inkway` or `inkway.exe` by executable name",
 				"exact child PID you started",
-				"`multica daemon status --output json`",
+				"`inkway daemon status --output json`",
 				"never kill it if it is the reported daemon PID",
 			} {
 				if !strings.Contains(s, want) {
@@ -1414,18 +1414,18 @@ func TestInjectRuntimeConfigAvailableCommandsCoreOnly(t *testing.T) {
 	for _, want := range []string{
 		"## Available Commands",
 		"core agent loop and common issue create/update tasks",
-		"`multica <command> --help`",
-		"multica issue get <id> --output json",
-		"multica issue comment list <issue-id>",
-		"multica issue create --title",
-		"multica issue update <id>",
-		"multica issue assign <id>",
+		"`inkway <command> --help`",
+		"inkway issue get <id> --output json",
+		"inkway issue comment list <issue-id>",
+		"inkway issue create --title",
+		"inkway issue update <id>",
+		"inkway issue assign <id>",
 		"--description-file <path>",
 		"--parent \"\"",
-		"multica repo checkout <url>",
-		"multica issue status <id> <status>",
-		"multica issue comment add <issue-id>",
-		"multica issue comment add --help",
+		"inkway repo checkout <url>",
+		"inkway issue status <id> <status>",
+		"inkway issue comment add <issue-id>",
+		"inkway issue comment add --help",
 	} {
 		if !strings.Contains(s, want) {
 			t.Errorf("AGENTS.md missing core command/help text %q\n---\n%s", want, s)
@@ -1447,7 +1447,7 @@ func TestInjectRuntimeConfigAvailableCommandsCoreOnly(t *testing.T) {
 	}
 	for _, want := range []string{
 		"### Squad maintenance",
-		"multica squad member set-role <squad-id>",
+		"inkway squad member set-role <squad-id>",
 	} {
 		if !strings.Contains(string(leader), want) {
 			t.Errorf("squad-leader AGENTS.md missing %q\n---\n%s", want, leader)
@@ -1456,29 +1456,29 @@ func TestInjectRuntimeConfigAvailableCommandsCoreOnly(t *testing.T) {
 
 	for _, banned := range []string{
 		"--no-start",
-		"multica issue list [--status",
-		"multica issue label list",
-		"multica issue subscriber list",
-		"multica label list",
-		"multica workspace member list",
-		"multica agent list",
-		"multica squad list",
-		"multica issue runs",
-		"multica issue run-messages",
-		"multica attachment download",
-		"multica autopilot list",
-		"multica autopilot create",
-		"multica autopilot update",
-		"multica autopilot trigger",
-		"multica autopilot delete",
-		"multica project get",
-		"multica project resource list",
-		"multica issue label add",
-		"multica issue label remove",
-		"multica issue subscriber add",
-		"multica issue subscriber remove",
-		"multica issue comment delete",
-		"multica label create",
+		"inkway issue list [--status",
+		"inkway issue label list",
+		"inkway issue subscriber list",
+		"inkway label list",
+		"inkway workspace member list",
+		"inkway agent list",
+		"inkway squad list",
+		"inkway issue runs",
+		"inkway issue run-messages",
+		"inkway attachment download",
+		"inkway autopilot list",
+		"inkway autopilot create",
+		"inkway autopilot update",
+		"inkway autopilot trigger",
+		"inkway autopilot delete",
+		"inkway project get",
+		"inkway project resource list",
+		"inkway issue label add",
+		"inkway issue label remove",
+		"inkway issue subscriber add",
+		"inkway issue subscriber remove",
+		"inkway issue comment delete",
+		"inkway label create",
 	} {
 		if strings.Contains(s, banned) {
 			t.Errorf("AGENTS.md should not inject non-core command %q\n---\n%s", banned, s)
@@ -1505,7 +1505,7 @@ func TestInjectRuntimeConfigCodex(t *testing.T) {
 	}
 
 	s := string(content)
-	if !strings.Contains(s, "Multica Agent Runtime") {
+	if !strings.Contains(s, "Inkway Agent Runtime") {
 		t.Error("AGENTS.md missing meta skill header")
 	}
 	// Listed by on-disk slug rather than the display name (MUL-5529).
@@ -1530,8 +1530,8 @@ func TestInjectRuntimeConfigNoSkills(t *testing.T) {
 	}
 
 	s := string(content)
-	if !strings.Contains(s, "multica issue get") {
-		t.Error("should reference multica CLI even without skills")
+	if !strings.Contains(s, "inkway issue get") {
+		t.Error("should reference inkway CLI even without skills")
 	}
 	if strings.Contains(s, "## Skills") {
 		t.Error("should not have Skills section when there are no skills")
@@ -1707,8 +1707,8 @@ func TestWriteContextFilesForcesSkillFrontmatterNameToSlug(t *testing.T) {
 
 // The directory-name == frontmatter-name invariant must survive collision
 // fallback, where the allocated slug is NOT sanitizeSkillName(Name). A
-// user-installed skill already sitting at the natural slug pushes Multica's
-// copy to `<slug>-multica`; the frontmatter has to follow it there, or the
+// user-installed skill already sitting at the natural slug pushes Inkway's
+// copy to `<slug>-inkway`; the frontmatter has to follow it there, or the
 // skill answers to the user's slug on Claude and to its own stale name on
 // OpenCode.
 func TestWriteContextFilesFrontmatterNameFollowsCollisionSlug(t *testing.T) {
@@ -1728,7 +1728,7 @@ func TestWriteContextFilesFrontmatterNameFollowsCollisionSlug(t *testing.T) {
 	ctx := TaskContextForEnv{
 		IssueID: "collision-test",
 		AgentSkills: []SkillContextForEnv{
-			{Name: "Review", Content: "---\nname: whatever-upstream-said\n---\n\nmultica body"},
+			{Name: "Review", Content: "---\nname: whatever-upstream-said\n---\n\ninkway body"},
 		},
 	}
 
@@ -1745,12 +1745,12 @@ func TestWriteContextFilesFrontmatterNameFollowsCollisionSlug(t *testing.T) {
 		t.Errorf("user skill was overwritten; got:\n%s", got)
 	}
 
-	// Multica's copy landed at the fallback slug and names itself after it.
-	moved, err := os.ReadFile(filepath.Join(dir, ".opencode", "skills", "review-multica", "SKILL.md"))
+	// Inkway's copy landed at the fallback slug and names itself after it.
+	moved, err := os.ReadFile(filepath.Join(dir, ".opencode", "skills", "review-inkway", "SKILL.md"))
 	if err != nil {
 		t.Fatalf("read relocated SKILL.md: %v", err)
 	}
-	want := "---\nname: review-multica\n---\n\nmultica body"
+	want := "---\nname: review-inkway\n---\n\ninkway body"
 	if string(moved) != want {
 		t.Errorf("frontmatter name did not follow the collision slug; got:\n%s\nwant:\n%s", moved, want)
 	}
@@ -2008,7 +2008,7 @@ func TestInjectRuntimeConfigOpencode(t *testing.T) {
 	}
 
 	s := string(content)
-	if !strings.Contains(s, "Multica Agent Runtime") {
+	if !strings.Contains(s, "Inkway Agent Runtime") {
 		t.Error("AGENTS.md missing meta skill header")
 	}
 	// Listed by on-disk slug rather than the display name (MUL-5529).
@@ -2044,7 +2044,7 @@ func TestInjectRuntimeConfigKiro(t *testing.T) {
 	}
 
 	s := string(content)
-	if !strings.Contains(s, "Multica Agent Runtime") {
+	if !strings.Contains(s, "Inkway Agent Runtime") {
 		t.Error("AGENTS.md missing meta skill header")
 	}
 	// Listed by on-disk slug rather than the display name (MUL-5529).
@@ -2075,7 +2075,7 @@ func TestInjectRuntimeConfigQoder(t *testing.T) {
 	}
 
 	s := string(content)
-	if !strings.Contains(s, "Multica Agent Runtime") {
+	if !strings.Contains(s, "Inkway Agent Runtime") {
 		t.Error("AGENTS.md missing meta skill header")
 	}
 	// Listed by on-disk slug rather than the display name (MUL-5529).
@@ -2104,7 +2104,7 @@ func TestInjectRuntimeConfigQoderCN(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to read AGENTS.md: %v", err)
 	}
-	if !strings.Contains(string(content), "Multica Agent Runtime") {
+	if !strings.Contains(string(content), "Inkway Agent Runtime") {
 		t.Error("AGENTS.md missing meta skill header")
 	}
 }
@@ -2131,7 +2131,7 @@ func TestInjectRuntimeConfigAntigravity(t *testing.T) {
 	}
 
 	s := string(content)
-	if !strings.Contains(s, "Multica Agent Runtime") {
+	if !strings.Contains(s, "Inkway Agent Runtime") {
 		t.Error("AGENTS.md missing meta skill header")
 	}
 	// Listed by on-disk slug rather than the display name (MUL-5529).
@@ -2168,7 +2168,7 @@ func TestInjectRuntimeConfigDim(t *testing.T) {
 	}
 
 	s := string(content)
-	if !strings.Contains(s, "Multica Agent Runtime") {
+	if !strings.Contains(s, "Inkway Agent Runtime") {
 		t.Error("AGENTS.md missing meta skill header")
 	}
 	if !strings.Contains(s, "coding") {
@@ -2245,7 +2245,7 @@ func TestPrepareWithRepoContextOpencode(t *testing.T) {
 	}
 	for _, e := range entries {
 		name := e.Name()
-		if name != ".agent_context" && name != ".multica" && name != "AGENTS.md" {
+		if name != ".agent_context" && name != ".inkway" && name != "AGENTS.md" {
 			t.Errorf("unexpected entry in workdir: %s", name)
 		}
 	}
@@ -2257,7 +2257,7 @@ func TestPrepareWithRepoContextOpencode(t *testing.T) {
 	}
 	s := string(content)
 	for _, want := range []string{
-		"multica repo checkout",
+		"inkway repo checkout",
 		"https://github.com/org/backend",
 	} {
 		if !strings.Contains(s, want) {
@@ -2299,13 +2299,13 @@ func TestInjectRuntimeConfigRequiresExplicitCommentPost(t *testing.T) {
 			}
 			s := string(data)
 
-			// The workflow must contain an explicit `multica issue comment add`
+			// The workflow must contain an explicit `inkway issue comment add`
 			// invocation for this issue — not just a prose mention of posting.
 			mustContain := []string{
 				// MUL-5442 cross-channel dedup: the brief states the loop shape; the
 				// ready-to-run commands with real ids live in the per-turn message.
 				// Pin the command NAME and the flag mnemonics, not full templates.
-				"post it with `multica issue comment add` using",
+				"post it with `inkway issue comment add` using",
 				"mandatory",
 			}
 			for _, want := range mustContain {
@@ -2318,7 +2318,7 @@ func TestInjectRuntimeConfigRequiresExplicitCommentPost(t *testing.T) {
 			// output is not user-visible. This is the second line of defense
 			// in case the agent skips past the workflow steps.
 			for _, want := range []string{
-				"Final results MUST be delivered via `multica issue comment add`",
+				"Final results MUST be delivered via `inkway issue comment add`",
 				"does NOT see your terminal output",
 			} {
 				if !strings.Contains(s, want) {
@@ -2407,7 +2407,7 @@ func TestInjectRuntimeConfigCommentGuardrailIsProviderAgnostic(t *testing.T) {
 // `--content-stdin` rule was kept for years to defend against backtick / `$()`
 // substitution in the body (MUL-2904), but the heredoc/flag boundary turned out
 // to be its own structural bug: when a model wrapped extra flags around the
-// heredoc on `multica issue create`, the flags were silently swallowed into
+// heredoc on `inkway issue create`, the flags were silently swallowed into
 // stdin (OXY-78, OXY-76). The file path defeats both classes — the body never
 // reaches the shell, and all flags live on one shell-token line — and converges
 // the Linux/macOS template with the long-standing Windows file-only path.
@@ -2483,7 +2483,7 @@ func TestInjectRuntimeConfigLinuxCommentFormattingEmphasizesFile(t *testing.T) {
 // the Comment Formatting section directs the agent at `--content-file`
 // instead of `--content-stdin`. PowerShell 5.1 / cmd.exe re-encode piped
 // HEREDOC bytes through the active console codepage and silently drop
-// non-ASCII as `?` before reaching `multica.exe` (#2198 / #2236 / #2376).
+// non-ASCII as `?` before reaching `inkway.exe` (#2198 / #2236 / #2376).
 //
 // Not parallel: mutates the package-level runtimeGOOS.
 func TestInjectRuntimeConfigCodexWindowsUsesContentFile(t *testing.T) {
@@ -2586,8 +2586,8 @@ func TestInjectRuntimeConfigAutopilotRunOnlyNoIssueWorkflow(t *testing.T) {
 	}
 
 	for _, absent := range []string{
-		"Run `multica issue get",
-		"Final results MUST be delivered via `multica issue comment add`",
+		"Run `inkway issue get",
+		"Final results MUST be delivered via `inkway issue comment add`",
 		// Per-run VALUES belong to the per-turn message, which renders them
 		// once (daemon.buildAutopilotPrompt). This file is the prompt-cache
 		// prefix, and its own contract is that no per-run identifier reaches
@@ -2640,7 +2640,7 @@ func TestInjectRuntimeConfigHermes(t *testing.T) {
 	}
 
 	s := string(content)
-	if !strings.Contains(s, "Multica Agent Runtime") {
+	if !strings.Contains(s, "Inkway Agent Runtime") {
 		t.Error("AGENTS.md missing meta skill header")
 	}
 	// Listed by on-disk slug rather than the display name (MUL-5529).
@@ -3554,10 +3554,10 @@ env_key = "NEW_API_KEY"
 	// Daemon-managed sandbox / multi-agent / memory blocks must all be
 	// re-applied on top of the fresh copy — PR correctness depends on it.
 	for _, marker := range []string{
-		multicaManagedBeginMarker,
-		multicaMultiAgentBeginMarker,
-		multicaMemoryFeatureBeginMarker,
-		multicaMemoryConfigBeginMarker,
+		inkwayManagedBeginMarker,
+		inkwayMultiAgentBeginMarker,
+		inkwayMemoryFeatureBeginMarker,
+		inkwayMemoryConfigBeginMarker,
 	} {
 		if !strings.Contains(s, marker) {
 			t.Errorf("daemon-managed marker %q missing after refresh, got:\n%s", marker, s)
@@ -3660,10 +3660,10 @@ env_key = "OLD_API_KEY"
 		}
 	}
 	for _, marker := range []string{
-		multicaManagedBeginMarker,
-		multicaMultiAgentBeginMarker,
-		multicaMemoryFeatureBeginMarker,
-		multicaMemoryConfigBeginMarker,
+		inkwayManagedBeginMarker,
+		inkwayMultiAgentBeginMarker,
+		inkwayMemoryFeatureBeginMarker,
+		inkwayMemoryConfigBeginMarker,
 	} {
 		if !strings.Contains(s, marker) {
 			t.Errorf("daemon-managed marker %q missing after shared source removed, got:\n%s", marker, s)
@@ -3686,7 +3686,7 @@ func TestEnsureCodexSandboxConfigCreatesDefaultLinux(t *testing.T) {
 		t.Fatalf("failed to read config.toml: %v", err)
 	}
 	s := string(data)
-	if !strings.Contains(s, multicaManagedBeginMarker) || !strings.Contains(s, multicaManagedEndMarker) {
+	if !strings.Contains(s, inkwayManagedBeginMarker) || !strings.Contains(s, inkwayManagedEndMarker) {
 		t.Errorf("missing managed block markers, got:\n%s", s)
 	}
 	if !strings.Contains(s, `sandbox_mode = "danger-full-access"`) {
@@ -3721,7 +3721,7 @@ func TestEnsureCodexSandboxConfigDarwinFallsBack(t *testing.T) {
 
 // TestEnsureCodexSandboxConfigWindowsFallsBack pins MUL-4957: when a Windows
 // user has not opted into a native Codex sandbox, Codex cannot enforce
-// workspace-write and rejects mutation commands (e.g. `multica issue create`)
+// workspace-write and rejects mutation commands (e.g. `inkway issue create`)
 // "by policy". The daemon therefore defaults Windows to danger-full-access and
 // emits no workspace-write keys.
 func TestEnsureCodexSandboxConfigWindowsFallsBack(t *testing.T) {
@@ -3804,7 +3804,7 @@ func TestEnsureCodexSandboxConfigIsIdempotent(t *testing.T) {
 	}
 	data, _ := os.ReadFile(configPath)
 	// The managed block should appear exactly once.
-	if n := strings.Count(string(data), multicaManagedBeginMarker); n != 1 {
+	if n := strings.Count(string(data), inkwayManagedBeginMarker); n != 1 {
 		t.Errorf("expected exactly 1 managed block, got %d in:\n%s", n, data)
 	}
 }
@@ -3883,12 +3883,12 @@ func TestEnsureCodexSandboxConfigHoistsAboveUserTables(t *testing.T) {
 
 	// User config that ends inside a table. If the managed block were
 	// appended at EOF, `sandbox_mode = "..."` would be parsed as
-	// permissions.multica.sandbox_mode and Codex would never see it — see
+	// permissions.inkway.sandbox_mode and Codex would never see it — see
 	// review of MUL-963 PR #1246. The block must be hoisted above any
 	// user-defined table headers so it lives at the TOML root.
 	existing := `model = "o3"
 
-[permissions.multica]
+[permissions.inkway]
 trust = "always"
 `
 	os.WriteFile(configPath, []byte(existing), 0o644)
@@ -3901,9 +3901,9 @@ trust = "always"
 	data, _ := os.ReadFile(configPath)
 	s := string(data)
 
-	beginIdx := strings.Index(s, multicaManagedBeginMarker)
-	endIdx := strings.Index(s, multicaManagedEndMarker)
-	tableIdx := strings.Index(s, "[permissions.multica]")
+	beginIdx := strings.Index(s, inkwayManagedBeginMarker)
+	endIdx := strings.Index(s, inkwayManagedEndMarker)
+	tableIdx := strings.Index(s, "[permissions.inkway]")
 	if beginIdx < 0 || endIdx < 0 || tableIdx < 0 {
 		t.Fatalf("expected managed block and user table to both be present, got:\n%s", s)
 	}
@@ -3911,14 +3911,14 @@ trust = "always"
 	// that sandbox_mode and sandbox_workspace_write.network_access are
 	// parsed at the TOML root.
 	if !(beginIdx < endIdx && endIdx < tableIdx) {
-		t.Errorf("managed block must be hoisted above [permissions.multica]; got begin=%d end=%d table=%d:\n%s", beginIdx, endIdx, tableIdx, s)
+		t.Errorf("managed block must be hoisted above [permissions.inkway]; got begin=%d end=%d table=%d:\n%s", beginIdx, endIdx, tableIdx, s)
 	}
 	// User content must be preserved verbatim.
 	if !strings.Contains(s, `model = "o3"`) {
 		t.Error("lost user top-level key")
 	}
 	if !strings.Contains(s, `trust = "always"`) {
-		t.Error("lost user permissions.multica content")
+		t.Error("lost user permissions.inkway content")
 	}
 
 	// Running again must be idempotent even when the preceding content ends
@@ -3930,7 +3930,7 @@ trust = "always"
 	if string(data2) != s {
 		t.Errorf("second pass should be idempotent:\n--- first ---\n%s\n--- second ---\n%s", s, data2)
 	}
-	if n := strings.Count(string(data2), multicaManagedBeginMarker); n != 1 {
+	if n := strings.Count(string(data2), inkwayManagedBeginMarker); n != 1 {
 		t.Errorf("expected exactly one managed block after idempotent rewrite, got %d", n)
 	}
 }
@@ -3946,15 +3946,15 @@ func TestEnsureCodexSandboxConfigMovesLegacyTrailingBlockToTop(t *testing.T) {
 	// top; otherwise sandbox_mode remains trapped inside the preceding table.
 	legacy := `model = "o3"
 
-[permissions.multica]
+[permissions.inkway]
 trust = "always"
 
-` + multicaManagedBeginMarker + `
+` + inkwayManagedBeginMarker + `
 sandbox_mode = "workspace-write"
 
 [sandbox_workspace_write]
 network_access = true
-` + multicaManagedEndMarker + `
+` + inkwayManagedEndMarker + `
 `
 	os.WriteFile(configPath, []byte(legacy), 0o644)
 
@@ -3965,12 +3965,12 @@ network_access = true
 	data, _ := os.ReadFile(configPath)
 	s := string(data)
 
-	beginIdx := strings.Index(s, multicaManagedBeginMarker)
-	tableIdx := strings.Index(s, "[permissions.multica]")
+	beginIdx := strings.Index(s, inkwayManagedBeginMarker)
+	tableIdx := strings.Index(s, "[permissions.inkway]")
 	if beginIdx < 0 || tableIdx < 0 || beginIdx > tableIdx {
-		t.Errorf("expected managed block to be hoisted above [permissions.multica], got:\n%s", s)
+		t.Errorf("expected managed block to be hoisted above [permissions.inkway], got:\n%s", s)
 	}
-	if strings.Count(s, multicaManagedBeginMarker) != 1 {
+	if strings.Count(s, inkwayManagedBeginMarker) != 1 {
 		t.Errorf("expected exactly one managed block, got:\n%s", s)
 	}
 	// The old inline `[sandbox_workspace_write]` header must be gone — the
@@ -4257,7 +4257,7 @@ func TestPrepareCodexHomeFailsClosedWhenSandboxWriteFails(t *testing.T) {
 	// Reused per-task home still holding the prior run's danger-full-access.
 	codexHome := t.TempDir()
 	configPath := filepath.Join(codexHome, "config.toml")
-	stale := multicaManagedBeginMarker + "\nsandbox_mode = \"danger-full-access\"\n" + multicaManagedEndMarker + "\n"
+	stale := inkwayManagedBeginMarker + "\nsandbox_mode = \"danger-full-access\"\n" + inkwayManagedEndMarker + "\n"
 	if err := os.WriteFile(configPath, []byte(stale), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -4315,7 +4315,7 @@ func TestPrepareCodexHomeWritesManagedSandboxBlock(t *testing.T) {
 		t.Fatalf("config.toml not created: %v", err)
 	}
 	s := string(data)
-	if !strings.Contains(s, multicaManagedBeginMarker) {
+	if !strings.Contains(s, inkwayManagedBeginMarker) {
 		t.Errorf("config.toml missing managed block, got:\n%s", s)
 	}
 	if !strings.Contains(s, `sandbox_mode = "danger-full-access"`) {
@@ -4362,13 +4362,13 @@ func TestReuseRestoresCodexHome(t *testing.T) {
 	if reused.CodexHome == "" {
 		t.Fatal("expected CodexHome to be restored after Reuse")
 	}
-	if reused.MulticaConfigRoot != filepath.Join(reused.RootDir, "multica-config") {
-		t.Fatalf("MulticaConfigRoot = %q, want restored task-local config directory", reused.MulticaConfigRoot)
+	if reused.InkwayConfigRoot != filepath.Join(reused.RootDir, "inkway-config") {
+		t.Fatalf("InkwayConfigRoot = %q, want restored task-local config directory", reused.InkwayConfigRoot)
 	}
-	if info, err := os.Stat(reused.MulticaConfigRoot); err != nil {
-		t.Fatalf("stat restored MulticaConfigRoot: %v", err)
+	if info, err := os.Stat(reused.InkwayConfigRoot); err != nil {
+		t.Fatalf("stat restored InkwayConfigRoot: %v", err)
 	} else if got := info.Mode().Perm(); got != 0o700 {
-		t.Fatalf("restored MulticaConfigRoot mode = %o, want 700", got)
+		t.Fatalf("restored InkwayConfigRoot mode = %o, want 700", got)
 	}
 
 	// Verify config.toml has a managed block (exact mode depends on host
@@ -4377,8 +4377,8 @@ func TestReuseRestoresCodexHome(t *testing.T) {
 	if err != nil {
 		t.Fatalf("config.toml not found in reused CodexHome: %v", err)
 	}
-	if !strings.Contains(string(data), multicaManagedBeginMarker) {
-		t.Error("reused config.toml missing multica-managed block")
+	if !strings.Contains(string(data), inkwayManagedBeginMarker) {
+		t.Error("reused config.toml missing inkway-managed block")
 	}
 }
 
@@ -4827,7 +4827,7 @@ func TestReuseUpdatesCodexWorkspaceSkills(t *testing.T) {
 
 // TestPrepareCodexSeedsUserSkills covers the fix for #1922: skills the user
 // installs under ~/.codex/skills/ must be discoverable by the codex CLI
-// inside a Multica task, despite the daemon redirecting CODEX_HOME to a
+// inside a Inkway task, despite the daemon redirecting CODEX_HOME to a
 // per-task directory.
 func TestPrepareCodexSeedsUserSkills(t *testing.T) {
 	// Cannot use t.Parallel() with t.Setenv.
@@ -5738,7 +5738,7 @@ func TestBuildMetaSkillContentOmitsRequestingUserWhenEmpty(t *testing.T) {
 // change whenever a different person causes the next run on the same issue.
 func TestOnBehalfOfBlock(t *testing.T) {
 	t.Parallel()
-	const want = "## On Behalf Of\n\nYou are acting on behalf of **Bohan** (bohan@example.com). Apply any person-specific privacy or access rules in your instructions to this person. Your Multica credentials and access remain scoped to the runtime owner; do not assume this person can access everything you can.\n\n"
+	const want = "## On Behalf Of\n\nYou are acting on behalf of **Bohan** (bohan@example.com). Apply any person-specific privacy or access rules in your instructions to this person. Your Inkway credentials and access remain scoped to the runtime owner; do not assume this person can access everything you can.\n\n"
 	if got := BuildOnBehalfOfBlock("Bohan", "bohan@example.com"); got != want {
 		t.Errorf("on-behalf-of block = %q, want %q", got, want)
 	}
@@ -5916,7 +5916,7 @@ func TestInjectRuntimeConfigBriefOmitsResumedThreadAnchor(t *testing.T) {
 		"No other new comments on this issue since your last run",
 		"issue-wide delta is empty",
 		"if resumed memory is not enough",
-		"multica issue comment list " + issueID + " --thread thread-root-1 --tail 30 --compact --output json",
+		"inkway issue comment list " + issueID + " --thread thread-root-1 --tail 30 --compact --output json",
 	} {
 		if !strings.Contains(hint, want) {
 			t.Errorf("resumed hint missing %q\n---\n%s", want, hint)
@@ -5959,7 +5959,7 @@ func TestInjectRuntimeConfigAssignmentTriggerScansRootsFirst(t *testing.T) {
 	}
 	// Older context must remain reachable through pagination. The cursor
 	// labels and flags now live in the CLI's own --help (MUL-5442, pinned by
-	// TestIssueCommentListHelpCarriesReadContract in cmd/multica); the brief
+	// TestIssueCommentListHelpCarriesReadContract in cmd/inkway); the brief
 	// keeps a pointer in the flag reference.
 	for _, want := range []string{
 		"paging cursors, and full flag semantics: `--help`",
@@ -5969,7 +5969,7 @@ func TestInjectRuntimeConfigAssignmentTriggerScansRootsFirst(t *testing.T) {
 		}
 	}
 	for _, banned := range []string{
-		"multica issue comment list issue-1 --output json",
+		"inkway issue comment list issue-1 --output json",
 		"read the full comment history",
 		"read the full history page-by-page",
 		"`--recent` is a way to read the full history",
@@ -6022,7 +6022,7 @@ func TestInjectRuntimeConfigCatchUpScansRootsFirst(t *testing.T) {
 		// The headline saturation warning stays in the flag reference; the
 		// deep semantics (per-thread cap, root-thread saturation) moved to the
 		// CLI's own --help (MUL-5442) and are pinned there
-		// (TestIssueCommentListHelpCarriesReadContract in cmd/multica).
+		// (TestIssueCommentListHelpCarriesReadContract in cmd/inkway).
 		"caps THREADS, not comments",
 	} {
 		if !strings.Contains(s, want) {
@@ -6032,7 +6032,7 @@ func TestInjectRuntimeConfigCatchUpScansRootsFirst(t *testing.T) {
 
 	// The workflow steps must not hand the agent a ready-to-paste bulk read;
 	// that is what made the mandatory step pull whole histories.
-	if strings.Contains(s, "multica issue comment list issue-1 --recent") {
+	if strings.Contains(s, "inkway issue comment list issue-1 --recent") {
 		t.Errorf("workflow steps must not present an issue-scoped --recent command\n---\n%s", s)
 	}
 	// The saturation warning belongs to the flag reference, which introduces
@@ -6078,15 +6078,15 @@ func TestBriefCarriesNoMetadataGuidance(t *testing.T) {
 		"Hints, not truth",
 		"never secrets or long content",
 		"Full write discipline:",
-		"multica issue metadata list <issue-id>",
-		"multica issue metadata set <issue-id> --key <k> --value <v> [--type string|number|bool]",
-		"multica issue metadata delete <issue-id> --key <k>",
+		"inkway issue metadata list <issue-id>",
+		"inkway issue metadata set <issue-id> --key <k> --value <v> [--type string|number|bool]",
+		"inkway issue metadata delete <issue-id> --key <k>",
 		"its JSON already carries the issue's `metadata` bag",
 		"What to look for: `## Issue Metadata`",
 		"the bar in `## Issue Metadata`",
 		// The standalone read step retired by #7016 must not come back
 		// through the phase-1 rewrite either.
-		"Read the metadata bag (`multica issue metadata list`)",
+		"Read the metadata bag (`inkway issue metadata list`)",
 	}
 
 	cases := []struct {
@@ -6163,7 +6163,7 @@ func TestBriefCarriesNoMetadataGuidance(t *testing.T) {
 				return
 			}
 			for _, want := range []string{
-				"1. Read the issue (`multica issue get`) to understand the context.",
+				"1. Read the issue (`inkway issue get`) to understand the context.",
 				"5. Before exiting, confirm the status still matches where things actually stand.",
 			} {
 				if !strings.Contains(s, want) {

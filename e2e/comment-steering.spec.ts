@@ -49,8 +49,8 @@ test("a reply steers the thread agent's running turn and shows its receipt", asy
     );
 
     await page.addInitScript((token) => {
-      localStorage.setItem("multica_token", token!);
-      localStorage.setItem("multica:chat:isOpen", "false");
+      localStorage.setItem("inkway_token", token!);
+      localStorage.setItem("inkway:chat:isOpen", "false");
     }, api.getToken());
     await page.setViewportSize({ width: 1440, height: 1000 });
     await page.goto(`/${workspace.slug}/issues/${issue.id}`, { waitUntil: "domcontentloaded" });

@@ -26,29 +26,29 @@ vi.mock("@tanstack/react-query", () => ({
   useQueryClient: () => ({ setQueryData: vi.fn() }),
 }));
 
-vi.mock("@multica/core/platform", () => ({
+vi.mock("@inkway/core/platform", () => ({
   CoreProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
   setCurrentWorkspace: vi.fn(),
 }));
 
-vi.mock("@multica/core/i18n", () => ({
+vi.mock("@inkway/core/i18n", () => ({
   pickLocale: () => "en",
 }));
 
-vi.mock("@multica/core/auth", () => ({
+vi.mock("@inkway/core/auth", () => ({
   useAuthStore: (selector: (auth: typeof state.auth) => unknown) =>
     selector(state.auth),
 }));
 
-vi.mock("@multica/core/onboarding", () => ({
+vi.mock("@inkway/core/onboarding", () => ({
   useWelcomeStore: { getState: () => ({ reset: vi.fn() }) },
 }));
 
-vi.mock("@multica/core/workspace/queries", () => ({
+vi.mock("@inkway/core/workspace/queries", () => ({
   workspaceKeys: { list: () => ["workspace-list"] },
 }));
 
-vi.mock("@multica/core/workspace", () => ({
+vi.mock("@inkway/core/workspace", () => ({
   useWorkspaceList: () => ({
     isFetching: false,
     ready: true,
@@ -58,26 +58,26 @@ vi.mock("@multica/core/workspace", () => ({
   }),
 }));
 
-vi.mock("@multica/core/api", () => ({
+vi.mock("@inkway/core/api", () => ({
   api: {
     listMyInvitations: vi.fn(),
     listWorkspaces: vi.fn(),
   },
 }));
 
-vi.mock("@multica/core/paths", () => ({
+vi.mock("@inkway/core/paths", () => ({
   useHasOnboarded: () => true,
 }));
 
-vi.mock("@multica/core/analytics", () => ({ captureEvent: vi.fn() }));
-vi.mock("@multica/ui/components/common/theme-provider", () => ({
+vi.mock("@inkway/core/analytics", () => ({ captureEvent: vi.fn() }));
+vi.mock("@inkway/ui/components/common/theme-provider", () => ({
   ThemeProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
 }));
-vi.mock("@multica/ui/components/common/multica-icon", () => ({
-  MulticaIcon: () => <div data-testid="app-loading" />,
+vi.mock("@inkway/ui/components/common/inkway-icon", () => ({
+  InkwayIcon: () => <div data-testid="app-loading" />,
 }));
-vi.mock("@multica/ui/components/ui/sonner", () => ({ Toaster: () => null }));
-vi.mock("@multica/views/locales", () => ({ RESOURCES: { en: {} } }));
+vi.mock("@inkway/ui/components/ui/sonner", () => ({ Toaster: () => null }));
+vi.mock("@inkway/views/locales", () => ({ RESOURCES: { en: {} } }));
 
 vi.mock("./pages/login", () => ({
   DesktopLoginPage: () => <div data-testid="login-page" />,

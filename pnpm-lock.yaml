@@ -180,13 +180,13 @@ importers:
       '@fontsource-variable/source-serif-4':
         specifier: ^5.2.9
         version: 5.2.9
-      '@multica/core':
+      '@inkway/core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@multica/ui':
+      '@inkway/ui':
         specifier: workspace:*
         version: link:../../packages/ui
-      '@multica/views':
+      '@inkway/views':
         specifier: workspace:*
         version: link:../../packages/views
       '@tanstack/react-query':
@@ -229,10 +229,10 @@ importers:
       '@electron-toolkit/tsconfig':
         specifier: ^2.0.0
         version: 2.0.0(@types/node@25.5.0)
-      '@multica/eslint-config':
+      '@inkway/eslint-config':
         specifier: workspace:*
         version: link:../../packages/eslint-config
-      '@multica/tsconfig':
+      '@inkway/tsconfig':
         specifier: workspace:*
         version: link:../../packages/tsconfig
       '@tailwindcss/vite':
@@ -283,7 +283,7 @@ importers:
 
   apps/docs:
     dependencies:
-      '@multica/ui':
+      '@inkway/ui':
         specifier: workspace:*
         version: link:../../packages/ui
       fumadocs-core:
@@ -338,7 +338,7 @@ importers:
       '@expo/vector-icons':
         specifier: ^14.1.0
         version: 14.1.0(expo-font@55.0.7)(react-native@0.83.6(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.0))(react@19.2.0)
-      '@multica/core':
+      '@inkway/core':
         specifier: workspace:*
         version: link:../../packages/core
       '@react-native-community/datetimepicker':
@@ -552,13 +552,13 @@ importers:
       '@fontsource-variable/inter':
         specifier: ^5.2.5
         version: 5.2.8
-      '@multica/core':
+      '@inkway/core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@multica/ui':
+      '@inkway/ui':
         specifier: workspace:*
         version: link:../../packages/ui
-      '@multica/views':
+      '@inkway/views':
         specifier: workspace:*
         version: link:../../packages/views
       '@tanstack/react-query':
@@ -595,10 +595,10 @@ importers:
         specifier: ^1.4.0
         version: 1.4.0
     devDependencies:
-      '@multica/eslint-config':
+      '@inkway/eslint-config':
         specifier: workspace:*
         version: link:../../packages/eslint-config
-      '@multica/tsconfig':
+      '@inkway/tsconfig':
         specifier: workspace:*
         version: link:../../packages/tsconfig
       '@tailwindcss/vite':
@@ -634,13 +634,13 @@ importers:
 
   apps/web:
     dependencies:
-      '@multica/core':
+      '@inkway/core':
         specifier: workspace:*
         version: link:../../packages/core
-      '@multica/ui':
+      '@inkway/ui':
         specifier: workspace:*
         version: link:../../packages/ui
-      '@multica/views':
+      '@inkway/views':
         specifier: workspace:*
         version: link:../../packages/views
       '@tanstack/react-query':
@@ -677,7 +677,7 @@ importers:
         specifier: 'catalog:'
         version: 4.3.6
     devDependencies:
-      '@multica/eslint-config':
+      '@inkway/eslint-config':
         specifier: workspace:*
         version: link:../../packages/eslint-config
       '@tailwindcss/postcss':
@@ -744,10 +744,10 @@ importers:
         specifier: 'catalog:'
         version: 5.0.12(@types/react@19.2.14)(immer@11.1.4)(react@19.2.3)(use-sync-external-store@1.6.0(react@19.2.3))
     devDependencies:
-      '@multica/eslint-config':
+      '@inkway/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
-      '@multica/tsconfig':
+      '@inkway/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig
       '@testing-library/react':
@@ -798,10 +798,10 @@ importers:
 
   packages/plugin-sdk:
     devDependencies:
-      '@multica/eslint-config':
+      '@inkway/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
-      '@multica/tsconfig':
+      '@inkway/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig
       typescript:
@@ -909,10 +909,10 @@ importers:
         specifier: 'catalog:'
         version: 1.0.3
     devDependencies:
-      '@multica/eslint-config':
+      '@inkway/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
-      '@multica/tsconfig':
+      '@inkway/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig
       '@types/linkify-it':
@@ -951,10 +951,10 @@ importers:
       '@floating-ui/dom':
         specifier: ^1.7.6
         version: 1.7.6
-      '@multica/core':
+      '@inkway/core':
         specifier: workspace:*
         version: link:../core
-      '@multica/ui':
+      '@inkway/ui':
         specifier: workspace:*
         version: link:../ui
       '@tanstack/react-query':
@@ -1120,13 +1120,13 @@ importers:
         specifier: 'catalog:'
         version: 5.0.12(@types/react@19.2.14)(immer@11.1.4)(react@19.2.3)(use-sync-external-store@1.6.0(react@19.2.3))
     devDependencies:
-      '@multica/eslint-config':
+      '@inkway/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
-      '@multica/plugin-sdk':
+      '@inkway/plugin-sdk':
         specifier: workspace:*
         version: link:../plugin-sdk
-      '@multica/tsconfig':
+      '@inkway/tsconfig':
         specifier: workspace:*
         version: link:../tsconfig
       '@testing-library/jest-dom':

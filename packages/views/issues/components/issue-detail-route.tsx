@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useCanonicalIssue } from "@multica/core/issues/canonical-id";
-import { useWorkspaceId } from "@multica/core/hooks";
-import { useWorkspacePaths } from "@multica/core/paths";
+import { useCanonicalIssue } from "@inkway/core/issues/canonical-id";
+import { useWorkspaceId } from "@inkway/core/hooks";
+import { useWorkspacePaths } from "@inkway/core/paths";
 import { useNavigation } from "../../navigation";
 import { IssueDetail, IssueDetailSkeleton, IssueNotFound } from "./issue-detail";
 

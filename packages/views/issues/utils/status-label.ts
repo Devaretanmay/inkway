@@ -4,9 +4,9 @@ import { useCallback } from "react";
 import {
   isBuiltInIssueStatus,
   isIssueStatusCategory,
-} from "@multica/core/issue-statuses";
-import { useIssueStatuses } from "@multica/core/issue-statuses/hooks";
-import type { BuiltInIssueStatus, IssueStatusCategory } from "@multica/core/types";
+} from "@inkway/core/issue-statuses";
+import { useIssueStatuses } from "@inkway/core/issue-statuses/hooks";
+import type { BuiltInIssueStatus, IssueStatusCategory } from "@inkway/core/types";
 import { useT } from "../../i18n";
 
 /**

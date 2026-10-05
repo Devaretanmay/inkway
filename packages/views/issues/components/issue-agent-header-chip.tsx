@@ -6,13 +6,13 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@multica/ui/components/ui/popover";
-import { useActorName } from "@multica/core/workspace/hooks";
-import { cn } from "@multica/ui/lib/utils";
-import { BorderBeam } from "@multica/ui/components/common/border-beam";
-import { api } from "@multica/core/api";
-import { issueKeys } from "@multica/core/issues/queries";
-import type { AgentTask } from "@multica/core/types";
+} from "@inkway/ui/components/ui/popover";
+import { useActorName } from "@inkway/core/workspace/hooks";
+import { cn } from "@inkway/ui/lib/utils";
+import { BorderBeam } from "@inkway/ui/components/common/border-beam";
+import { api } from "@inkway/core/api";
+import { issueKeys } from "@inkway/core/issues/queries";
+import type { AgentTask } from "@inkway/core/types";
 import { TranscriptButton } from "../../common/task-transcript";
 import { AgentAvatarStack } from "../../agents/components/agent-avatar-stack";
 import { ActiveTaskRow } from "./execution-log-section";

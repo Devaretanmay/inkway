@@ -81,9 +81,9 @@ Use the existing helpers rather than rebuilding request or subscription plumbing
 From the repository root:
 
 ```bash
-pnpm --filter @multica/mobile typecheck
-pnpm --filter @multica/mobile lint
-pnpm --filter @multica/mobile test
+pnpm --filter @inkway/mobile typecheck
+pnpm --filter @inkway/mobile lint
+pnpm --filter @inkway/mobile test
 ```
 
 - Root frontend checks exclude mobile. `.github/workflows/mobile-verify.yml` defines the current mobile CI scope; these checks do not build an IPA or verify native rendering.

@@ -10,18 +10,18 @@ import {
 } from "react";
 import { useDefaultLayout } from "react-resizable-panels";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
-import { useWorkspaceId } from "@multica/core/hooks";
-import { ApiError, errorCode } from "@multica/core/api";
-import { useWorkspacePaths } from "@multica/core/paths";
-import { useModalStore } from "@multica/core/modals";
+import { useWorkspaceId } from "@inkway/core/hooks";
+import { ApiError, errorCode } from "@inkway/core/api";
+import { useWorkspacePaths } from "@inkway/core/paths";
+import { useModalStore } from "@inkway/core/modals";
 import {
   getShortcut,
   isEditableShortcutTarget,
   isPortalLayerShortcutTarget,
   shortcutMatchesEvent,
-} from "@multica/core/shortcuts";
-import { isImeComposing } from "@multica/core/utils";
-import { useIssueDraftStore } from "@multica/core/issues/stores/draft-store";
+} from "@inkway/core/shortcuts";
+import { isImeComposing } from "@inkway/core/utils";
+import { useIssueDraftStore } from "@inkway/core/issues/stores/draft-store";
 import {
   inboxListOptions,
   archivedInboxPagesOptions,
@@ -29,7 +29,7 @@ import {
   deduplicateInboxItems,
   deduplicateArchivedInboxItems,
   useInboxUnreadCount,
-} from "@multica/core/inbox/queries";
+} from "@inkway/core/inbox/queries";
 import {
   useMarkInboxRead,
   useMarkInboxUnread,
@@ -40,7 +40,7 @@ import {
   useArchiveAllReadInbox,
   useArchiveCompletedInbox,
   useRetrySourceContextQuickCreate,
-} from "@multica/core/inbox/mutations";
+} from "@inkway/core/inbox/mutations";
 import {
   filterInboxItems,
   inboxFiltersForPrioritySupport,
@@ -48,11 +48,17 @@ import {
   inboxPriorityFilterSupport,
   useInboxFilters,
   useInboxFilterStore,
-} from "@multica/core/inbox/filter-store";
+} from "@inkway/core/inbox/filter-store";
+import {
+  INBOX_ATTENTION_CATEGORIES,
+  filterInboxByAttentionCategory,
+  inboxAttentionCounts,
+  type InboxAttentionCategory,
+} from "@inkway/core/inbox/attention";
 
 import { IssueDetail, issueHighlightMementoKey } from "../../issues/components/issue-detail";
 import { useViewStateWriter } from "../../platform";
-import { ErrorBoundary } from "@multica/ui/components/common/error-boundary";
+import { ErrorBoundary } from "@inkway/ui/components/common/error-boundary";
 import { useNavigation, useReportNavigating } from "../../navigation";
 import { toast } from "sonner";
 import {
@@ -66,24 +72,24 @@ import {
   ListChecks,
   ArrowLeft,
 } from "lucide-react";
-import type { InboxItem } from "@multica/core/types";
-import { Button } from "@multica/ui/components/ui/button";
+import type { InboxItem } from "@inkway/core/types";
+import { Button } from "@inkway/ui/components/ui/button";
 import {
   ResizablePanelGroup,
   ResizablePanel,
   ResizableHandle,
-} from "@multica/ui/components/ui/resizable";
-import { Skeleton } from "@multica/ui/components/ui/skeleton";
-import { NumberFlow } from "@multica/ui/components/ui/number-flow";
+} from "@inkway/ui/components/ui/resizable";
+import { Skeleton } from "@inkway/ui/components/ui/skeleton";
+import { NumberFlow } from "@inkway/ui/components/ui/number-flow";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-} from "@multica/ui/components/ui/dropdown-menu";
-import { useIsCompact } from "@multica/ui/hooks/use-mobile";
-import { cn } from "@multica/ui/lib/utils";
+} from "@inkway/ui/components/ui/dropdown-menu";
+import { useIsCompact } from "@inkway/ui/hooks/use-mobile";
+import { cn } from "@inkway/ui/lib/utils";
 import { PAGE_GUTTER, PageHeader } from "../../layout/page-header";
 import { useTimeAgo } from "./inbox-list-item";
 import { InboxList } from "./inbox-list";
@@ -150,7 +156,26 @@ export function InboxPage() {
   // The paginated endpoint guarantees the projection, including on empty pages.
   const priorityFilterSupport = isArchivedView ? "supported" : inboxPriorityFilterSupport(rawItems);
   const effectiveFilters = useMemo(() => inboxFiltersForPrioritySupport(filters, priorityFilterSupport), [filters, priorityFilterSupport]);
-  const visibleItems = useMemo(() => filterInboxItems(viewItems, effectiveFilters), [viewItems, effectiveFilters]);
+  const filteredItems = useMemo(() => filterInboxItems(viewItems, effectiveFilters), [viewItems, effectiveFilters]);
+  /**
+   * The attention lens, applied after the existing filter dimensions.
+   *
+   * This is a view over the same list the server returned — not a different
+   * query — so read/unread state, archiving and the issue links behind each row
+   * behave identically whichever tab is open. Composing the two keeps the
+   * faceted filter menu and the attention split from fighting: "unread only"
+   * and "needs attention" are independent questions.
+   */
+  const [attentionCategory, setAttentionCategory] =
+    useState<InboxAttentionCategory>("all");
+  const visibleItems = useMemo(
+    () => filterInboxByAttentionCategory(filteredItems, attentionCategory),
+    [attentionCategory, filteredItems],
+  );
+  const attentionCounts = useMemo(
+    () => inboxAttentionCounts(filteredItems),
+    [filteredItems],
+  );
   const hasActiveFilters = inboxFilterCount(effectiveFilters) > 0;
   const selectedOnPage = viewItems.find((i) => (i.issue_id ?? i.id) === selectedKey);
   // A deep link can point beyond every loaded page. Resolve its group directly
@@ -273,7 +298,7 @@ export function InboxPage() {
   ]);
 
   const { defaultLayout, onLayoutChanged } = useDefaultLayout({
-    id: "multica_inbox_layout",
+    id: "inkway_inbox_layout",
   });
 
   const isCompact = useIsCompact();
@@ -496,10 +521,77 @@ export function InboxPage() {
 
   // -- Shared sub-components --------------------------------------------------
 
+  /**
+   * The attention row. A tab is offered only when the inbox actually holds
+   * something for it — an empty category is a question the page cannot answer,
+   * and four tabs where two are always zero is noise. The backend's own
+   * `severity` drives "Needs attention", so this stays correct as new
+   * attention-producing events land without a UI change.
+   */
+  const attentionRow = useMemo(() => {
+    const offered = INBOX_ATTENTION_CATEGORIES.filter(
+      (category) =>
+        category === "all" ||
+        category === attentionCategory ||
+        attentionCounts[category] > 0,
+    );
+    // Only the main inbox is a queue of things to act on. The archive is
+    // already triaged by definition.
+    if (offered.length < 2 || isArchivedView) return null;
+    return (
+      <div className="flex shrink-0 items-center gap-1 overflow-x-auto">
+        {offered.map((category) => {
+          const active = category === attentionCategory;
+          const count = attentionCounts[category];
+          return (
+            <Button
+              key={category}
+              type="button"
+              variant="outline"
+              size="sm"
+              aria-pressed={active}
+              onClick={() => setAttentionCategory(category)}
+              className={cn(
+                "h-7 shrink-0 gap-1.5 px-2.5 text-caption",
+                active
+                  ? "bg-accent text-accent-foreground hover:bg-accent/80"
+                  : "text-muted-foreground",
+              )}
+            >
+              <span className="truncate">
+                {category === "all"
+                  ? t(($) => $.tabs.all)
+                  : category === "attention"
+                    ? t(($) => $.tabs.attention)
+                    : category === "review"
+                      ? t(($) => $.tabs.review)
+                      : t(($) => $.tabs.updates)}
+              </span>
+              <span className="tabular-nums text-micro text-muted-foreground">
+                {count}
+              </span>
+            </Button>
+          );
+        })}
+      </div>
+    );
+  }, [attentionCategory, attentionCounts, isArchivedView, t]);
+
+  const emptyAttentionLabel = useMemo(() => {
+    if (attentionCategory === "attention") return t(($) => $.tabs.empty_attention);
+    if (attentionCategory === "review") return t(($) => $.tabs.empty_review);
+    if (attentionCategory === "updates") return t(($) => $.tabs.empty_updates);
+    return undefined;
+  }, [attentionCategory, t]);
+
   const listHeader = (
+    <>
     <PageHeader>
-      <div className="flex flex-1 items-center gap-2">
-        <h1 className="text-body font-semibold">{t(($) => $.page.title)}</h1>
+      <div className="flex min-w-0 flex-1 items-center gap-2">
+        <h1 className="shrink-0 text-body font-semibold">{t(($) => $.page.title)}</h1>
+        <p className="hidden min-w-0 truncate text-caption text-muted-foreground md:block">
+          {t(($) => $.page.subtitle)}
+        </p>
         {unreadCount > 0 && (
           <NumberFlow
             value={unreadCount}
@@ -554,6 +646,12 @@ export function InboxPage() {
       </DropdownMenu>
       )}
     </PageHeader>
+    {attentionRow ? (
+      <div className={`flex shrink-0 items-center gap-2 py-1.5 ${PAGE_GUTTER}`}>
+        {attentionRow}
+      </div>
+    ) : null}
+    </>
   );
 
   // Back out of the archive. Sits inside the list panel rather than replacing
@@ -602,7 +700,7 @@ export function InboxPage() {
         emptyLabel={
           hasActiveFilters && visibleItems.length === 0
             ? t(($) => $.filters.empty)
-            : undefined
+            : emptyAttentionLabel
         }
         emptyAction={
           hasActiveFilters && visibleItems.length === 0 ? (
@@ -692,7 +790,7 @@ export function InboxPage() {
         key={detailItem.issue_id}
         issueId={detailItem.issue_id}
         defaultSidebarOpen={false}
-        layoutId="multica_inbox_issue_detail_layout"
+        layoutId="inkway_inbox_issue_detail_layout"
         highlightCommentId={detailItem.details?.comment_id ?? undefined}
         highlightRequestToken={highlightRequestToken}
         // The split layout already has a nav trigger in the list header.

@@ -1,6 +1,7 @@
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import { AppCrashBoundary } from "./components/app-crash-boundary";
+import { migrateLegacyBrandStorage } from "@inkway/core/platform";
 // Inter variable font covers all weights (100-900) in a single file.
 // CJK is handled by system font fallback (see globals.css --font-sans chain).
 // Keep font stack in sync with apps/web/app/layout.tsx.
@@ -23,6 +24,8 @@ import "@fontsource-variable/source-serif-4/wght-italic.css";
 // class instead of chasing weights one at a time.
 import "@fontsource-variable/geist-mono";
 import "./globals.css";
+
+migrateLegacyBrandStorage(window.localStorage);
 
 // react-grab: dev-only element inspector. Hold ⌘C (Mac) / Ctrl+C and click any
 // element to copy its source path + line + component stack for pasting to an AI.

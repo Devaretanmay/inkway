@@ -2,12 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Loader2, Save } from "lucide-react";
-import { useConfigStore } from "@multica/core/config";
-import { AGENT_FOCUS_CONVERSATION_STARTERS } from "@multica/core/paths";
-import type { Agent, AgentConversationStarter } from "@multica/core/types";
-import { Button } from "@multica/ui/components/ui/button";
-import { Textarea } from "@multica/ui/components/ui/textarea";
-import { cn } from "@multica/ui/lib/utils";
+import { useConfigStore } from "@inkway/core/config";
+import { AGENT_FOCUS_CONVERSATION_STARTERS } from "@inkway/core/paths";
+import type { Agent, AgentConversationStarter } from "@inkway/core/types";
+import { Button } from "@inkway/ui/components/ui/button";
+import { Textarea } from "@inkway/ui/components/ui/textarea";
+import { cn } from "@inkway/ui/lib/utils";
 import { useT } from "../../../i18n";
 import { useOptionalNavigation } from "../../../navigation";
 

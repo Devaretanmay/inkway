@@ -43,8 +43,8 @@ async function loginCapturingUser(page: Page): Promise<SetupResult> {
   const token = api.getToken();
   if (!token) throw new Error("login did not return a token");
   await page.addInitScript((t) => {
-    localStorage.setItem("multica_token", t);
-    localStorage.setItem("multica:chat:isOpen", "false");
+    localStorage.setItem("inkway_token", t);
+    localStorage.setItem("inkway:chat:isOpen", "false");
   }, token);
   return { slug: workspace.slug, userId };
 }

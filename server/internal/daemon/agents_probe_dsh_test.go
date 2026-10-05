@@ -13,7 +13,7 @@ import (
 )
 
 // dshProbeFixture writes a fake dsh and controls the one filesystem fact the
-// classification turns on: whether the `multica` profile manifest is present.
+// classification turns on: whether the `inkway` profile manifest is present.
 // DSH_HOME is pinned so the answer never depends on the machine running the
 // test.
 //
@@ -28,7 +28,7 @@ func dshProbeFixture(t *testing.T, body string, manifest bool) string {
 	home := t.TempDir()
 	t.Setenv("DSH_HOME", home)
 	if manifest {
-		dir := filepath.Join(home, "profiles", dshMulticaProfileName)
+		dir := filepath.Join(home, "profiles", dshInkwayProfileName)
 		if err := os.MkdirAll(dir, 0o755); err != nil {
 			t.Fatal(err)
 		}
@@ -50,7 +50,7 @@ const dshProbeOKFrame = `printf '%s\n' '{"v":1,"type":"probe","runtime":"dsh","p
 // other failure mode is a statement about this instant, and treating them alike
 // is what let a momentary failure during a DSH upgrade demote a working runtime
 // and start overwriting an installation that was already there.
-func TestProbeDshMulticaProfile(t *testing.T) {
+func TestProbeDshInkwayProfile(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("shell fixture")
 	}
@@ -65,7 +65,7 @@ func TestProbeDshMulticaProfile(t *testing.T) {
 		},
 		{
 			name: "profile absent and the probe says so",
-			body: `printf '%s\n' 'profile "multica" does not exist' >&2; exit 1`,
+			body: `printf '%s\n' 'profile "inkway" does not exist' >&2; exit 1`,
 			want: dshProbeMissingProfile,
 		},
 		{
@@ -122,7 +122,9 @@ func TestProbeDshMulticaProfile(t *testing.T) {
 	}
 	origTimeout := dshProbeTimeout
 	t.Cleanup(func() { dshProbeTimeout = origTimeout })
-	dshProbeTimeout = 2 * time.Second
+	// Several shell-backed timeout fixtures run under the race detector, where
+	// process startup and process-tree cleanup can exceed two seconds.
+	dshProbeTimeout = 5 * time.Second
 
 	// A cancelled round says nothing about the profile, whatever the manifest
 	// says: the probe never got to finish on its own terms.
@@ -130,16 +132,16 @@ func TestProbeDshMulticaProfile(t *testing.T) {
 		path := dshProbeFixture(t, `exec sleep 30`, false)
 		ctx, cancel := context.WithCancel(context.Background())
 		cancel()
-		if got := probeDshMulticaProfile(ctx, path); got != dshProbeUnavailable {
-			t.Fatalf("probeDshMulticaProfile() = %v, want %v", got, dshProbeUnavailable)
+		if got := probeDshInkwayProfile(ctx, path); got != dshProbeUnavailable {
+			t.Fatalf("probeDshInkwayProfile() = %v, want %v", got, dshProbeUnavailable)
 		}
 	})
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			path := dshProbeFixture(t, tc.body, tc.manifest)
-			if got := probeDshMulticaProfile(context.Background(), path); got != tc.want {
-				t.Fatalf("probeDshMulticaProfile() = %v, want %v", got, tc.want)
+			if got := probeDshInkwayProfile(context.Background(), path); got != tc.want {
+				t.Fatalf("probeDshInkwayProfile() = %v, want %v", got, tc.want)
 			}
 		})
 	}
@@ -181,7 +183,7 @@ func TestProbeBuiltinRuntime_DshFailureWithProfileInstalledIsNotCondemned(t *tes
 			record := filepath.Join(t.TempDir(), "provisioned.log")
 			// A bundle IS configured: the assertion is that these failures never
 			// reach the install path.
-			t.Setenv(dshProfileBundleEnv, "@multica-ai/dsh-runtime")
+			t.Setenv(dshProfileBundleEnv, "@inkway-ai/dsh-runtime")
 			t.Setenv("DSH_TEST_RECORD", record)
 
 			d := &Daemon{
@@ -217,7 +219,7 @@ func TestProbeBuiltinRuntime_DshFailureWithProfileInstalledIsNotCondemned(t *tes
 // Gating discovery on the profile instead — which this test used to assert —
 // is what made a missing profile invisible: dsh vanished from the availability
 // set with nothing on /health, in the log, or in `daemon status` to say why.
-func TestProbeAgentCLIsDiscoversDshWithoutMulticaProfile(t *testing.T) {
+func TestProbeAgentCLIsDiscoversDshWithoutInkwayProfile(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("shell fixture")
 	}
@@ -228,16 +230,16 @@ func TestProbeAgentCLIsDiscoversDshWithoutMulticaProfile(t *testing.T) {
 
 	fakeDir := t.TempDir()
 	path := filepath.Join(fakeDir, "dsh")
-	body := "#!/bin/sh\nset -eu\nprintf '%s\\n' 'missing multica profile' >&2\nexit 1\n"
+	body := "#!/bin/sh\nset -eu\nprintf '%s\\n' 'missing inkway profile' >&2\nexit 1\n"
 	if err := os.WriteFile(path, []byte(body), 0o755); err != nil {
 		t.Fatal(err)
 	}
 	t.Setenv("PATH", fakeDir)
-	t.Setenv("MULTICA_DSH_PATH", "")
+	t.Setenv("INKWAY_DSH_PATH", "")
 
 	entry, found := probeAgentCLIs()["dsh"]
 	if !found {
-		t.Fatal("dsh was not discovered; discovery must not depend on the Multica runtime profile")
+		t.Fatal("dsh was not discovered; discovery must not depend on the Inkway runtime profile")
 	}
 	if want := canonicalExecutablePath(path); entry.Path != want {
 		t.Fatalf("dsh path = %q, want %q", entry.Path, want)
@@ -252,7 +254,7 @@ func TestProbeAgentCLIsDiscoversDshWithoutMulticaProfile(t *testing.T) {
 // The manifest is what decides, so the fixture owns it: a probe that fails over
 // an installed profile is not the same finding as one that fails with nothing
 // installed, and only the second may be installed over.
-func TestProbeBuiltinRuntime_DshWithoutMulticaProfile(t *testing.T) {
+func TestProbeBuiltinRuntime_DshWithoutInkwayProfile(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("shell fixture")
 	}
@@ -270,7 +272,7 @@ func TestProbeBuiltinRuntime_DshWithoutMulticaProfile(t *testing.T) {
 		},
 		{
 			name:        "profile missing",
-			probeBody:   `printf '%s\n' 'profile "multica" does not exist' >&2; exit 1`,
+			probeBody:   `printf '%s\n' 'profile "inkway" does not exist' >&2; exit 1`,
 			wantVerdict: builtinProbeMissingProfile,
 		},
 	}
@@ -313,7 +315,7 @@ func TestProbeBuiltinRuntime_DshBinaryGoneIsNotAProfileVerdict(t *testing.T) {
 }
 
 // dshDesktopBundleFixture writes a fake DSH Desktop bundled CLI that answers
-// `--probe` the way the Multica runtime profile does, and pins discovery to
+// `--probe` the way the Inkway runtime profile does, and pins discovery to
 // it. The DSH Desktop app ships its CLI inside the .app bundle and never
 // installs `dsh` onto PATH, so neither LookPath nor the login-shell sweep can
 // find it.
@@ -339,8 +341,8 @@ func dshDesktopBundleFixture(t *testing.T, mode os.FileMode) string {
 	t.Cleanup(func() { dshDesktopAppBundlePaths = originalBundles })
 
 	t.Setenv("PATH", t.TempDir())
-	t.Setenv("MULTICA_DSH_PATH", "")
-	t.Setenv("MULTICA_DSH_MODEL", "deepseek-official/deepseek-chat")
+	t.Setenv("INKWAY_DSH_PATH", "")
+	t.Setenv("INKWAY_DSH_MODEL", "deepseek-official/deepseek-chat")
 	return bundle
 }
 
@@ -361,7 +363,7 @@ func TestProbeAgentCLIsUsesDshDesktopAppBundleFallback(t *testing.T) {
 		t.Fatalf("dsh command = %q, want dsh", entry.Command)
 	}
 	if entry.Model != "deepseek-official/deepseek-chat" {
-		t.Fatalf("dsh model = %q, want the MULTICA_DSH_MODEL override", entry.Model)
+		t.Fatalf("dsh model = %q, want the INKWAY_DSH_MODEL override", entry.Model)
 	}
 }
 
@@ -384,7 +386,7 @@ func TestProbeAgentCLIsIgnoresNonExecutableDshBundle(t *testing.T) {
 // `--version` included.
 //
 // Probing the profile before version detection reported that machine as "the
-// Multica runtime profile is not installed": a repair for a problem it did not
+// Inkway runtime profile is not installed": a repair for a problem it did not
 // have, sending the user to install a bundle while the actual fault was a CLI
 // that cannot execute — and, with a bundle configured, starting that install
 // against it. A CLI that cannot answer `--version` is not one this daemon has
@@ -411,7 +413,7 @@ func TestProbeBuiltinRuntime_DshThatCannotRunIsNotAProfileVerdict(t *testing.T) 
 	record := filepath.Join(t.TempDir(), "provisioned.log")
 	// A bundle IS configured: the assertion is that an unrunnable CLI never
 	// reaches the install path.
-	t.Setenv(dshProfileBundleEnv, "@multica-ai/dsh-runtime")
+	t.Setenv(dshProfileBundleEnv, "@inkway-ai/dsh-runtime")
 	t.Setenv("DSH_TEST_RECORD", record)
 
 	d := &Daemon{

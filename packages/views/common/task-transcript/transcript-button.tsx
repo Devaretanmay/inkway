@@ -3,20 +3,20 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Loader2, ScrollText } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { cn } from "@multica/ui/lib/utils";
+import { cn } from "@inkway/ui/lib/utils";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@multica/ui/components/ui/tooltip";
-import { api } from "@multica/core/api";
+} from "@inkway/ui/components/ui/tooltip";
+import { api } from "@inkway/core/api";
 import {
   chatKeys,
   isTaskMessageTaskId,
   taskMessagesOptions,
-} from "@multica/core/chat/queries";
-import type { AgentTask } from "@multica/core/types/agent";
-import type { TaskMessagePayload } from "@multica/core/types/events";
+} from "@inkway/core/chat/queries";
+import type { AgentTask } from "@inkway/core/types/agent";
+import type { TaskMessagePayload } from "@inkway/core/types/events";
 import { AgentTranscriptDialog } from "./agent-transcript-dialog";
 import { buildTimeline, type TimelineItem } from "./build-timeline";
 
@@ -158,9 +158,9 @@ export function TranscriptButton({
       setOpen(false);
     };
 
-    window.addEventListener("multica:navigate", handleGlobalNavigate);
+    window.addEventListener("inkway:navigate", handleGlobalNavigate);
     return () => {
-      window.removeEventListener("multica:navigate", handleGlobalNavigate);
+      window.removeEventListener("inkway:navigate", handleGlobalNavigate);
     };
   }, [open, setOpen]);
 

@@ -6,15 +6,15 @@ import {
   useRouteError,
 } from "react-router-dom";
 import { AlertTriangle, RotateCw, X } from "lucide-react";
-import { useAuthStore } from "@multica/core/auth";
-import { setCurrentWorkspace } from "@multica/core/platform";
-import { WorkspaceSlugProvider } from "@multica/core/paths";
-import { useWorkspaceList } from "@multica/core/workspace";
-import { Button } from "@multica/ui/components/ui/button";
-import { MulticaIcon } from "@multica/ui/components/common/multica-icon";
-import { ModalRegistry } from "@multica/views/modals/registry";
-import { WorkspacePresencePrefetch } from "@multica/views/layout";
-import { DragStrip } from "@multica/views/platform";
+import { useAuthStore } from "@inkway/core/auth";
+import { setCurrentWorkspace } from "@inkway/core/platform";
+import { WorkspaceSlugProvider } from "@inkway/core/paths";
+import { useWorkspaceList } from "@inkway/core/workspace";
+import { Button } from "@inkway/ui/components/ui/button";
+import { InkwayIcon } from "@inkway/ui/components/common/inkway-icon";
+import { ModalRegistry } from "@inkway/views/modals/registry";
+import { WorkspacePresencePrefetch } from "@inkway/views/layout";
+import { DragStrip } from "@inkway/views/platform";
 import type { IssueWindowContext } from "../../../shared/issue-window";
 import { DesktopAuthRecoveryPage } from "../pages/auth-recovery";
 import { IssueDetailPage } from "../pages/issue-detail-page";
@@ -67,7 +67,7 @@ function IssueWindowRoute() {
     return (
       <IssueWindowFrame>
         <div className="flex min-h-0 flex-1 items-center justify-center">
-          <MulticaIcon className="size-6 animate-pulse" />
+          <InkwayIcon className="size-6 animate-pulse" />
         </div>
       </IssueWindowFrame>
     );

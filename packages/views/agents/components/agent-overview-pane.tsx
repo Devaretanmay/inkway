@@ -6,16 +6,16 @@ import type {
   Agent,
   AgentRuntime,
   MemberWithUser,
-} from "@multica/core/types";
-import { providerSupportsMcpConfig } from "@multica/core/agents";
-import { useFeatureEnabled } from "@multica/core/config";
-import { COMPOSIO_MCP_APPS_FLAG } from "@multica/core/feature-flags";
-import { useWorkspaceId } from "@multica/core/hooks";
-import { larkInstallationsOptions } from "@multica/core/lark";
-import { slackInstallationsOptions } from "@multica/core/slack";
-import { dingtalkInstallationsOptions } from "@multica/core/dingtalk";
-import { wecomInstallationsOptions } from "@multica/core/wecom";
-import { telegramInstallationsOptions } from "@multica/core/telegram";
+} from "@inkway/core/types";
+import { providerSupportsMcpConfig } from "@inkway/core/agents";
+import { useFeatureEnabled } from "@inkway/core/config";
+import { COMPOSIO_MCP_APPS_FLAG } from "@inkway/core/feature-flags";
+import { useWorkspaceId } from "@inkway/core/hooks";
+import { larkInstallationsOptions } from "@inkway/core/lark";
+import { slackInstallationsOptions } from "@inkway/core/slack";
+import { dingtalkInstallationsOptions } from "@inkway/core/dingtalk";
+import { wecomInstallationsOptions } from "@inkway/core/wecom";
+import { telegramInstallationsOptions } from "@inkway/core/telegram";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,8 +25,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@multica/ui/components/ui/alert-dialog";
-import { cn } from "@multica/ui/lib/utils";
+} from "@inkway/ui/components/ui/alert-dialog";
+import { cn } from "@inkway/ui/lib/utils";
 import { PAGE_GUTTER, PAGE_RAIL } from "../../layout/page-header";
 import { ActivityTab } from "./tabs/activity-tab";
 import { InstructionsTab } from "./tabs/instructions-tab";

@@ -1,13 +1,13 @@
 "use client";
 
-import { useAuthStore } from "@multica/core/auth";
-import { useWorkspaceList } from "@multica/core/workspace";
+import { useAuthStore } from "@inkway/core/auth";
+import { useWorkspaceList } from "@inkway/core/workspace";
 import {
   paths,
   resolvePostAuthDestination,
   useHasOnboarded,
-} from "@multica/core/paths";
-import type { Workspace } from "@multica/core/types";
+} from "@inkway/core/paths";
+import type { Workspace } from "@inkway/core/types";
 
 /**
  * While the workspace list is in flight the CTA points at `/issues`, which the

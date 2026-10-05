@@ -12,10 +12,10 @@ import (
 	"testing/iotest"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/multica-ai/multica/server/internal/auth"
-	"github.com/multica-ai/multica/server/internal/middleware"
-	"github.com/multica-ai/multica/server/internal/testutil"
-	db "github.com/multica-ai/multica/server/pkg/db/generated"
+	"github.com/Devaretanmay/inkway/server/internal/auth"
+	"github.com/Devaretanmay/inkway/server/internal/middleware"
+	"github.com/Devaretanmay/inkway/server/internal/testutil"
+	db "github.com/Devaretanmay/inkway/server/pkg/db/generated"
 )
 
 type googleRoundTripper func(*http.Request) (*http.Response, error)

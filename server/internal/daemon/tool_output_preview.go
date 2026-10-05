@@ -3,7 +3,7 @@ package daemon
 import (
 	"unicode/utf8"
 
-	"github.com/multica-ai/multica/server/internal/util"
+	"github.com/Devaretanmay/inkway/server/internal/util"
 )
 
 // toolOutputPreviewBudget keeps the existing byte budget for tool_result

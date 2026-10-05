@@ -15,8 +15,8 @@
  */
 
 import { useEffect, useReducer, useRef, useState } from "react";
-import { cn } from "@multica/ui/lib/utils";
-import { Dialog, DialogContent } from "@multica/ui/components/ui/dialog";
+import { cn } from "@inkway/ui/lib/utils";
+import { Dialog, DialogContent } from "@inkway/ui/components/ui/dialog";
 import { useT } from "../i18n";
 import { CodeBlockIframe } from "./code-block-iframe";
 import {
@@ -37,7 +37,7 @@ import {
 } from "./utils/html-block-document";
 import { hashSource } from "./utils/source-hash";
 
-const HEIGHT_CACHE_PREFIX = "multica:html-block:height:";
+const HEIGHT_CACHE_PREFIX = "inkway:html-block:height:";
 
 // A document that never reports (a Content-Security-Policy in the author's
 // HTML can block the bridge) is shown at the old fixed height, scrolling

@@ -10,18 +10,18 @@ import type {
   IssueAssigneeType,
   IssueStatus,
   Project,
-} from "@multica/core/types";
-import { Button } from "@multica/ui/components/ui/button";
+} from "@inkway/core/types";
+import { Button } from "@inkway/ui/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-} from "@multica/ui/components/ui/dropdown-menu";
-import { useWorkspaceId } from "@multica/core/hooks";
-import { useIssueStatuses } from "@multica/core/issue-statuses/hooks";
-import { STATUS_CONFIG } from "@multica/core/issues/config";
-import { useViewStoreApi } from "@multica/core/issues/stores/view-store-context";
+} from "@inkway/ui/components/ui/dropdown-menu";
+import { useWorkspaceId } from "@inkway/core/hooks";
+import { useIssueStatuses } from "@inkway/core/issue-statuses/hooks";
+import { STATUS_CONFIG } from "@inkway/core/issues/config";
+import { useViewStoreApi } from "@inkway/core/issues/stores/view-store-context";
 import { useViewBaseline } from "../surface/view-baseline-context";
 import { StatusHeading } from "./status-heading";
 import { DraggableBoardCard } from "./board-card";

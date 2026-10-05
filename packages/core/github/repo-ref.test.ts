@@ -66,32 +66,32 @@ describe("validateGitRef", () => {
 
 describe("splitGithubUrlRef", () => {
   it("splits a browse URL into clone URL and ref", () => {
-    expect(splitGithubUrlRef("https://github.com/multica-ai/multica/tree/main")).toEqual({
-      url: "https://github.com/multica-ai/multica",
+    expect(splitGithubUrlRef("https://github.com/Devaretanmay/inkway/tree/main")).toEqual({
+      url: "https://github.com/Devaretanmay/inkway",
       ref: "main",
     });
   });
 
   it("keeps a multi-segment branch together", () => {
     expect(
-      splitGithubUrlRef("https://github.com/multica-ai/multica/tree/release/2026-09"),
+      splitGithubUrlRef("https://github.com/Devaretanmay/inkway/tree/release/2026-09"),
     ).toEqual({
-      url: "https://github.com/multica-ai/multica",
+      url: "https://github.com/Devaretanmay/inkway",
       ref: "release/2026-09",
     });
   });
 
   it("drops a .git suffix before /tree and a trailing slash after the ref", () => {
     expect(
-      splitGithubUrlRef("https://github.com/multica-ai/multica.git/tree/main/"),
-    ).toEqual({ url: "https://github.com/multica-ai/multica", ref: "main" });
+      splitGithubUrlRef("https://github.com/Devaretanmay/inkway.git/tree/main/"),
+    ).toEqual({ url: "https://github.com/Devaretanmay/inkway", ref: "main" });
   });
 
   it("leaves a plain clone URL untouched", () => {
     for (const url of [
-      "https://github.com/multica-ai/multica",
-      "https://github.com/multica-ai/multica.git",
-      "git@github.com:multica-ai/multica.git",
+      "https://github.com/Devaretanmay/inkway",
+      "https://github.com/Devaretanmay/inkway.git",
+      "git@github.com:inkway-ai/inkway.git",
       "https://gitlab.com/owner/repo/tree/main",
     ]) {
       expect(splitGithubUrlRef(url)).toEqual({ url });
@@ -99,14 +99,14 @@ describe("splitGithubUrlRef", () => {
   });
 
   it("leaves /blob and /pull URLs alone — neither names a checkout baseline", () => {
-    const blob = "https://github.com/multica-ai/multica/blob/main/README.md";
-    const pull = "https://github.com/multica-ai/multica/pull/8572";
+    const blob = "https://github.com/Devaretanmay/inkway/blob/main/README.md";
+    const pull = "https://github.com/Devaretanmay/inkway/pull/8572";
     expect(splitGithubUrlRef(blob)).toEqual({ url: blob });
     expect(splitGithubUrlRef(pull)).toEqual({ url: pull });
   });
 
   it("does not split when the extracted ref would be invalid", () => {
-    const url = "https://github.com/multica-ai/multica/tree/main..dev";
+    const url = "https://github.com/Devaretanmay/inkway/tree/main..dev";
     expect(splitGithubUrlRef(url)).toEqual({ url });
   });
 

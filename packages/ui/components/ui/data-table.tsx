@@ -23,9 +23,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@multica/ui/components/ui/table";
-import { columnSizeVar, getCellStyle } from "@multica/ui/lib/data-table";
-import { cn } from "@multica/ui/lib/utils";
+} from "@inkway/ui/components/ui/table";
+import { columnSizeVar, getCellStyle } from "@inkway/ui/lib/data-table";
+import { cn } from "@inkway/ui/lib/utils";
 
 // Pointer travel that turns a press on the resize handle into a drag. Matches
 // the column-reorder sensor's activation distance so both gestures on the same

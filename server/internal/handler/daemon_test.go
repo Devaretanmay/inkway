@@ -15,15 +15,15 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/multica-ai/multica/server/internal/auth"
-	"github.com/multica-ai/multica/server/internal/daemonws"
-	"github.com/multica-ai/multica/server/internal/issuestatus"
-	"github.com/multica-ai/multica/server/internal/middleware"
-	"github.com/multica-ai/multica/server/internal/service"
-	"github.com/multica-ai/multica/server/internal/testutil"
-	db "github.com/multica-ai/multica/server/pkg/db/generated"
-	"github.com/multica-ai/multica/server/pkg/protocol"
-	"github.com/multica-ai/multica/server/pkg/remotemcp"
+	"github.com/Devaretanmay/inkway/server/internal/auth"
+	"github.com/Devaretanmay/inkway/server/internal/daemonws"
+	"github.com/Devaretanmay/inkway/server/internal/issuestatus"
+	"github.com/Devaretanmay/inkway/server/internal/middleware"
+	"github.com/Devaretanmay/inkway/server/internal/service"
+	"github.com/Devaretanmay/inkway/server/internal/testutil"
+	db "github.com/Devaretanmay/inkway/server/pkg/db/generated"
+	"github.com/Devaretanmay/inkway/server/pkg/protocol"
+	"github.com/Devaretanmay/inkway/server/pkg/remotemcp"
 )
 
 // slowProbeLocalSkillListStore wraps a LocalSkillListStore but blocks inside
@@ -2257,7 +2257,7 @@ func TestClaimTask_ProjectWithoutRepos_FallsBackToWorkspaceRepos(t *testing.T) {
 // Regression test for #1276: ClaimTaskByRuntime must populate both
 // workspace and project context for run_only autopilot tasks. Project context
 // is what lets the daemon select a bound local_directory and materialize the
-// managed .multica/project/resources.json source manifest before launch.
+// managed .inkway/project/resources.json source manifest before launch.
 func TestClaimTask_AutopilotRunOnly_PopulatesWorkspaceAndProjectContext(t *testing.T) {
 	if testHandler == nil {
 		t.Skip("database not available")
@@ -2464,7 +2464,7 @@ func TestClaimTaskByRuntime_TaskWorkspaceMismatch_CancelsAndRejects(t *testing.T
 // comment, threaded under the trigger. Before the fix, CompleteTask exempted
 // comment-triggered tasks from the auto-synthesis path, so a Claude Code /
 // Codex / etc. agent that ended its run with only terminal text (no
-// `multica issue comment add` call) left the user staring at a "Completed"
+// `inkway issue comment add` call) left the user staring at a "Completed"
 // badge with no reply.
 func TestCompleteTask_CommentTriggered_SynthesizesCommentWhenAgentSilent(t *testing.T) {
 	if testHandler == nil {
@@ -3222,7 +3222,7 @@ func createAutoRetryForTest(t *testing.T, ctx context.Context, parentID string) 
 // gap. The retry row comes from the real CreateRetryTask so the query and the
 // claim are pinned together; the workdir reaches the daemon only when both
 // carry it (GH #7998). The workdir is offered only to a daemon whose
-// `multica repo checkout` keeps an existing checkout's work; an older daemon
+// `inkway repo checkout` keeps an existing checkout's work; an older daemon
 // keeps getting a fresh directory, because its checkout would reset the very
 // checkout being kept. Contrast a
 // force_fresh task with no retry lineage, which resumes nothing

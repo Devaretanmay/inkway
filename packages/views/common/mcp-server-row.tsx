@@ -12,13 +12,13 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { Button } from "@multica/ui/components/ui/button";
-import { Input } from "@multica/ui/components/ui/input";
+import { Button } from "@inkway/ui/components/ui/button";
+import { Input } from "@inkway/ui/components/ui/input";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@multica/ui/components/ui/tooltip";
+} from "@inkway/ui/components/ui/tooltip";
 import { mcpTransportLabel } from "./mcp-transport";
 
 export type McpServerRowLabels = {
@@ -107,7 +107,7 @@ export function McpRemoveButton({
 }
 
 /**
- * Shared MCP inventory row used wherever Multica owns the server entry.
+ * Shared MCP inventory row used wherever Inkway owns the server entry.
  *
  * Data writes remain the caller's responsibility: workspace settings replaces
  * a write-only config, while an agent edits its readable local config. Keeping

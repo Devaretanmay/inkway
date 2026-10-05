@@ -12,9 +12,9 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/multica-ai/multica/server/internal/logger"
-	"github.com/multica-ai/multica/server/internal/util"
-	db "github.com/multica-ai/multica/server/pkg/db/generated"
+	"github.com/Devaretanmay/inkway/server/internal/logger"
+	"github.com/Devaretanmay/inkway/server/internal/util"
+	db "github.com/Devaretanmay/inkway/server/pkg/db/generated"
 )
 
 // The workspace property catalog is capped at 20 active definitions. Six

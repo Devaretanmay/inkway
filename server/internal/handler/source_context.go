@@ -15,14 +15,14 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/multica-ai/multica/server/internal/logger"
-	obsmetrics "github.com/multica-ai/multica/server/internal/metrics"
-	"github.com/multica-ai/multica/server/internal/service"
-	"github.com/multica-ai/multica/server/internal/util"
-	agentpkg "github.com/multica-ai/multica/server/pkg/agent"
-	db "github.com/multica-ai/multica/server/pkg/db/generated"
-	"github.com/multica-ai/multica/server/pkg/dbid"
-	"github.com/multica-ai/multica/server/pkg/protocol"
+	"github.com/Devaretanmay/inkway/server/internal/logger"
+	obsmetrics "github.com/Devaretanmay/inkway/server/internal/metrics"
+	"github.com/Devaretanmay/inkway/server/internal/service"
+	"github.com/Devaretanmay/inkway/server/internal/util"
+	agentpkg "github.com/Devaretanmay/inkway/server/pkg/agent"
+	db "github.com/Devaretanmay/inkway/server/pkg/db/generated"
+	"github.com/Devaretanmay/inkway/server/pkg/dbid"
+	"github.com/Devaretanmay/inkway/server/pkg/protocol"
 )
 
 type sourceContextStreamUploader interface {

@@ -35,11 +35,11 @@ import {
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { toast } from "sonner";
-import { cn } from "@multica/ui/lib/utils";
-import { copyText } from "@multica/ui/lib/clipboard";
-import { api } from "@multica/core/api";
-import { useConfigStore } from "@multica/core/config";
-import type { Attachment as AttachmentRecord } from "@multica/core/types";
+import { cn } from "@inkway/ui/lib/utils";
+import { copyText } from "@inkway/ui/lib/clipboard";
+import { api } from "@inkway/core/api";
+import { useConfigStore } from "@inkway/core/config";
+import type { Attachment as AttachmentRecord } from "@inkway/core/types";
 import { useT } from "../i18n";
 import { useAttachmentDownloadResolver } from "./attachment-download-context";
 import { useAttachmentPreview } from "./attachment-preview-modal";
@@ -225,7 +225,7 @@ function absolutizeMediaURL(rawUrl: string): string {
 //   - `record.markdown_url` — the durable URL the server picked for
 //                             persistence (MUL-3192 / `buildMarkdownURL`):
 //                             public CDN passthrough when the storage is
-//                             public-readable, or `MULTICA_PUBLIC_URL +
+//                             public-readable, or `INKWAY_PUBLIC_URL +
 //                             /api/attachments/<id>/download` for
 //                             private-bucket modes. Aligned with the
 //                             server-side policy by construction, so it

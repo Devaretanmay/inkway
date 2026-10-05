@@ -4,8 +4,8 @@ import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { MoreHorizontal, Pause, Play, Unplug } from "lucide-react";
-import { Button } from "@multica/ui/components/ui/button";
-import { Switch } from "@multica/ui/components/ui/switch";
+import { Button } from "@inkway/ui/components/ui/button";
+import { Switch } from "@inkway/ui/components/ui/switch";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,22 +15,22 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@multica/ui/components/ui/alert-dialog";
+} from "@inkway/ui/components/ui/alert-dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@multica/ui/components/ui/dropdown-menu";
-import { useConfigStore } from "@multica/core/config";
-import { useWorkspaceId } from "@multica/core/hooks";
-import { useCurrentMember } from "@multica/core/permissions";
-import { useCurrentWorkspace } from "@multica/core/paths";
-import { workspaceKeys } from "@multica/core/workspace/queries";
-import { deriveGitHubSettings, githubInstallationsOptions } from "@multica/core/github";
-import { api } from "@multica/core/api";
-import type { Workspace } from "@multica/core/types";
+} from "@inkway/ui/components/ui/dropdown-menu";
+import { useConfigStore } from "@inkway/core/config";
+import { useWorkspaceId } from "@inkway/core/hooks";
+import { useCurrentMember } from "@inkway/core/permissions";
+import { useCurrentWorkspace } from "@inkway/core/paths";
+import { workspaceKeys } from "@inkway/core/workspace/queries";
+import { deriveGitHubSettings, githubInstallationsOptions } from "@inkway/core/github";
+import { api } from "@inkway/core/api";
+import type { Workspace } from "@inkway/core/types";
 import { useT } from "../../i18n";
 import {
   SettingsCard,
@@ -301,7 +301,7 @@ export function CodeTab() {
               <>
                 {t(($) => $.github.feature_co_author_description_prefix)}{" "}
                 <code className="rounded-xs bg-muted px-1 py-0.5 text-caption">
-                  {"Co-authored-by: multica-agent <github@multica.ai>"}
+                  {"Co-authored-by: inkway-agent <github@multica.ai>"}
                 </code>
                 {t(($) => $.github.feature_co_author_description_suffix)}
               </>

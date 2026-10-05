@@ -24,8 +24,8 @@ import {
   type SortingState,
 } from "@tanstack/react-table";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
-import { DataTable } from "@multica/ui/components/ui/data-table";
-import { cn } from "@multica/ui/lib/utils";
+import { DataTable } from "@inkway/ui/components/ui/data-table";
+import { cn } from "@inkway/ui/lib/utils";
 import { useT } from "../i18n";
 import {
   parseDelimited,

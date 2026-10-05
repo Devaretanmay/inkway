@@ -158,7 +158,7 @@ func dshOnlyVerdicts(demotable map[string]runtimeVerdict) map[string]runtimeVerd
 }
 
 // dshProfileMismatch names a disagreement between the two states the daemon has
-// to keep aligned: whether the Multica runtime profile is installed, and whether
+// to keep aligned: whether the Inkway runtime profile is installed, and whether
 // a dsh runtime is registered.
 //
 // The kind, rather than a bare bool, is what the caller needs, because the two
@@ -174,7 +174,7 @@ const (
 	// routing work into a CLI that cannot start.
 	dshMismatchRuntimeWithoutProfile dshProfileMismatch = "runtime-without-profile"
 	// dshMismatchProfileWithoutRuntime is the mirror image, and is what a
-	// manual `dsh plugin --profile multica add` produces.
+	// manual `dsh plugin --profile inkway add` produces.
 	dshMismatchProfileWithoutRuntime dshProfileMismatch = "profile-without-runtime"
 )
 
@@ -206,7 +206,7 @@ func (m dshProfileMismatch) forcesEveryTick() bool {
 // was not looking — is caught on the very next tick rather than never.
 func (d *Daemon) dshRuntimeProfileMismatch() dshProfileMismatch {
 	registered := d.dshRuntimeRegistered()
-	if registered == dshMulticaProfilePresent() {
+	if registered == dshInkwayProfilePresent() {
 		return dshMismatchNone
 	}
 	if registered {
@@ -358,7 +358,7 @@ func (d *Daemon) refreshAgentAvailability() []string {
 // This is the agent-CLI counterpart to trySelfReload, and it deliberately does
 // NOT restart. What a user needs when codex or claude upgrades is that
 // subsequent tasks run the new CLI under the new version's rules — not that
-// Multica's availability tracks a third party's release cadence. An in-place
+// Inkway's availability tracks a third party's release cadence. An in-place
 // POSIX upgrade changes the binary behind the pinned path; a Windows installer
 // upgrade retargets the stable junction resolved by resolveAgentEntry. The two
 // things left stale are the cached version (which keys version-sensitive policy

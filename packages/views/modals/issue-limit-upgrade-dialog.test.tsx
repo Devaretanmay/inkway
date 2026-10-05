@@ -9,14 +9,14 @@ import {
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { I18nProvider } from "@multica/core/i18n/react";
-import { useModalStore } from "@multica/core/modals";
+import { I18nProvider } from "@inkway/core/i18n/react";
+import { useModalStore } from "@inkway/core/modals";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogTitle,
-} from "@multica/ui/components/ui/dialog";
+} from "@inkway/ui/components/ui/dialog";
 import enCommon from "../locales/en/common.json";
 import enModals from "../locales/en/modals.json";
 
@@ -38,17 +38,17 @@ const summaryState = vi.hoisted(() => ({
   pending: null as Promise<{ availableActions: AvailableActions } | null> | null,
 }));
 
-vi.mock("@multica/core/hooks", () => ({
+vi.mock("@inkway/core/hooks", () => ({
   useWorkspaceId: () => workspaceState.id,
 }));
 
-vi.mock("@multica/core/paths", () => ({
+vi.mock("@inkway/core/paths", () => ({
   useWorkspacePaths: () => ({
     settings: () => `/${workspaceState.id}/settings`,
   }),
 }));
 
-vi.mock("@multica/core/config", () => ({
+vi.mock("@inkway/core/config", () => ({
   useFeatureEnabled: () => featureState.billingEnabled,
 }));
 
@@ -60,7 +60,7 @@ vi.mock("../platform", () => ({
   openExternal: mockOpenExternal,
 }));
 
-vi.mock("@multica/core/billing", () => ({
+vi.mock("@inkway/core/billing", () => ({
   workspaceSubscriptionSummaryOptions: (wsId: string) => ({
     queryKey: ["workspace-subscriptions", wsId, "summary"],
     queryFn: mockSummaryQuery,
@@ -232,6 +232,9 @@ describe("IssueLimitUpgradeDialog", () => {
     summaryState.value = { availableActions: actions({ checkout: true }) };
     renderPrompt({ layered: true });
     const user = await openPrompt();
+    await screen.findByRole("dialog", {
+      name: "This workspace has reached its issue limit",
+    });
 
     await user.keyboard("{Escape}");
 

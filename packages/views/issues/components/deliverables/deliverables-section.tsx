@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { ChevronRight, LayoutGrid } from "lucide-react";
-import type { DeliverableFile } from "@multica/core/attachments/deliverables";
+import type { DeliverableFile } from "@inkway/core/attachments/deliverables";
 import { useT } from "../../../i18n";
 import { formatBytes } from "../../../common/format-bytes";
 import { fileIcon } from "../../../editor/utils/file-icon";

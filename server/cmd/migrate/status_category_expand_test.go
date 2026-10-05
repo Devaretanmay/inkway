@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/multica-ai/multica/server/internal/issuestatus"
+	"github.com/Devaretanmay/inkway/server/internal/issuestatus"
 )
 
 func TestStatusCategoryExpandUpgradePaths(t *testing.T) {

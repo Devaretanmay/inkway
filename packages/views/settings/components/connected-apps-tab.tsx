@@ -1,10 +1,10 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { ApiError, errorCode } from "@multica/core/api";
-import { composioToolkitsOptions } from "@multica/core/composio";
-import { useFeatureEnabled } from "@multica/core/config";
-import { COMPOSIO_MCP_APPS_FLAG } from "@multica/core/feature-flags";
+import { ApiError, errorCode } from "@inkway/core/api";
+import { composioToolkitsOptions } from "@inkway/core/composio";
+import { useFeatureEnabled } from "@inkway/core/config";
+import { COMPOSIO_MCP_APPS_FLAG } from "@inkway/core/feature-flags";
 import { useT } from "../../i18n";
 import { ComposioTab } from "./composio-tab";
 import { SettingsTab } from "./settings-layout";

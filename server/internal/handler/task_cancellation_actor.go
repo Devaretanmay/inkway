@@ -3,8 +3,8 @@ package handler
 import (
 	"context"
 
-	"github.com/multica-ai/multica/server/internal/service"
-	"github.com/multica-ai/multica/server/internal/util"
+	"github.com/Devaretanmay/inkway/server/internal/service"
+	"github.com/Devaretanmay/inkway/server/internal/util"
 )
 
 // taskCancellationActor snapshots the authenticated actor's display name for

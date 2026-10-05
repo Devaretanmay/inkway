@@ -15,23 +15,23 @@ import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@multica/ui/components/ui/tooltip";
-import { Button } from "@multica/ui/components/ui/button";
-import { NumberFlow } from "@multica/ui/components/ui/number-flow";
-import { Skeleton } from "@multica/ui/components/ui/skeleton";
+} from "@inkway/ui/components/ui/tooltip";
+import { Button } from "@inkway/ui/components/ui/button";
+import { NumberFlow } from "@inkway/ui/components/ui/number-flow";
+import { Skeleton } from "@inkway/ui/components/ui/skeleton";
 import { useInfiniteQuery, useQueries, useQuery } from "@tanstack/react-query";
-import type { Agent, AgentTask, Issue } from "@multica/core/types";
+import type { Agent, AgentTask, Issue } from "@inkway/core/types";
 import {
   type AgentActivity,
   agentTaskSnapshotOptions,
   agentTasksOptions,
   summarizeActivityWindow,
   useWorkspaceActivityMap,
-} from "@multica/core/agents";
-import { api } from "@multica/core/api";
-import { useWorkspaceId } from "@multica/core/hooks";
-import { useWorkspacePaths } from "@multica/core/paths";
-import { issueDetailOptions } from "@multica/core/issues/queries";
+} from "@inkway/core/agents";
+import { api } from "@inkway/core/api";
+import { useWorkspaceId } from "@inkway/core/hooks";
+import { useWorkspacePaths } from "@inkway/core/paths";
+import { issueDetailOptions } from "@inkway/core/issues/queries";
 import { AppLink } from "../../../navigation";
 import { TranscriptButton } from "../../../common/task-transcript";
 import { AttributionBadge } from "../../../issues/components/attribution-badge";

@@ -16,10 +16,10 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	obsmetrics "github.com/multica-ai/multica/server/internal/metrics"
-	"github.com/multica-ai/multica/server/internal/middleware"
-	"github.com/multica-ai/multica/server/internal/seatcapacity"
-	"github.com/multica-ai/multica/server/internal/testutil"
+	obsmetrics "github.com/Devaretanmay/inkway/server/internal/metrics"
+	"github.com/Devaretanmay/inkway/server/internal/middleware"
+	"github.com/Devaretanmay/inkway/server/internal/seatcapacity"
+	"github.com/Devaretanmay/inkway/server/internal/testutil"
 )
 
 const invitationTestEmail = "invitation-test@multica.ai"
@@ -582,7 +582,7 @@ func TestCreateInvitation_RateLimiterFailureReturnsServiceUnavailable(t *testing
 	if body["code"] != "invitation_rate_limiter_unavailable" {
 		t.Errorf("code = %q, want invitation_rate_limiter_unavailable", body["code"])
 	}
-	metricFamily := obsmetrics.GatherForTest(t, testHandler.Metrics)["multica_email_rate_limited_total"]
+	metricFamily := obsmetrics.GatherForTest(t, testHandler.Metrics)["inkway_email_rate_limited_total"]
 	for _, metric := range metricFamily.GetMetric() {
 		if metric.GetCounter().GetValue() != 0 {
 			t.Errorf("rate-limit metric = %v, want 0 when the final response is 503", metric.GetCounter().GetValue())

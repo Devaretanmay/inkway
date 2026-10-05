@@ -30,7 +30,7 @@ export const useCreateModeStore = create<CreateModeState>()(
       setLastMode: (mode) => set({ lastMode: mode }),
     }),
     {
-      name: "multica_create_mode",
+      name: "inkway_create_mode",
       storage: createJSONStorage(() => defaultStorage),
     },
   ),

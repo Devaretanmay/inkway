@@ -10,8 +10,8 @@ import (
 
 	"github.com/jackc/pgx/v5/pgtype"
 
-	"github.com/multica-ai/multica/server/internal/integrations/channel/engine"
-	db "github.com/multica-ai/multica/server/pkg/db/generated"
+	"github.com/Devaretanmay/inkway/server/internal/integrations/channel/engine"
+	db "github.com/Devaretanmay/inkway/server/pkg/db/generated"
 )
 
 func TestEncodeInstallConfigRoundTrip(t *testing.T) {

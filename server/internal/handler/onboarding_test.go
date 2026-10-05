@@ -12,7 +12,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 
-	obsmetrics "github.com/multica-ai/multica/server/internal/metrics"
+	obsmetrics "github.com/Devaretanmay/inkway/server/internal/metrics"
 )
 
 // newWaitlistTestUser inserts a fresh user row, returns its id, and
@@ -282,7 +282,7 @@ func TestBootstrapOnboardingRuntimeCreatesSingleGuideIssue(t *testing.T) {
 		t.Fatalf("assistant instructions were not seeded with the new identity: %q", instructions)
 	}
 	if avatarURL == nil || *avatarURL != onboardingAssistantAvatarURL {
-		t.Fatalf("agent avatar_url = %v, want seeded Multica Helper avatar", avatarURL)
+		t.Fatalf("agent avatar_url = %v, want seeded Inkway Helper avatar", avatarURL)
 	}
 
 	var (
@@ -393,7 +393,7 @@ func TestBootstrapOnboardingRuntime_WithStarterPrompt(t *testing.T) {
 		testUserID,
 	)
 
-	const wantPrompt = "Introduce Multica to me, please."
+	const wantPrompt = "Introduce Inkway to me, please."
 	body := map[string]string{
 		"workspace_id":   testWorkspaceID,
 		"runtime_id":     testRuntimeID,
@@ -552,7 +552,7 @@ func TestBootstrapOnboardingNoRuntimeCreatesSingleGuideIssue(t *testing.T) {
 		t.Fatalf("issue status/priority = %s/%s, want todo/high", issueStatus, issuePriority)
 	}
 	for _, want := range []string{
-		"Try Multica first",
+		"Try Inkway first",
 		"https://multica.ai/docs/install-agent-runtime",
 		"npm i -g @openai/codex",
 	} {
@@ -720,8 +720,8 @@ func TestPatchOnboardingSplitsQuestionnaireAndSourceEvents(t *testing.T) {
 	h := *testHandler
 	h.Metrics = m
 
-	const questionnaireCounter = "multica_onboarding_questionnaire_submitted_total"
-	const sourceCounter = "multica_onboarding_source_submitted_total"
+	const questionnaireCounter = "inkway_onboarding_questionnaire_submitted_total"
+	const sourceCounter = "inkway_onboarding_source_submitted_total"
 
 	const inFlow = `{"source":[],"source_other":null,"source_skipped":false,` +
 		`"role":"engineer","role_other":null,"role_skipped":false,` +
@@ -777,10 +777,10 @@ func TestPatchOnboardingAllSkippedResolvesBothCounters(t *testing.T) {
 		`"use_case":[],"use_case_other":null,"use_case_skipped":true,"version":2}`
 	patchOnboardingAs(t, &h, userID, skipped)
 
-	if got := counterValue(t, m, "multica_onboarding_questionnaire_submitted_total"); got != 1 {
+	if got := counterValue(t, m, "inkway_onboarding_questionnaire_submitted_total"); got != 1 {
 		t.Fatalf("expected questionnaire counter 1 for all-skip, got %v", got)
 	}
-	if got := counterValue(t, m, "multica_onboarding_source_submitted_total"); got != 1 {
+	if got := counterValue(t, m, "inkway_onboarding_source_submitted_total"); got != 1 {
 		t.Fatalf("expected source counter 1 for an explicit decline, got %v", got)
 	}
 }

@@ -8,7 +8,7 @@ import (
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/text"
 
-	"github.com/multica-ai/multica/server/internal/util"
+	"github.com/Devaretanmay/inkway/server/internal/util"
 )
 
 // sealedInputQuote keeps the owned input as the source of attribution, including

@@ -2,10 +2,10 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Copy } from "lucide-react";
-import { Input } from "@multica/ui/components/ui/input";
-import { Textarea } from "@multica/ui/components/ui/textarea";
-import { Button } from "@multica/ui/components/ui/button";
-import { Label } from "@multica/ui/components/ui/label";
+import { Input } from "@inkway/ui/components/ui/input";
+import { Textarea } from "@inkway/ui/components/ui/textarea";
+import { Button } from "@inkway/ui/components/ui/button";
+import { Label } from "@inkway/ui/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -13,8 +13,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@multica/ui/components/ui/dialog";
-import { copyText } from "@multica/ui/lib/clipboard";
+} from "@inkway/ui/components/ui/dialog";
+import { copyText } from "@inkway/ui/lib/clipboard";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -24,25 +24,25 @@ import {
   AlertDialogFooter,
   AlertDialogCancel,
   AlertDialogAction,
-} from "@multica/ui/components/ui/alert-dialog";
+} from "@inkway/ui/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useAuthStore } from "@multica/core/auth";
-import { useLeaveWorkspace, useDeleteWorkspace } from "@multica/core/workspace/mutations";
+import { useAuthStore } from "@inkway/core/auth";
+import { useLeaveWorkspace, useDeleteWorkspace } from "@inkway/core/workspace/mutations";
 import {
   memberListOptions,
   workspaceKeys,
   workspaceListOptions,
-} from "@multica/core/workspace/queries";
-import { issueKeys } from "@multica/core/issues/queries";
-import { api } from "@multica/core/api";
+} from "@inkway/core/workspace/queries";
+import { issueKeys } from "@inkway/core/issues/queries";
+import { api } from "@inkway/core/api";
 import {
   resolvePostAuthDestination,
   useCurrentWorkspace,
   useHasOnboarded,
-} from "@multica/core/paths";
-import { setCurrentWorkspace } from "@multica/core/platform";
-import type { Workspace } from "@multica/core/types";
+} from "@inkway/core/paths";
+import { setCurrentWorkspace } from "@inkway/core/platform";
+import type { Workspace } from "@inkway/core/types";
 import { AvatarUploadControl } from "../../common/avatar-upload-control";
 import { useNavigation } from "../../navigation";
 import { DeleteWorkspaceDialog } from "./delete-workspace-dialog";

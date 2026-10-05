@@ -8,9 +8,9 @@ import (
 	"testing"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/multica-ai/multica/server/internal/service"
-	"github.com/multica-ai/multica/server/internal/testutil"
-	db "github.com/multica-ai/multica/server/pkg/db/generated"
+	"github.com/Devaretanmay/inkway/server/internal/service"
+	"github.com/Devaretanmay/inkway/server/internal/testutil"
+	db "github.com/Devaretanmay/inkway/server/pkg/db/generated"
 )
 
 func signupInvitation(t *testing.T, email string) string {

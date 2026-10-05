@@ -16,30 +16,30 @@ import type {
   AgentRuntime,
   DisabledRuntimeSkill,
   RuntimeLocalSkillSummary,
-} from "@multica/core/types";
-import { api, ApiError } from "@multica/core/api";
-import { useWorkspaceId } from "@multica/core/hooks";
+} from "@inkway/core/types";
+import { api, ApiError } from "@inkway/core/api";
+import { useWorkspaceId } from "@inkway/core/hooks";
 import {
   isRuntimeUsableForUser,
   runtimeCapabilitiesOptions,
   runtimeDisplayLabel,
-} from "@multica/core/runtimes";
+} from "@inkway/core/runtimes";
 import {
   skillDetailOptions,
   skillListOptions,
   workspaceKeys,
-} from "@multica/core/workspace/queries";
-import { Badge } from "@multica/ui/components/ui/badge";
-import { Button } from "@multica/ui/components/ui/button";
+} from "@inkway/core/workspace/queries";
+import { Badge } from "@inkway/ui/components/ui/badge";
+import { Button } from "@inkway/ui/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@multica/ui/components/ui/dialog";
-import { Switch } from "@multica/ui/components/ui/switch";
-import { cn } from "@multica/ui/lib/utils";
+} from "@inkway/ui/components/ui/dialog";
+import { Switch } from "@inkway/ui/components/ui/switch";
+import { cn } from "@inkway/ui/lib/utils";
 import { SkillAddDialog } from "../skill-add-dialog";
 import { useT } from "../../../i18n";
 

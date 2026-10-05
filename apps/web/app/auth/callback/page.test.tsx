@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
-import type { SupportedLocale } from "@multica/core/i18n";
-import { I18nProvider } from "@multica/core/i18n/react";
-import { paths } from "@multica/core/paths";
-import { RESOURCES } from "@multica/views/locales";
-import { ApiError } from "@multica/core/api";
+import type { SupportedLocale } from "@inkway/core/i18n";
+import { I18nProvider } from "@inkway/core/i18n/react";
+import { paths } from "@inkway/core/paths";
+import { RESOURCES } from "@inkway/views/locales";
+import { ApiError } from "@inkway/core/api";
 
 const {
   mockPush,
@@ -30,10 +30,10 @@ const {
   };
 });
 
-vi.mock("@multica/core/logger", async () => {
+vi.mock("@inkway/core/logger", async () => {
   const actual =
-    await vi.importActual<typeof import("@multica/core/logger")>(
-      "@multica/core/logger",
+    await vi.importActual<typeof import("@inkway/core/logger")>(
+      "@inkway/core/logger",
     );
   return {
     ...actual,
@@ -74,10 +74,10 @@ vi.mock("@tanstack/react-query", () => ({
 
 // Preserve the real sanitizeNextUrl so the "drop unsafe ?next=" behavior is
 // exercised rather than silently diverging from the source of truth.
-vi.mock("@multica/core/auth", async () => {
+vi.mock("@inkway/core/auth", async () => {
   const actual =
-    await vi.importActual<typeof import("@multica/core/auth")>(
-      "@multica/core/auth",
+    await vi.importActual<typeof import("@inkway/core/auth")>(
+      "@inkway/core/auth",
     );
   return {
     ...actual,
@@ -86,16 +86,16 @@ vi.mock("@multica/core/auth", async () => {
   };
 });
 
-vi.mock("@multica/core/workspace/queries", () => ({
+vi.mock("@inkway/core/workspace/queries", () => ({
   workspaceKeys: {
     list: () => ["workspaces"],
     myInvitations: () => ["invitations", "mine"],
   },
 }));
 
-vi.mock("@multica/core/api", async () => {
-  const actual = await vi.importActual<typeof import("@multica/core/api")>(
-    "@multica/core/api",
+vi.mock("@inkway/core/api", async () => {
+  const actual = await vi.importActual<typeof import("@inkway/core/api")>(
+    "@inkway/core/api",
   );
   return {
     ...actual,
@@ -125,7 +125,7 @@ describe("CallbackPage", () => {
     // doesn't inherit a cap-reached state from a previous run).
     for (let i = window.localStorage.length - 1; i >= 0; i--) {
       const k = window.localStorage.key(i);
-      if (k && k.startsWith("multica.source_backfill.dismiss.")) {
+      if (k && k.startsWith("inkway.source_backfill.dismiss.")) {
         window.localStorage.removeItem(k);
       }
     }
@@ -242,7 +242,7 @@ describe("CallbackPage", () => {
     ["Desktop", "platform:desktop"],
     ["CLI", "cli_callback:http://127.0.0.1:46233/callback,cli_state:test"],
   ])("uses the same localized error handling for the %s callback", async (_flow, state) => {
-    const { api: mockedApi } = await import("@multica/core/api");
+    const { api: mockedApi } = await import("@inkway/core/api");
     vi.mocked(mockedApi.googleLogin).mockRejectedValue(
       new ApiError("English fallback", 403, "Forbidden", { code: "signup_prohibited" }),
     );
@@ -356,7 +356,7 @@ describe("CallbackPage", () => {
   });
 
   it("redirects to CLI callback with token when state contains valid cli_callback", async () => {
-    const { api: mockedApi } = await import("@multica/core/api");
+    const { api: mockedApi } = await import("@inkway/core/api");
     const mockGoogleLogin = mockedApi.googleLogin as ReturnType<typeof vi.fn>;
 
     const hrefSetter = vi.fn();
@@ -416,7 +416,7 @@ describe("CallbackPage", () => {
   it("redirects to CLI callback even when state also contains platform:desktop", async () => {
     // cli_callback takes precedence over platform:desktop — the CLI flow
     // is a specific user intent that should not be derailed by desktop flag.
-    const { api: mockedApi } = await import("@multica/core/api");
+    const { api: mockedApi } = await import("@inkway/core/api");
     const mockGoogleLogin = mockedApi.googleLogin as ReturnType<typeof vi.fn>;
 
     const hrefSetter = vi.fn();

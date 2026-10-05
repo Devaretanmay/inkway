@@ -12,7 +12,7 @@
  * this registry for the page case.
  *
  * Icon values are *names*, not React components, so this module stays
- * React-free and safe inside `@multica/core`. The name → component registry
+ * React-free and safe inside `@inkway/core`. The name → component registry
  * lives in `packages/views/layout/route-icon-components.tsx`; its
  * `Record<RouteIconName, LucideIcon>` type makes a missing component a compile
  * error.
@@ -45,6 +45,7 @@ export type RouteIconName =
 /** i18n label key (under the `layout.nav` namespace) for a page. */
 export type NavLabelKey =
   | "inbox"
+  | "fastpaths"
   | "chat"
   | "my_issues"
   | "issues"
@@ -53,13 +54,14 @@ export type NavLabelKey =
   | "agents"
   | "squads"
   | "usage"
-  | "runtimes"
+  | "providers"
   | "skills"
   | "settings";
 
 /** Stable identifier for each workspace navigation page. */
 export type WorkspacePageKey =
   | "inbox"
+  | "inks"
   | "chat"
   | "myIssues"
   | "issues"
@@ -87,6 +89,7 @@ export interface WorkspacePage {
  */
 export const WORKSPACE_PAGES: Record<WorkspacePageKey, WorkspacePage> = {
   inbox: { segment: "inbox", icon: "Inbox", navKey: "inbox" },
+  inks: { segment: "inks", icon: "Zap", navKey: "fastpaths" },
   chat: { segment: "chat", icon: "MessageSquare", navKey: "chat" },
   myIssues: { segment: "my-issues", icon: "CircleUser", navKey: "my_issues" },
   issues: { segment: "issues", icon: "ListTodo", navKey: "issues" },
@@ -95,7 +98,7 @@ export const WORKSPACE_PAGES: Record<WorkspacePageKey, WorkspacePage> = {
   agents: { segment: "agents", icon: "Bot", navKey: "agents" },
   squads: { segment: "squads", icon: "Users", navKey: "squads" },
   usage: { segment: "usage", icon: "BarChart3", navKey: "usage" },
-  runtimes: { segment: "runtimes", icon: "Monitor", navKey: "runtimes" },
+  runtimes: { segment: "runtimes", icon: "Monitor", navKey: "providers" },
   skills: { segment: "skills", icon: "BookOpenText", navKey: "skills" },
   settings: { segment: "settings", icon: "Settings", navKey: "settings" },
 };

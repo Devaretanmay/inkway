@@ -1,14 +1,14 @@
 "use client";
 
-import { ActorAvatar } from "@multica/ui/components/common/actor-avatar";
-import { Button } from "@multica/ui/components/ui/button";
+import { ActorAvatar } from "@inkway/ui/components/common/actor-avatar";
+import { Button } from "@inkway/ui/components/ui/button";
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
-} from "@multica/ui/components/ui/hover-card";
-import { useActorName } from "@multica/core/workspace/hooks";
-import type { WorkingAgentSummary } from "@multica/core/types";
+} from "@inkway/ui/components/ui/hover-card";
+import { useActorName } from "@inkway/core/workspace/hooks";
+import type { WorkingAgentSummary } from "@inkway/core/types";
 import { AgentAvatarStack } from "../../agents/components/agent-avatar-stack";
 import { useT } from "../../i18n";
 

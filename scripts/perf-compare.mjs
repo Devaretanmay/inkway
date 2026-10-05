@@ -200,7 +200,7 @@ async function measure(ref, label) {
     const buildStart = Date.now();
     const buildLog = execFileSync(
       "pnpm",
-      ["exec", "turbo", "build", "--filter=@multica/web"],
+      ["exec", "turbo", "build", "--filter=@inkway/web"],
       { cwd: checkout, encoding: "utf8", stdio: ["ignore", "pipe", "inherit"] },
     );
     process.stdout.write(buildLog);
@@ -209,7 +209,7 @@ async function measure(ref, label) {
 
     port = await freePort();
     const startStart = Date.now();
-    server = spawn("pnpm", ["--filter", "@multica/web", "start"], {
+    server = spawn("pnpm", ["--filter", "@inkway/web", "start"], {
       cwd: checkout,
       env: { ...process.env, PORT: String(port), REMOTE_API_URL: "http://127.0.0.1:1" },
       stdio: "ignore",

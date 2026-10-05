@@ -28,7 +28,7 @@ import {
   tokenAtCursor,
   type MentionMarker,
 } from "@/lib/mention-serialize";
-import { isMentionBoundaryAfter } from "@multica/core/markdown";
+import { isMentionBoundaryAfter } from "@inkway/core/markdown";
 
 export interface MentioningState {
   start: number;

@@ -11,8 +11,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/multica-ai/multica/server/pkg/agent"
-	"github.com/multica-ai/multica/server/pkg/protocol"
+	"github.com/Devaretanmay/inkway/server/pkg/agent"
+	"github.com/Devaretanmay/inkway/server/pkg/protocol"
 )
 
 const (

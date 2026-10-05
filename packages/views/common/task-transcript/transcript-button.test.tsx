@@ -12,18 +12,18 @@ import {
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
-import { api } from "@multica/core/api";
+import { api } from "@inkway/core/api";
 import {
   chatKeys,
   mergeTaskMessagesBySeq,
-} from "@multica/core/chat/queries";
-import type { AgentTask } from "@multica/core/types/agent";
-import type { TaskMessagePayload } from "@multica/core/types/events";
+} from "@inkway/core/chat/queries";
+import type { AgentTask } from "@inkway/core/types/agent";
+import type { TaskMessagePayload } from "@inkway/core/types/events";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { TranscriptButton } from "./transcript-button";
 import type { TimelineItem } from "./build-timeline";
 
-vi.mock("@multica/core/api", () => ({
+vi.mock("@inkway/core/api", () => ({
   api: {
     listTaskMessages: vi.fn(),
   },
@@ -119,7 +119,7 @@ describe("TranscriptButton", () => {
 
     act(() => {
       window.dispatchEvent(
-        new CustomEvent("multica:navigate", {
+        new CustomEvent("inkway:navigate", {
           detail: { path: "/acme/inbox?issue=MUL-123" },
         }),
       );

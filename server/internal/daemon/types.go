@@ -3,14 +3,14 @@ package daemon
 import (
 	"encoding/json"
 
-	"github.com/multica-ai/multica/server/internal/runtimeapps"
-	"github.com/multica-ai/multica/server/pkg/remotemcp"
+	"github.com/Devaretanmay/inkway/server/internal/runtimeapps"
+	"github.com/Devaretanmay/inkway/server/pkg/remotemcp"
 )
 
 // AgentEntry describes a single available agent CLI.
 type AgentEntry struct {
 	Path string // stable startup-resolved CLI entry point; launch resolution may follow platform links to a concrete path
-	// Command is the bare command name or MULTICA_*_PATH value that Path was
+	// Command is the bare command name or INKWAY_*_PATH value that Path was
 	// resolved from at startup. It is kept so the daemon can re-resolve Path
 	// if the pinned executable later vanishes — e.g. a version manager
 	// (Homebrew Cask, nvm/fnm) does an in-place upgrade that deletes the old
@@ -69,16 +69,23 @@ type IssueStatusData struct {
 // Agent data (name, skills) is populated by the claim endpoint.
 type Task struct {
 	// StartClaimSupported gates retries when talking to older servers.
-	StartClaimSupported  bool                   `json:"start_claim_supported,omitempty"`
-	DispatchedAt         string                 `json:"dispatched_at,omitempty"`
-	ID                   string                 `json:"id"`
-	AgentID              string                 `json:"agent_id"`
-	RuntimeID            string                 `json:"runtime_id"`
-	IssueID              string                 `json:"issue_id"`
-	WorkspaceID          string                 `json:"workspace_id"`
-	WorkspaceSlug        string                 `json:"workspace_slug,omitempty"`
-	IssueIdentifier      string                 `json:"issue_identifier,omitempty"`
-	RemoteMCPConnections []remotemcp.Connection `json:"remote_mcp_connections,omitempty"`
+	StartClaimSupported     bool                   `json:"start_claim_supported,omitempty"`
+	DispatchedAt            string                 `json:"dispatched_at,omitempty"`
+	ID                      string                 `json:"id"`
+	RetryOfTaskID           string                 `json:"retry_of_task_id,omitempty"`
+	Attempt                 int32                  `json:"attempt,omitempty"`
+	RetryFailureReason      string                 `json:"retry_failure_reason,omitempty"`
+	InkDecisionID     string                 `json:"-"`
+	InkDecisionSource string                 `json:"-"`
+	InkDecisionChoice string                 `json:"-"`
+	InkPriorSessionID string                 `json:"-"`
+	AgentID                 string                 `json:"agent_id"`
+	RuntimeID               string                 `json:"runtime_id"`
+	IssueID                 string                 `json:"issue_id"`
+	WorkspaceID             string                 `json:"workspace_id"`
+	WorkspaceSlug           string                 `json:"workspace_slug,omitempty"`
+	IssueIdentifier         string                 `json:"issue_identifier,omitempty"`
+	RemoteMCPConnections    []remotemcp.Connection `json:"remote_mcp_connections,omitempty"`
 	// RemoteMCPDaemonToken stays inside the daemon and authenticates the local
 	// broker's credential-resolution calls. It must never enter agent env/config.
 	RemoteMCPDaemonToken string `json:"remote_mcp_daemon_token,omitempty"`
@@ -132,7 +139,7 @@ type Task struct {
 	ChatType                      string                 `json:"chat_type,omitempty"`                        // "group" when the channel conversation is a shared room, "p2p" for a 1:1 with the bot. Empty for a web chat or an old server; the per-turn prompt then reports unknown rather than guessing 1:1
 	ChatInThread                  bool                   `json:"chat_in_thread,omitempty"`                   // true when the latest @mention was a thread reply; selects which read command the prompt tells the agent to start with
 	ChatMessage                   string                 `json:"chat_message,omitempty"`                     // user message content for chat tasks
-	ChatMessageAttachments        []ChatAttachmentMeta   `json:"chat_message_attachments,omitempty"`         // attachments linked to the chat message; agent uses these to `multica attachment download <id>`
+	ChatMessageAttachments        []ChatAttachmentMeta   `json:"chat_message_attachments,omitempty"`         // attachments linked to the chat message; agent uses these to `inkway attachment download <id>`
 	ChatIntro                     bool                   `json:"chat_intro,omitempty"`                       // legacy compatibility for historical is_agent_intro sessions; new agent creation no longer creates these chats
 	RegenerateQuickActionsFor     string                 `json:"regenerate_quick_actions_for,omitempty"`     // set only by servers predating server-side quick-actions generation (MUL-5573). Read as a REFUSAL marker, never executed: see the guard in runTask
 	AutopilotRunID                string                 `json:"autopilot_run_id,omitempty"`                 // non-empty for autopilot run_only tasks
@@ -173,7 +180,7 @@ type Task struct {
 	InitiatorName  string `json:"initiator_name,omitempty"`
 	InitiatorEmail string `json:"initiator_email,omitempty"`
 	// AuthToken is the task-scoped credential the server mints at claim time.
-	// The daemon injects it into the spawned agent as MULTICA_TOKEN so the
+	// The daemon injects it into the spawned agent as INKWAY_TOKEN so the
 	// agent never sees the daemon's own (often workspace-owner) credential.
 	// Empty or non-task-scoped values are fatal for writable agent tasks; the
 	// daemon must not fall back to its own token. See MUL-3292.
@@ -183,7 +190,7 @@ type Task struct {
 // ChatAttachmentMeta is the structured attachment metadata the daemon
 // hands to the agent for chat tasks. We pass id + filename + content_type
 // so the chat prompt can list them explicitly and instruct the agent to
-// run `multica attachment download <id>` instead of guessing from a
+// run `inkway attachment download <id>` instead of guessing from a
 // signed CDN URL (which expires).
 type ChatAttachmentMeta struct {
 	ID          string `json:"id"`
@@ -310,8 +317,26 @@ type TaskResult struct {
 	// abandoned as unresumable (GH #6066). Forwarded on every terminal path,
 	// including the completed one: a fresh-session retry that SUCCEEDS is
 	// precisely when the abandoned id would otherwise stay selectable.
-	RetiredSessionID string           `json:"-"`
-	Usage            []TaskUsageEntry `json:"usage,omitempty"` // per-model token usage
+	RetiredSessionID                string           `json:"-"`
+	Usage                           []TaskUsageEntry `json:"usage,omitempty"` // per-model token usage
+	InkDecisionID             string           `json:"-"`
+	InkDecisionSource         string           `json:"-"`
+	InkDecisionChoice         string           `json:"-"`
+	InkPriorSessionID         string           `json:"-"`
+	InkRetryFailureReason     string           `json:"-"`
+	InkRetryAttempt           int              `json:"-"`
+	InkIssueID                string           `json:"-"`
+	InkIssueStatusBefore      string           `json:"-"`
+	NativeRecoveryDecisionID        string           `json:"-"`
+	NativeRecoveryChoice            string           `json:"-"`
+	NativeRecoverySource            string           `json:"-"`
+	NativeRecoveryProvider          string           `json:"-"`
+	NativeRecoveryFailureReason     string           `json:"-"`
+	NativeRecoveryAttempt           int              `json:"-"`
+	NativeRecoveryIssueID           string           `json:"-"`
+	NativeRecoveryIssueStatusBefore string           `json:"-"`
+	NativeRecoverySessionBefore     string           `json:"-"`
+	NativeRecoverySessionAfter      string           `json:"-"`
 }
 
 // PluginHookTool is one agent-trigger plugin hook, as the agent will see it.

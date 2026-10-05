@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { LOCALE_COOKIE } from "@multica/core/i18n";
+import { LOCALE_COOKIE } from "@inkway/core/i18n";
 import {
-  MULTICA_LOCALE_HEADER,
+  INKWAY_LOCALE_HEADER,
   resolveLocaleFromSignals,
 } from "./lib/locale-routing";
 import { runtimeRewriteDestination } from "./config/runtime-urls";
@@ -32,13 +32,13 @@ function resolveLocale(req: NextRequest): string {
   });
 }
 
-// Forward the resolved locale to RSC layouts via the `x-multica-locale`
+// Forward the resolved locale to RSC layouts via the `x-inkway-locale`
 // request header. layout.tsx reads it through `await headers()`. The
 // `request: { headers }` form is what makes the header land on the upstream
 // request — without it the value would only sit on the response.
 function nextWithLocale(req: NextRequest): NextResponse {
   const headers = new Headers(req.headers);
-  headers.set(MULTICA_LOCALE_HEADER, resolveLocale(req));
+  headers.set(INKWAY_LOCALE_HEADER, resolveLocale(req));
   return NextResponse.next({ request: { headers } });
 }
 
@@ -55,7 +55,7 @@ export function proxy(req: NextRequest) {
     return NextResponse.rewrite(url);
   }
 
-  const hasSession = req.cookies.has("multica_logged_in");
+  const hasSession = req.cookies.has("inkway_logged_in");
   const lastSlug = req.cookies.get("last_workspace_slug")?.value;
 
   // --- Legacy URL redirect: /issues/... → /{slug}/issues/... ---

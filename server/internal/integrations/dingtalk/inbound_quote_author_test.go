@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/multica-ai/multica/server/internal/integrations/channel"
+	"github.com/Devaretanmay/inkway/server/internal/integrations/channel"
 )
 
 func TestInboundFromCallback_QuotedAuthorUsesDisplayNameOnly(t *testing.T) {

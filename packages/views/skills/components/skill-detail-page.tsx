@@ -26,28 +26,28 @@ import type {
   Skill,
   SkillFile,
   UpdateSkillRequest,
-} from "@multica/core/types";
+} from "@inkway/core/types";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { api } from "@multica/core/api";
-import { useAuthStore } from "@multica/core/auth";
+import { api } from "@inkway/core/api";
+import { useAuthStore } from "@inkway/core/auth";
 import { useTimeAgo } from "../../i18n";
-import { useWorkspaceId } from "@multica/core/hooks";
-import { useWorkspacePaths } from "@multica/core/paths";
+import { useWorkspaceId } from "@inkway/core/hooks";
+import { useWorkspacePaths } from "@inkway/core/paths";
 import {
   agentListOptions,
   memberListOptions,
   selectSkillAssignments,
   skillDetailOptions,
   workspaceKeys,
-} from "@multica/core/workspace/queries";
-import { resolvePublicFileUrl } from "@multica/core/workspace/avatar-url";
+} from "@inkway/core/workspace/queries";
+import { resolvePublicFileUrl } from "@inkway/core/workspace/avatar-url";
 import {
   runtimeDisplayLabel,
   runtimeListOptions,
-} from "@multica/core/runtimes";
-import { ActorAvatar } from "@multica/ui/components/common/actor-avatar";
-import { Button, buttonVariants } from "@multica/ui/components/ui/button";
+} from "@inkway/core/runtimes";
+import { ActorAvatar } from "@inkway/ui/components/common/actor-avatar";
+import { Button, buttonVariants } from "@inkway/ui/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -55,22 +55,22 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@multica/ui/components/ui/dialog";
-import { Input } from "@multica/ui/components/ui/input";
-import { Skeleton } from "@multica/ui/components/ui/skeleton";
-import { Textarea } from "@multica/ui/components/ui/textarea";
+} from "@inkway/ui/components/ui/dialog";
+import { Input } from "@inkway/ui/components/ui/input";
+import { Skeleton } from "@inkway/ui/components/ui/skeleton";
+import { Textarea } from "@inkway/ui/components/ui/textarea";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@multica/ui/components/ui/tooltip";
-import { cn } from "@multica/ui/lib/utils";
+} from "@inkway/ui/components/ui/tooltip";
+import { cn } from "@inkway/ui/lib/utils";
 import { AppLink, useNavigation } from "../../navigation";
 import { BreadcrumbHeader } from "../../layout/breadcrumb-header";
 import { PAGE_GUTTER, PAGE_RAIL } from "../../layout/page-header";
 import { useCanEditSkill } from "../hooks/use-can-edit-skill";
-import { useSkillPermissions } from "@multica/core/permissions";
-import { CapabilityBanner } from "@multica/ui/components/common/capability-banner";
+import { useSkillPermissions } from "@inkway/core/permissions";
+import { CapabilityBanner } from "@inkway/ui/components/common/capability-banner";
 import {
   isRefreshableOrigin,
   originSourceUrl,

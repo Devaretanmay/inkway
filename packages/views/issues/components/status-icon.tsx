@@ -1,12 +1,12 @@
-import { statusCategoryOfKey } from "@multica/core/issues";
-import { isBuiltInIssueStatus } from "@multica/core/issue-statuses";
+import { statusCategoryOfKey } from "@inkway/core/issues";
+import { isBuiltInIssueStatus } from "@inkway/core/issue-statuses";
 import type {
   BuiltInIssueStatus,
   IssueStatus,
   IssueStatusCategory,
   IssueStatusIcon,
-} from "@multica/core/types";
-import { STATUS_CONFIG } from "@multica/core/issues/config";
+} from "@inkway/core/types";
+import { STATUS_CONFIG } from "@inkway/core/issues/config";
 
 // ---------------------------------------------------------------------------
 // Geometry constants (viewBox 0 0 14 14, center 7,7)

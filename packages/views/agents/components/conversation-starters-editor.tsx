@@ -6,11 +6,11 @@ import {
   AGENT_CONVERSATION_STARTER_MAX_LENGTH,
   AGENT_CONVERSATION_STARTERS_MAX,
   selectConversationStarters,
-} from "@multica/core/agents";
-import type { AgentConversationStarter } from "@multica/core/types";
-import { Button } from "@multica/ui/components/ui/button";
-import { Input } from "@multica/ui/components/ui/input";
-import { Textarea } from "@multica/ui/components/ui/textarea";
+} from "@inkway/core/agents";
+import type { AgentConversationStarter } from "@inkway/core/types";
+import { Button } from "@inkway/ui/components/ui/button";
+import { Input } from "@inkway/ui/components/ui/input";
+import { Textarea } from "@inkway/ui/components/ui/textarea";
 import {
   ConversationStarterList,
   useFallbackConversationStarters,

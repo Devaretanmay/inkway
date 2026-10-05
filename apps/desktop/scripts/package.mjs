@@ -362,6 +362,14 @@ function main() {
   const passthrough = stripLeadingSeparator(process.argv.slice(2));
   const parsed = parsePackageArgs(passthrough);
   const buildMatrix = resolveBuildMatrix(parsed);
+  const unsupportedInkTargets = buildMatrix.filter(
+    (target) => target.platform !== "mac" || target.arch !== "arm64",
+  );
+  if (unsupportedInkTargets.length > 0) {
+    throw new Error(
+      `[package] bundled Ink is currently available only for macOS arm64; unsupported target(s): ${unsupportedInkTargets.map(formatTarget).join(", ")}`,
+    );
+  }
   console.log(
     `[package] build matrix → ${buildMatrix.map(formatTarget).join(", ")}`,
   );
@@ -428,8 +436,8 @@ function main() {
 
   const useScopedOutputDir = buildMatrix.length > 1;
 
-  // Step 3: for each requested target, build the matching CLI into
-  // resources/bin/ and package that target in isolation.
+  // Step 3: for each requested target, build the matching CLI and the
+  // versioned Ink runtime into resources/ before packaging.
   for (const target of buildMatrix) {
     console.log(`[package] bundling CLI → ${formatTarget(target)}`);
     execFileSync(
@@ -441,6 +449,24 @@ function main() {
         "--target-arch",
         target.arch,
       ],
+      {
+        stdio: "inherit",
+        cwd: desktopRoot,
+      },
+    );
+
+    console.log(`[package] bundling Ink runtime → ${formatTarget(target)}`);
+    const inkRuntimeArgs = [
+      resolve(here, "package-ink-runtime.mjs"),
+      "--target-platform",
+      PLATFORM_CONFIG[target.platform].runtimePlatform,
+      "--target-arch",
+      target.arch,
+    ];
+    if (version) inkRuntimeArgs.push("--inkway-version", version);
+    execFileSync(
+      "node",
+      inkRuntimeArgs,
       {
         stdio: "inherit",
         cwd: desktopRoot,

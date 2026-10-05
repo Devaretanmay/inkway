@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/multica-ai/multica/server/pkg/protocol"
+	"github.com/Devaretanmay/inkway/server/pkg/protocol"
 )
 
 func TestTaskWakeupURL(t *testing.T) {
@@ -37,9 +37,9 @@ func TestTaskWakeupURL(t *testing.T) {
 		},
 		{
 			name:       "base path",
-			baseURL:    "https://api.example.com/multica",
+			baseURL:    "https://api.example.com/inkway",
 			runtimeIDs: []string{"runtime-1"},
-			want:       "wss://api.example.com/multica/api/daemon/ws?runtime_ids=runtime-1",
+			want:       "wss://api.example.com/inkway/api/daemon/ws?runtime_ids=runtime-1",
 		},
 		{
 			name:       "account-only connection",

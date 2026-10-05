@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
-import { useAuthStore } from "@multica/core/auth";
+import { useAuthStore } from "@inkway/core/auth";
 import {
   completeOnboarding,
   ONBOARDING_STEP_ORDER,
@@ -11,9 +11,9 @@ import {
   useWelcomeStore,
   type OnboardingStep,
   type QuestionnaireAnswers,
-} from "@multica/core/onboarding";
-import { useWorkspaceList } from "@multica/core/workspace";
-import type { AgentRuntime, Workspace } from "@multica/core/types";
+} from "@inkway/core/onboarding";
+import { useWorkspaceList } from "@inkway/core/workspace";
+import type { AgentRuntime, Workspace } from "@inkway/core/types";
 import { StepWelcome } from "./steps/step-welcome";
 import { StepShell } from "./components/step-shell";
 import { StepAboutYou } from "./steps/step-about-you";
@@ -23,6 +23,7 @@ import { StepPlatformFork } from "./steps/step-platform-fork";
 import { OnboardingLogoutButton } from "./components/onboarding-logout-button";
 import { getMikaOnboarding, pickContentLang } from "./templates";
 import { useT } from "../i18n";
+import { InkwayFirstRun } from "./inkway-first-run";
 
 const EMPTY_QUESTIONNAIRE: QuestionnaireAnswers = {
   source: [],
@@ -104,7 +105,7 @@ interface OnboardingFlowProps {
     destination?: OnboardingDestination,
   ) => void;
   /** "new_workspace" is the same flow run by someone who already uses
-   *  Multica: it starts at the workspace step, because the intro and the
+   *  Inkway: it starts at the workspace step, because the intro and the
    *  questionnaire only make sense once per person, and it always creates a
    *  workspace rather than offering to continue with an existing one. */
   mode?: OnboardingMode;
@@ -125,6 +126,16 @@ interface OnboardingFlowProps {
 }
 
 export function OnboardingFlow(props: OnboardingFlowProps) {
+  if ((props.mode ?? "first_run") === "first_run") {
+    return (
+      <InkwayFirstRun
+        onComplete={(workspace, destination) =>
+          props.onComplete(workspace, destination)
+        }
+        onRuntimeRefresh={props.onRuntimeRefresh}
+      />
+    );
+  }
   return <OnboardingStepFlow {...props} />;
 }
 

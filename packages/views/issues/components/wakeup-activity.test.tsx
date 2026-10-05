@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { renderHook } from "@testing-library/react";
-import type { TimelineEntry } from "@multica/core/types";
-import { I18nProvider } from "@multica/core/i18n/react";
+import type { TimelineEntry } from "@inkway/core/types";
+import { I18nProvider } from "@inkway/core/i18n/react";
 import { RESOURCES } from "../../test/i18n";
 import { useT } from "../../i18n";
 import { useWakeupText } from "./wakeup-presentation";

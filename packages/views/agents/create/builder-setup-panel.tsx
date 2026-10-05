@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect } from "react";
-import { useWorkspacePaths } from "@multica/core/paths";
+import { useWorkspacePaths } from "@inkway/core/paths";
 import type {
   AgentBuilderSessionSummary,
   RuntimeDevice,
-} from "@multica/core/types";
+} from "@inkway/core/types";
 import { BuilderSetup } from "./builder-conversation";
 import { UnfinishedDraftsBanner } from "./unfinished-drafts";
 import { useBuilderSession } from "./use-builder-session";

@@ -2,9 +2,9 @@ import { useLayoutEffect, type ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, cleanup, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createChatStore, registerChatStore } from "@multica/core/chat";
-import { setCurrentWorkspace } from "@multica/core/platform";
-import type { ChatSession, Project, StorageAdapter } from "@multica/core/types";
+import { createChatStore, registerChatStore } from "@inkway/core/chat";
+import { setCurrentWorkspace } from "@inkway/core/platform";
+import type { ChatSession, Project, StorageAdapter } from "@inkway/core/types";
 import { useChatController } from "./use-chat-controller";
 
 const route = vi.hoisted(() => ({ workspaceId: "ws-source", isActive: true }));
@@ -13,14 +13,14 @@ const data = vi.hoisted(() => ({
   projects: {} as Record<string, Project[]>,
 }));
 
-vi.mock("@multica/core/hooks", () => ({
+vi.mock("@inkway/core/hooks", () => ({
   useWorkspaceId: () => route.workspaceId,
 }));
-vi.mock("@multica/core/auth", () => ({
+vi.mock("@inkway/core/auth", () => ({
   useAuthStore: (selector: (state: { user: { id: string } }) => unknown) =>
     selector({ user: { id: "user-1" } }),
 }));
-vi.mock("@multica/core/agents", () => ({
+vi.mock("@inkway/core/agents", () => ({
   isAgentRuntimeBound: () => false,
   useAgentPresenceDetail: () => ({ availability: "online" }),
   useCustomizeConversationStartersHref: () => null,
@@ -90,9 +90,9 @@ describe("useChatController workspace rehydration", () => {
     data.projects = { "ws-source": [], "ws-target": [targetProject] };
     await act(async () => setCurrentWorkspace("source", "ws-source"));
     const values = new Map<string, string>([
-      ["multica:chat:activeSessionId:source", sourceSession.id],
-      ["multica:chat:activeSessionId:target", targetSession.id],
-      ["multica:chat:selectedProjectId:target", targetProject.id],
+      ["inkway:chat:activeSessionId:source", sourceSession.id],
+      ["inkway:chat:activeSessionId:target", targetSession.id],
+      ["inkway:chat:selectedProjectId:target", targetProject.id],
     ]);
     storage = {
       getItem: (key) => values.get(key) ?? null,
@@ -112,10 +112,10 @@ describe("useChatController workspace rehydration", () => {
 
   function expectTargetSelection() {
     expect(store.getState().activeSessionId).toBe(targetSession.id);
-    expect(storage.getItem("multica:chat:activeSessionId:target")).toBe(targetSession.id);
+    expect(storage.getItem("inkway:chat:activeSessionId:target")).toBe(targetSession.id);
     expect(store.getState().selectedProjectId).toBe(targetProject.id);
-    expect(storage.getItem("multica:chat:selectedProjectId:target")).toBe(targetProject.id);
-    expect(storage.getItem("multica:chat:activeSessionId:source")).toBe(sourceSession.id);
+    expect(storage.getItem("inkway:chat:selectedProjectId:target")).toBe(targetProject.id);
+    expect(storage.getItem("inkway:chat:activeSessionId:source")).toBe(sourceSession.id);
   }
 
   it.each([false, true])("preserves the target selection while the source controller remains mounted (isActive=%s)", async (isActive) => {
@@ -160,8 +160,8 @@ describe("useChatController workspace rehydration", () => {
 
     expect(store.getState().activeSessionId).toBeNull();
     expect(store.getState().selectedProjectId).toBeNull();
-    expect(storage.getItem("multica:chat:activeSessionId:target")).toBeNull();
-    expect(storage.getItem("multica:chat:selectedProjectId:target")).toBeNull();
-    expect(storage.getItem("multica:chat:activeSessionId:source")).toBe(sourceSession.id);
+    expect(storage.getItem("inkway:chat:activeSessionId:target")).toBeNull();
+    expect(storage.getItem("inkway:chat:selectedProjectId:target")).toBeNull();
+    expect(storage.getItem("inkway:chat:activeSessionId:source")).toBe(sourceSession.id);
   });
 });

@@ -1,5 +1,5 @@
 import { app, ipcMain, BrowserWindow, shell } from "electron";
-import { execFile } from "child_process";
+import { execFile, spawn } from "child_process";
 import {
   readFile,
   writeFile,
@@ -22,6 +22,7 @@ import type {
   LocalRuntimeProbe,
 } from "../shared/daemon-types";
 import { daemonStatusAlive } from "../shared/daemon-types";
+import { packagedInkEnv } from "./ink-runtime";
 import { ensureManagedCli, managedCliPath } from "./cli-bootstrap";
 import { decideVersionAction } from "./version-decision";
 import {
@@ -54,7 +55,7 @@ import {
 } from "./daemon-auth-probe";
 
 const POLL_INTERVAL_MS = 5_000;
-const PREFS_PATH = join(homedir(), ".multica", "desktop_prefs.json");
+const PREFS_PATH = join(homedir(), ".inkway", "desktop_prefs.json");
 const LOG_TAIL_RETRY_MS = 2_000;
 const LOG_TAIL_MAX_RETRIES = 5;
 // How long a start may sit in "starting" (with no /health) before we probe the
@@ -62,8 +63,8 @@ const LOG_TAIL_MAX_RETRIES = 5;
 // take a while (it renews the PAT and lists workspaces before serving /health), so we
 // wait past the common case to avoid probing healthy-but-slow starts.
 const AUTH_PROBE_GRACE_MS = 10_000;
-// `multica daemon start` blocks until the daemon reports ready, polling /health
-// for up to its own startup timeout (45s in server/cmd/multica/cmd_daemon.go) to
+// `inkway daemon start` blocks until the daemon reports ready, polling /health
+// for up to its own startup timeout (45s in server/cmd/inkway/cmd_daemon.go) to
 // cover cold-start agent-version detection. This execFile timeout MUST stay
 // above that — otherwise Electron kills the CLI supervisor mid-startup and a
 // healthy-but-slow start is misreported as a failure (the detached daemon child
@@ -204,7 +205,7 @@ async function fetchHealthAtPort(
 
 /**
  * Validates the daemon profile's token against the backend to find out whether
- * a stuck start is an auth problem. Hits the same endpoint `multica auth status`
+ * a stuck start is an auth problem. Hits the same endpoint `inkway auth status`
  * uses (GET /api/me) with the exact token the daemon loads from config.json, so
  * the verdict matches what the daemon itself would get from the server.
  *
@@ -267,7 +268,7 @@ async function writeProfileConfig(
  *
  * Returns `null` until the renderer reports its `apiUrl`. There is no profile
  * to act on in that window, and callers must do nothing rather than reach for
- * the user's default CLI profile at `~/.multica/` — neither its files nor its
+ * the user's default CLI profile at `~/.inkway/` — neither its files nor its
  * health port.
  */
 async function resolveActiveProfile(): Promise<ActiveProfile | null> {
@@ -418,7 +419,8 @@ async function fetchHealth(): Promise<DaemonStatus> {
 }
 
 function findCliOnPath(): string | null {
-  const candidates = process.platform === "win32" ? ["multica.exe"] : ["multica"];
+  const candidates =
+    process.platform === "win32" ? ["inkway.exe", "multica.exe"] : ["inkway", "multica"];
   const paths = (process.env["PATH"] ?? "").split(
     process.platform === "win32" ? ";" : ":",
   );
@@ -438,14 +440,14 @@ function findCliOnPath(): string | null {
  * Returns the path to the CLI binary bundled inside the Desktop app.
  *
  * - Dev (`electron-vite dev`): `app.getAppPath()` → `apps/desktop`, resolving
- *   to `apps/desktop/resources/bin/multica`. `bundle-cli.mjs` populates this
+ *   to `apps/desktop/resources/bin/inkway`. `bundle-cli.mjs` populates this
  *   before dev starts, so iterating on Go changes is "make build → restart".
- * - Packaged: `app.getAppPath()` → `<Multica.app>/Contents/Resources/app.asar`.
+ * - Packaged: `app.getAppPath()` → `<Inkway.app>/Contents/Resources/app.asar`.
  *   electron-builder's `asarUnpack: resources/**` extracts the binary to
  *   `app.asar.unpacked/`, so we swap the path segment to execute it.
  */
 function bundledCliPath(): string {
-  const binName = process.platform === "win32" ? "multica.exe" : "multica";
+  const binName = process.platform === "win32" ? "inkway.exe" : "inkway";
   return join(app.getAppPath(), "resources", "bin", binName).replace(
     "app.asar",
     "app.asar.unpacked",
@@ -483,12 +485,12 @@ async function probeCliBinary(
 }
 
 /**
- * Returns a usable `multica` binary path. Priority:
+ * Returns a usable `inkway` binary path. Priority:
  *   1. Cached result from a previous successful resolve.
  *   2. Bundled binary shipped with the Desktop app (`bundle-cli.mjs`).
  *   3. Managed binary already installed in userData (`managedCliPath`).
  *   4. Download + install latest release into userData.
- *   5. `multica` on PATH (dev convenience / user-installed via brew).
+ *   5. `inkway` on PATH (dev convenience / user-installed via brew).
  * Returns `null` only when all of the above fail.
  *
  * Bundled is preferred so Desktop iterates in lockstep with Go changes in
@@ -657,7 +659,7 @@ async function mintPat(jwt: string): Promise<string> {
       Authorization: `Bearer ${jwt}`,
     },
     // Omit expires_in_days → server treats as null → non-expiring PAT.
-    body: JSON.stringify({ name: "Multica Desktop" }),
+    body: JSON.stringify({ name: "Inkway Desktop" }),
   });
   if (!res.ok) {
     const body = await res.text().catch(() => "");
@@ -773,7 +775,7 @@ async function loadPrefs(): Promise<DaemonPrefs> {
 }
 
 async function savePrefs(prefs: DaemonPrefs): Promise<void> {
-  const dir = join(homedir(), ".multica");
+  const dir = join(homedir(), ".inkway");
   await mkdir(dir, { recursive: true });
   await writeFile(PREFS_PATH, JSON.stringify(prefs, null, 2), "utf-8");
 }
@@ -932,7 +934,16 @@ async function probeLocalRuntimes(): Promise<LocalRuntimeProbe> {
 // applied by fix-path in main/index.ts — as a top-level const it would
 // snapshot process.env at import time, before that block runs.
 function desktopSpawnEnv(): NodeJS.ProcessEnv {
-  return { ...process.env, MULTICA_LAUNCHED_BY: "desktop" };
+  const env = { ...process.env, INKWAY_LAUNCHED_BY: "desktop" };
+  if (!app.isPackaged) return env;
+  return {
+    ...env,
+    ...packagedInkEnv(
+      process.resourcesPath,
+      app.getPath("userData"),
+      app.getVersion(),
+    ),
+  };
 }
 
 function scheduleStatusRefresh(): void {
@@ -943,7 +954,7 @@ async function startDaemon(
   recoveryProfile?: ActiveProfile,
 ): Promise<{ success: boolean; error?: string }> {
   const bin = await resolveCliBinary();
-  if (!bin) return { success: false, error: "multica CLI is not installed" };
+  if (!bin) return { success: false, error: "Inkway runtime CLI is not installed" };
 
   const active = await ensureActiveProfile();
   if (!active) {
@@ -1044,7 +1055,7 @@ async function stopDaemon(): Promise<{ success: boolean; error?: string }> {
   if (await lifecycleBlockedByForeignDaemon()) return { success: true };
 
   const bin = await resolveCliBinary();
-  if (!bin) return { success: false, error: "multica CLI is not installed" };
+  if (!bin) return { success: false, error: "Inkway runtime CLI is not installed" };
 
   const active = await ensureActiveProfile();
   if (!active) return { success: true };
@@ -1407,6 +1418,58 @@ export function setupDaemonManager(
     const bin = await resolveCliBinary();
     return bin !== null;
   });
+  ipcMain.handle(
+    "daemon:provider-credential",
+    async (_event, request: { action: string; runtimeId: string; provider: string; model?: string; value?: string }) => {
+      const runtimeId = String(request?.runtimeId ?? "").trim();
+      const provider = String(request?.provider ?? "").trim().toLowerCase();
+      const action = String(request?.action ?? "");
+      const model = String(request?.model ?? "").trim();
+      const value = String(request?.value ?? "");
+      if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(runtimeId)) {
+        return { ok: false, message: "Enter a valid runtime ID." };
+      }
+      if (!["openai", "anthropic", "groq"].includes(provider) || !["status", "set", "delete", "validate"].includes(action)) {
+        return { ok: false, message: "Unsupported provider credential operation." };
+      }
+      if (action === "set" && (!value.trim() || value.length > 16 * 1024)) {
+        return { ok: false, message: "Credential is empty or too large." };
+      }
+      if (action === "validate" && (!model || model.length > 200)) {
+        return { ok: false, message: "Enter a provider model to validate." };
+      }
+      const bin = await resolveCliBinary();
+      if (!bin) return { ok: false, message: "Inkway runtime CLI is not installed." };
+      const args = ["runtime", "credentials", action, runtimeId, provider];
+      if (action === "set") args.push("--stdin");
+      if (action === "status") args.push("--json");
+      if (action === "validate") args.push(model);
+      return await new Promise<{ ok: boolean; message: string; present?: boolean }>((resolve) => {
+        const child = spawn(bin, args, { stdio: ["pipe", "pipe", "pipe"], windowsHide: true });
+        let statusOutput = "";
+        child.stdout.on("data", (chunk: Buffer) => {
+          if (action === "status" && statusOutput.length < 1024) statusOutput += chunk.toString().slice(0, 1024 - statusOutput.length);
+        });
+        child.stderr.resume();
+        child.on("error", () => resolve({ ok: false, message: "Could not start the runtime credential helper." }));
+        child.on("close", (code) => {
+          // CLI/provider diagnostics may echo request or credential material.
+          // Keep that text in neither renderer state nor logs; the UI only
+          // needs a bounded operation result.
+          const ok = code === 0;
+          const message = ok
+            ? action === "validate" ? "Provider connection verified." : action === "set" ? "Credential saved on this computer." : action === "delete" ? "Credential removed from this computer." : "Credential status checked."
+            : action === "validate" ? "Provider validation failed. Check its settings and try again." : "Credential operation failed.";
+          let present: boolean | undefined;
+          if (ok && action === "status") {
+            try { const status: unknown = JSON.parse(statusOutput); if (typeof status === "object" && status !== null && "present" in status && typeof status.present === "boolean") present = status.present; } catch { /* Unknown status stays unknown; never imply a connection. */ }
+          }
+          resolve({ ok, message, ...(present !== undefined ? { present } : {}) });
+        });
+        child.stdin.end(action === "set" ? value : undefined);
+      });
+    },
+  );
   ipcMain.handle("daemon:retry-install", async () => {
     cachedCliBinary = undefined;
     cliResolvePromise = null;

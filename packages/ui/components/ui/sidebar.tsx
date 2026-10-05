@@ -6,24 +6,24 @@ import { useRender } from "@base-ui/react/use-render"
 import { cva, type VariantProps } from "class-variance-authority"
 import { useTranslation } from "react-i18next"
 
-import { useIsCompact } from "@multica/ui/hooks/use-mobile"
-import { cn } from "@multica/ui/lib/utils"
-import { Button } from "@multica/ui/components/ui/button"
-import { Input } from "@multica/ui/components/ui/input"
-import { Separator } from "@multica/ui/components/ui/separator"
+import { useIsCompact } from "@inkway/ui/hooks/use-mobile"
+import { cn } from "@inkway/ui/lib/utils"
+import { Button } from "@inkway/ui/components/ui/button"
+import { Input } from "@inkway/ui/components/ui/input"
+import { Separator } from "@inkway/ui/components/ui/separator"
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from "@multica/ui/components/ui/sheet"
-import { Skeleton } from "@multica/ui/components/ui/skeleton"
+} from "@inkway/ui/components/ui/sheet"
+import { Skeleton } from "@inkway/ui/components/ui/skeleton"
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@multica/ui/components/ui/tooltip"
+} from "@inkway/ui/components/ui/tooltip"
 import { PanelLeftIcon } from "lucide-react"
 
 const SIDEBAR_WIDTH_DEFAULT = 256

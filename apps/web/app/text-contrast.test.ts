@@ -97,10 +97,16 @@ const decodeSrgb = (c: number) =>
  * Quantises to 8-bit on purpose: contrast is judged on what the display
  * actually paints, not on the unrounded float behind it.
  */
-function oklchToRgb(value: string): Rgb {
+function cssColorToRgb(value: string): Rgb {
+  const hex = /^#([\da-f]{3}|[\da-f]{6})$/i.exec(value)?.[1];
+  if (hex) {
+    const expanded = hex.length === 3 ? [...hex].map((digit) => `${digit}${digit}`).join("") : hex;
+    return [0, 2, 4].map((offset) => Number.parseInt(expanded.slice(offset, offset + 2), 16)) as Rgb;
+  }
+
   const match = /^oklch\(\s*([\d.]+)\s+([\d.]+)\s+([\d.]+)\s*\)$/.exec(value);
   if (!match?.[1] || !match[2] || !match[3]) {
-    throw new Error(`expected an alpha-free oklch() colour, got "${value}"`);
+    throw new Error(`expected an alpha-free oklch() or hex colour, got "${value}"`);
   }
 
   const lightness = Number(match[1]);
@@ -143,10 +149,10 @@ function expectTonePasses(
   tone: string,
   floor: number,
 ) {
-  const foreground = oklchToRgb(resolveToken(declarations, tone));
+  const foreground = cssColorToRgb(resolveToken(declarations, tone));
 
   for (const token of backgroundTokens) {
-    const background = oklchToRgb(resolveToken(declarations, token));
+    const background = cssColorToRgb(resolveToken(declarations, token));
     const ratio = contrastRatio(foreground, background);
 
     expect(
@@ -415,9 +421,9 @@ describe("text contrast", () => {
       ["dark", ".dark"],
     ])("stays quieter than muted-foreground in %s mode", (_mode, selector) => {
       const declarations = readBlock(tokensCss(), selector);
-      const surface = oklchToRgb(resolveToken(declarations, "--surface"));
-      const faint = oklchToRgb(resolveToken(declarations, "--faint-foreground"));
-      const muted = oklchToRgb(resolveToken(declarations, "--muted-foreground"));
+      const surface = cssColorToRgb(resolveToken(declarations, "--surface"));
+      const faint = cssColorToRgb(resolveToken(declarations, "--faint-foreground"));
+      const muted = cssColorToRgb(resolveToken(declarations, "--muted-foreground"));
 
       expect(
         contrastRatio(faint, surface),
@@ -434,9 +440,9 @@ describe("text contrast", () => {
   it.each(["--muted-foreground", "--faint-foreground"])(
     "keeps the landing-light copy of %s in sync with the light token",
     (tone) => {
-      expect(resolveToken(readBlock(landingCss(), ".landing-light"), tone)).toBe(
-        resolveToken(readBlock(tokensCss(), ":root"), tone),
-      );
+      expect(
+        cssColorToRgb(resolveToken(readBlock(landingCss(), ".landing-light"), tone)),
+      ).toEqual(cssColorToRgb(resolveToken(readBlock(tokensCss(), ":root"), tone)));
     },
   );
 

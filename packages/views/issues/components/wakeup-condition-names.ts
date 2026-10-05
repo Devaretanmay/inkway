@@ -1,10 +1,10 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useWorkspaceId } from "@multica/core/hooks";
-import { labelListOptions } from "@multica/core/labels/queries";
-import { propertyListOptions } from "@multica/core/properties/queries";
-import { useActorName } from "@multica/core/workspace/hooks";
+import { useWorkspaceId } from "@inkway/core/hooks";
+import { labelListOptions } from "@inkway/core/labels/queries";
+import { propertyListOptions } from "@inkway/core/properties/queries";
+import { useActorName } from "@inkway/core/workspace/hooks";
 import { useStatusLabel } from "../utils/status-label";
 
 /**

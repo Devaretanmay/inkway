@@ -4,17 +4,17 @@ import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronRight, Loader2, Maximize2, Square } from "lucide-react";
 import { toast } from "sonner";
-import { api } from "@multica/core/api";
-import { issueTasksOptions } from "@multica/core/issues/queries";
-import { useCustomPricingStore } from "@multica/core/runtimes/custom-pricing-store";
-import type { AgentTask } from "@multica/core/types";
-import { cn } from "@multica/ui/lib/utils";
+import { api } from "@inkway/core/api";
+import { issueTasksOptions } from "@inkway/core/issues/queries";
+import { useCustomPricingStore } from "@inkway/core/runtimes/custom-pricing-store";
+import type { AgentTask } from "@inkway/core/types";
+import { cn } from "@inkway/ui/lib/utils";
 import { useLocale, useTimeAgo } from "../../i18n";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@multica/ui/components/ui/tooltip";
+} from "@inkway/ui/components/ui/tooltip";
 import { ActorAvatar } from "../../common/actor-avatar";
 import { formatDuration } from "../../agents/components/agent-activity-hover-content";
 import { TranscriptButton } from "../../common/task-transcript";
@@ -72,6 +72,7 @@ import { WakeupRunLabel } from "./wakeup-source-chip";
 // list updates without polling.
 
 interface ExecutionLogSectionProps {
+  defaultOpen?: boolean;
   issueId: string;
   /** Shown in the Runs dialog's subtitle so it names the issue it lays out. */
   identifier?: string;
@@ -90,9 +91,9 @@ const PAST_STATUS_RANK: Record<string, number> = {
   completed: 2,
 };
 
-export function ExecutionLogSection({ issueId, identifier, issueTitle }: ExecutionLogSectionProps) {
+export function ExecutionLogSection({ issueId, identifier, issueTitle, defaultOpen = true }: ExecutionLogSectionProps) {
   const { t } = useT("issues");
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(defaultOpen);
   const [runsOpen, setRunsOpen] = useState(false);
   const pricings = useCustomPricingStore((s) => s.pricings);
 

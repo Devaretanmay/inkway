@@ -3,17 +3,17 @@
 import { useId, useState } from "react";
 import { ListChecks, Pencil } from "lucide-react";
 import { toast } from "sonner";
-import { useUpdateIssueSystemWakeup } from "@multica/core/issues";
-import type { SystemWakeup } from "@multica/core/types";
-import { Button } from "@multica/ui/components/ui/button";
-import { Switch } from "@multica/ui/components/ui/switch";
-import { Textarea } from "@multica/ui/components/ui/textarea";
+import { useUpdateIssueSystemWakeup } from "@inkway/core/issues";
+import type { SystemWakeup } from "@inkway/core/types";
+import { Button } from "@inkway/ui/components/ui/button";
+import { Switch } from "@inkway/ui/components/ui/switch";
+import { Textarea } from "@inkway/ui/components/ui/textarea";
 import {
   Popover,
   PopoverContent,
   PopoverTitle,
   PopoverTrigger,
-} from "@multica/ui/components/ui/popover";
+} from "@inkway/ui/components/ui/popover";
 import { useT } from "../../i18n";
 import { useWakeupText } from "./wakeup-presentation";
 

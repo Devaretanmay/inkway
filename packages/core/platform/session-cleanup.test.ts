@@ -45,17 +45,17 @@ describe("clearClientSessionData", () => {
     const shared = "acme";
     const storage = makeStorage({
       // A workspace-scoped draft, through the registry.
-      "multica_comment_drafts:acme": '{"issue-1":"A private draft"}',
+      "inkway_comment_drafts:acme": '{"issue-1":"A private draft"}',
       // A non-draft workspace-scoped key.
-      "multica:chat:activeSessionId:acme": "session-1",
+      "inkway:chat:activeSessionId:acme": "session-1",
       // Desktop tab layout, whose paths carry slugs and issue ids.
-      multica_tabs: '[{"path":"/acme/issues/secret-issue"}]',
+      inkway_tabs: '[{"path":"/acme/issues/secret-issue"}]',
       // Untouched: not owned by the session.
-      multica_locale: "zh-Hans",
+      inkway_locale: "zh-Hans",
     });
     const resetInMemory = vi.fn();
     registerDraftCleanup({
-      storageKey: "multica_comment_drafts",
+      storageKey: "inkway_comment_drafts",
       workspaceScoped: true,
       resetInMemory,
     });
@@ -69,7 +69,7 @@ describe("clearClientSessionData", () => {
     clearClientSessionData(queryClient, storage);
 
     // Persisted layer.
-    expect(storage.snapshot()).toEqual({ multica_locale: "zh-Hans" });
+    expect(storage.snapshot()).toEqual({ inkway_locale: "zh-Hans" });
     // Memory layer — a client-side login does not reload the page, so the
     // Zustand singleton would otherwise still hold A's draft.
     expect(resetInMemory).toHaveBeenCalledOnce();
@@ -82,8 +82,8 @@ describe("clearClientSessionData", () => {
 
   it("clears every workspace the session had, not just the active one", () => {
     const storage = makeStorage({
-      "multica_navigation:acme": "1",
-      "multica_navigation:globex": "2",
+      "inkway_navigation:acme": "1",
+      "inkway_navigation:globex": "2",
     });
     const queryClient = new QueryClient();
     queryClient.setQueryData(workspaceKeys.list(), [
@@ -102,13 +102,13 @@ describe("clearClientSessionData", () => {
   // just deleted — for the issue draft store, with the previous user's
   // lastAssignee inside.
   it("resets in-memory drafts before removing their persisted keys", () => {
-    const storage = makeStorage({ "multica_issue_draft:acme": "A's draft" });
+    const storage = makeStorage({ "inkway_issue_draft:acme": "A's draft" });
     registerDraftCleanup({
-      storageKey: "multica_issue_draft",
+      storageKey: "inkway_issue_draft",
       workspaceScoped: true,
       // Stands in for persist middleware writing the emptied store back out.
       resetInMemory: () =>
-        storage.setItem("multica_issue_draft:acme", '{"lastAssignee":"A"}'),
+        storage.setItem("inkway_issue_draft:acme", '{"lastAssignee":"A"}'),
     });
     const queryClient = new QueryClient();
     queryClient.setQueryData(workspaceKeys.list(), [
@@ -117,21 +117,21 @@ describe("clearClientSessionData", () => {
 
     clearClientSessionData(queryClient, storage);
 
-    expect(storage.snapshot()["multica_issue_draft:acme"]).toBeUndefined();
+    expect(storage.snapshot()["inkway_issue_draft:acme"]).toBeUndefined();
   });
 
   // A cold start rejected at the identity probe has an empty Query cache, so
   // there is no workspace list to read slugs from. Asserting only the global
-  // `multica_tabs` here would pass while every per-workspace key survived —
+  // `inkway_tabs` here would pass while every per-workspace key survived —
   // the exact hole that let a stale-token launch leak A's drafts to B.
   it("clears workspace-scoped keys even with no workspace list to enumerate", () => {
     const storage = makeStorage({
-      "multica_comment_drafts:acme": '{"issue-1":"A private draft"}',
-      "multica:chat:activeSessionId:acme": "session-1",
-      multica_tabs: "[]",
+      "inkway_comment_drafts:acme": '{"issue-1":"A private draft"}',
+      "inkway:chat:activeSessionId:acme": "session-1",
+      inkway_tabs: "[]",
     });
     registerDraftCleanup({
-      storageKey: "multica_comment_drafts",
+      storageKey: "inkway_comment_drafts",
       workspaceScoped: true,
       resetInMemory: vi.fn(),
     });

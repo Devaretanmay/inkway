@@ -1,7 +1,7 @@
-import type { Issue, IssueStatus } from "@multica/core/types";
-import { BUILT_IN_STATUS_ORDER, PRIORITY_ORDER } from "@multica/core/issues/config";
-import type { SortField, SortDirection } from "@multica/core/issues/stores/view-store";
-import { propertyIdFromViewKey } from "@multica/core/issues/stores/view-store";
+import type { Issue, IssueStatus } from "@inkway/core/types";
+import { BUILT_IN_STATUS_ORDER, PRIORITY_ORDER } from "@inkway/core/issues/config";
+import type { SortField, SortDirection } from "@inkway/core/issues/stores/view-store";
+import { propertyIdFromViewKey } from "@inkway/core/issues/stores/view-store";
 
 const PRIORITY_RANK: Record<string, number> = Object.fromEntries(
   PRIORITY_ORDER.map((p, i) => [p, i])

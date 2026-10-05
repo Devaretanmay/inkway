@@ -1,6 +1,6 @@
 # Dialog
 
-Import from `@multica/ui/components/ui/dialog`.
+Import from `@inkway/ui/components/ui/dialog`.
 
 ## Usage
 

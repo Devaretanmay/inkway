@@ -313,9 +313,25 @@
     "sections": {
       "identity": "Identity",
       "behavior": "Behavior & capabilities",
+      "provider_tool": "Provider / Tool",
+      "provider_tool_hint": "Choose the tool or provider this agent will use.",
       "execution": "Execution",
       "execution_hint": "Unspecified options use the runtime defaults.",
       "access": "Access"
+    },
+    "provider_tool": {
+      "execution_legend": "Provider / Tool",
+      "local_tool": "Local coding tool",
+      "api_provider": "API provider",
+      "provider": "Provider",
+      "native_provider_aria": "API provider",
+      "openai": "OpenAI",
+      "anthropic": "Anthropic",
+      "groq": "Groq",
+      "model": "Model",
+      "native_model_aria": "API provider model",
+      "model_id": "Model ID",
+      "credentials_local": "Provider keys stay with the connected tool."
     },
     "thinking_label": "Thinking",
     "speed_label": "Speed",
@@ -466,12 +482,12 @@
       "intro": "Set the system prompt used for every run. Markdown is supported.",
       "system_prompt_label": "System prompt",
       "placeholder": "Define this agent's role, expertise, and working style.\n\n# Example\nYou are a frontend engineer specializing in React and TypeScript.\n\n## Working Style\n- Write small, focused PRs — one commit per logical change\n- Prefer composition over inheritance\n- Always add unit tests for new components\n\n## Constraints\n- Do not modify shared/ types without explicit approval\n- Follow the existing component patterns in features/",
-      "system_layer_label": "Maintained by Multica",
-      "system_layer_hint": "Updates with each Multica release. You can't edit it, and your notes below are never overwritten.",
+      "system_layer_label": "Maintained by Inkway",
+      "system_layer_hint": "Updates with each Inkway release. You can't edit it, and your notes below are never overwritten.",
       "system_layer_show": "Show",
       "system_layer_hide": "Hide",
       "workspace_notes_label": "Workspace notes",
-      "workspace_notes_intro": "Add your team's context and preferences below. They apply on top of the instructions Multica maintains for this agent. Markdown is supported.",
+      "workspace_notes_intro": "Add your team's context and preferences below. They apply on top of the instructions Inkway maintains for this agent. Markdown is supported.",
       "workspace_notes_placeholder": "Add context this agent should always have.\n\n# Example\nOur main repository is github.com/acme/platform.\nWrite issues in English even when we chat in Chinese.\nWe do not deploy on Fridays."
     },
     "env": {
@@ -524,12 +540,12 @@
       "save_failed_toast": "Failed to save custom arguments"
     },
     "mcp_config": {
-      "managed_title": "Managed by Multica",
-      "managed_empty": "No MCP servers are managed by Multica yet.",
+      "managed_title": "Managed by Inkway",
+      "managed_empty": "No MCP servers are managed by Inkway yet.",
       "add_action": "Add MCP",
       "agent_disabled_badge": "Off for agent",
       "runtime_disabled_badge": "Off in runtime",
-      "runtime_overridden_badge": "Overridden by Multica",
+      "runtime_overridden_badge": "Overridden by Inkway",
       "workspace_title": "From the workspace library",
       "workspace_action_failed": "Could not update this agent's MCP servers",
       "workspace_removed_toast": "MCP server removed from this agent",
@@ -983,5 +999,9 @@
     "selected_one": "{{count}} selected",
     "selected_other": "{{count}} selected",
     "clear_selection": "Clear selection"
+  },
+  "advanced": {
+    "label": "Advanced",
+    "hint": "Thinking level, service tier, skills, conversation starters and access."
   }
 }

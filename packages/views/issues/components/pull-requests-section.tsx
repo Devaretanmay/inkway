@@ -4,24 +4,24 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ChevronRight, CircleSlash, MoreHorizontal, Plus, RotateCcw, Settings } from "lucide-react";
-import { ApiError } from "@multica/core/api";
+import { ApiError } from "@inkway/core/api";
 import {
   issuePullRequestsOptions,
   useGitHubSettings,
   useLinkIssuePullRequest,
   useSetIssuePRAutoComplete,
-} from "@multica/core/github";
-import { useWorkspacePaths } from "@multica/core/paths";
-import { Button } from "@multica/ui/components/ui/button";
+} from "@inkway/core/github";
+import { useWorkspacePaths } from "@inkway/core/paths";
+import { Button } from "@inkway/ui/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@multica/ui/components/ui/dropdown-menu";
-import { Input } from "@multica/ui/components/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@multica/ui/components/ui/popover";
+} from "@inkway/ui/components/ui/dropdown-menu";
+import { Input } from "@inkway/ui/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@inkway/ui/components/ui/popover";
 import { useNavigation } from "../../navigation";
 import { useT } from "../../i18n";
 import { PullRequestList } from "./pull-request-list";

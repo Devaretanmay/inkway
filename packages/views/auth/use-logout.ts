@@ -2,9 +2,9 @@
 
 import { useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useAuthStore } from "@multica/core/auth";
-import { clearClientSessionData } from "@multica/core/platform";
-import { paths } from "@multica/core/paths";
+import { useAuthStore } from "@inkway/core/auth";
+import { clearClientSessionData } from "@inkway/core/platform";
+import { paths } from "@inkway/core/paths";
 import { useNavigation } from "../navigation";
 
 /**

@@ -1,10 +1,10 @@
-# Multica Mobile (iOS)
+# Inkway Mobile (iOS)
 
-Expo + React Native iOS client for Multica. Independent from web/desktop — shares types and pure utilities from `@multica/core/`. See [`AGENTS.md`](./AGENTS.md) for mobile architecture and development rules; `package.json` records the current dependency versions.
+Expo + React Native iOS client for Inkway. Independent from web/desktop — shares types and pure utilities from `@inkway/core/`. See [`AGENTS.md`](./AGENTS.md) for mobile architecture and development rules; `package.json` records the current dependency versions.
 
 ## Just want to use it on your phone? (no development)
 
-Multica isn't on the App Store yet — until that changes, anyone who wants it on their iPhone builds from source. One command:
+Inkway isn't on the App Store yet — until that changes, anyone who wants it on their iPhone builds from source. One command:
 
 ```bash
 pnpm ios:mobile:device:prod:release
@@ -16,10 +16,10 @@ This connects to the same backend as `multica.ai`, so your existing account just
 
 Xcode signs the build with the "Personal Team" your Apple ID automatically owns — created silently the first time you signed into Xcode, no setup needed. The first build downloads CocoaPods + compiles React Native from source — expect 10–20 minutes. Subsequent builds reuse Xcode's cache.
 
-**If Xcode rejects signing with "No matching provisioning profiles found"** — rare, happens if someone has claimed the default bundle id `ai.multica.mobile` on Apple's developer portal. Pick any reverse-domain you own and re-run:
+**If Xcode rejects signing with "No matching provisioning profiles found"** — rare, happens if someone has claimed the default bundle id `ai.inkway.mobile` on Apple's developer portal. Pick any reverse-domain you own and re-run:
 
 ```bash
-export EXPO_BUNDLE_IDENTIFIER_PROD=com.yourname.multica
+export EXPO_BUNDLE_IDENTIFIER_PROD=com.yourname.inkway
 pnpm ios:mobile:device:prod:release
 ```
 
@@ -63,7 +63,7 @@ cp apps/mobile/.env.example apps/mobile/.env.development.local
 # then edit EXPO_PUBLIC_API_URL inside it to your Mac's LAN IP, e.g. http://192.168.1.42:8080
 ```
 
-If your Apple ID isn't on the Multica Apple Developer team yet, also set `EXPO_BUNDLE_IDENTIFIER_DEV` to a reverse-domain you own (e.g. `com.yourname.multica.dev`). For a personal production build, set `EXPO_BUNDLE_IDENTIFIER_PROD` in `.env.production.local`.
+If your Apple ID isn't on the Inkway Apple Developer team yet, also set `EXPO_BUNDLE_IDENTIFIER_DEV` to a reverse-domain you own (e.g. `com.yourname.inkway.dev`). For a personal production build, set `EXPO_BUNDLE_IDENTIFIER_PROD` in `.env.production.local`.
 
 If your Apple ID belongs to more than one Apple Developer team, also set `EXPO_APPLE_TEAM_ID` to the team that should sign your builds. Unlike the bundle id overrides it applies to every variant, and it is re-applied on each run — so it also fixes a checkout that has already latched onto the wrong team.
 

@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/multica-ai/multica/server/internal/events"
-	"github.com/multica-ai/multica/server/pkg/plugincontract"
-	"github.com/multica-ai/multica/server/pkg/protocol"
+	"github.com/Devaretanmay/inkway/server/internal/events"
+	"github.com/Devaretanmay/inkway/server/pkg/plugincontract"
+	"github.com/Devaretanmay/inkway/server/pkg/protocol"
 )
 
 // Translating the internal event bus into the seven events a plugin may

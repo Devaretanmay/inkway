@@ -8,9 +8,9 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/multica-ai/multica/server/internal/issuestatus"
-	"github.com/multica-ai/multica/server/internal/testutil"
-	db "github.com/multica-ai/multica/server/pkg/db/generated"
+	"github.com/Devaretanmay/inkway/server/internal/issuestatus"
+	"github.com/Devaretanmay/inkway/server/internal/testutil"
+	db "github.com/Devaretanmay/inkway/server/pkg/db/generated"
 )
 
 // These are the installed Web/Desktop consumer's literal accepted buckets,

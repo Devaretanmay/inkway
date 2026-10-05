@@ -9,8 +9,8 @@ import type {
   Issue,
   SearchIssueResult,
   SearchProjectResult,
-} from "@multica/core/types";
-import { partitionAggregatedSearchResults } from "@multica/core/search/cancelled-rank";
+} from "@inkway/core/types";
+import { partitionAggregatedSearchResults } from "@inkway/core/search/cancelled-rank";
 
 export type RowItem =
   | { kind: "header"; key: string; title: string }

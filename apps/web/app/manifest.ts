@@ -33,18 +33,18 @@ export const PWA_START_URL = "/inbox";
 export default function manifest(): MetadataRoute.Manifest {
   return {
     id: "/",
-    name: "Multica",
-    short_name: "Multica",
+    name: "Inkway",
+    short_name: "Inkway",
     description:
-      "Assign tasks to coding agents, track progress, and keep your team's work in one place.",
+      "Connect a coding tool, create an agent, assign an issue, and review the result.",
     start_url: PWA_START_URL,
     scope: "/",
     display: "standalone",
     // Splash-screen colours. The runtime status bar is driven by the
     // per-scheme `<meta name="theme-color">` pair in app/layout.tsx, which the
     // manifest cannot express — these are the pre-launch fallback only.
-    background_color: "#ffffff",
-    theme_color: "#ffffff",
+    background_color: "#FAF8F4",
+    theme_color: "#FAF8F4",
     categories: ["productivity"],
     icons: [
       {
@@ -71,7 +71,7 @@ export default function manifest(): MetadataRoute.Manifest {
     // does instead of needing a slug the manifest cannot know.
     shortcuts: [
       { name: "Inbox", url: "/inbox" },
-      { name: "My Issues", url: "/my-issues" },
+      { name: "Agents", url: "/agents" },
     ],
   };
 }

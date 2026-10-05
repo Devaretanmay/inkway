@@ -5,15 +5,15 @@ import type { FormEvent, HTMLAttributes } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Cloud, Loader2, RefreshCw, Rocket, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import type { CloudRuntimeNode } from "@multica/core/runtimes";
+import type { CloudRuntimeNode } from "@inkway/core/runtimes";
 import {
   cloudRuntimeNodeListOptions,
   useCreateCloudRuntimeNode,
   useDeleteCloudRuntimeNode,
-} from "@multica/core/runtimes";
-import { useWorkspaceId } from "@multica/core/hooks";
-import { Badge } from "@multica/ui/components/ui/badge";
-import { Button } from "@multica/ui/components/ui/button";
+} from "@inkway/core/runtimes";
+import { useWorkspaceId } from "@inkway/core/hooks";
+import { Badge } from "@inkway/ui/components/ui/badge";
+import { Button } from "@inkway/ui/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -21,17 +21,17 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@multica/ui/components/ui/dialog";
-import { Input } from "@multica/ui/components/ui/input";
-import { Label } from "@multica/ui/components/ui/label";
+} from "@inkway/ui/components/ui/dialog";
+import { Input } from "@inkway/ui/components/ui/input";
+import { Label } from "@inkway/ui/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@multica/ui/components/ui/select";
-import { cn } from "@multica/ui/lib/utils";
+} from "@inkway/ui/components/ui/select";
+import { cn } from "@inkway/ui/lib/utils";
 import { useT } from "../../i18n";
 
 const CLOUD_RUNTIME_INSTANCE_TYPES = ["t4g.medium", "t4g.large"] as const;

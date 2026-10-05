@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/multica-ai/multica/server/internal/testutil"
+	"github.com/Devaretanmay/inkway/server/internal/testutil"
 )
 
 // TestPRMergeStatusMigration runs migration 551 against workspaces with each

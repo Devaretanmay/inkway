@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/multica-ai/multica/server/internal/events"
-	"github.com/multica-ai/multica/server/pkg/protocol"
+	"github.com/Devaretanmay/inkway/server/internal/events"
+	"github.com/Devaretanmay/inkway/server/pkg/protocol"
 )
 
 // Regression tests for the second half of MUL-5492: `issue:updated` used to

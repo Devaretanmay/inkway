@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 import { toast } from "sonner";
-import { useCancelIssueRun } from "@multica/core/issues/mutations";
+import { useCancelIssueRun } from "@inkway/core/issues/mutations";
 import { useT } from "../../i18n";
 
 /**

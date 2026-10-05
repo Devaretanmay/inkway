@@ -1,4 +1,4 @@
-import type { SupportedLocale } from "@multica/core/i18n";
+import type { SupportedLocale } from "@inkway/core/i18n";
 
 export interface CelestialWorkspaceName {
   slugBase: string;

@@ -4,15 +4,15 @@ import { useCallback, useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import type { MemberWithUser } from "@multica/core/types";
-import { api } from "@multica/core/api";
-import { useWorkspaceId } from "@multica/core/hooks";
-import { workspaceKeys } from "@multica/core/workspace/queries";
-import { Button } from "@multica/ui/components/ui/button";
+import type { MemberWithUser } from "@inkway/core/types";
+import { api } from "@inkway/core/api";
+import { useWorkspaceId } from "@inkway/core/hooks";
+import { workspaceKeys } from "@inkway/core/workspace/queries";
+import { Button } from "@inkway/ui/components/ui/button";
 import {
   UI_EASE_OUT,
   UI_MOTION_DURATION,
-} from "@multica/ui/lib/motion";
+} from "@inkway/ui/lib/motion";
 import {
   Dialog,
   DialogContent,
@@ -20,7 +20,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@multica/ui/components/ui/dialog";
+} from "@inkway/ui/components/ui/dialog";
 import { Archive, ArchiveRestore, Loader2, X } from "lucide-react";
 import { useT } from "../../i18n";
 import { AccessPicker, type AccessChange } from "./inspector/access-picker";

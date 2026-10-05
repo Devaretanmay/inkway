@@ -10,8 +10,8 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/multica-ai/multica/server/internal/middleware"
-	db "github.com/multica-ai/multica/server/pkg/db/generated"
+	"github.com/Devaretanmay/inkway/server/internal/middleware"
+	db "github.com/Devaretanmay/inkway/server/pkg/db/generated"
 )
 
 // chat_draft_restore has no FK to chat_session (MUL-3515), so an INSERT into it

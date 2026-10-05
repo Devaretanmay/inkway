@@ -3,21 +3,21 @@
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import type { Agent, SkillSummary } from "@multica/core/types";
-import { api } from "@multica/core/api";
-import { useWorkspaceId } from "@multica/core/hooks";
+import type { Agent, SkillSummary } from "@inkway/core/types";
+import { api } from "@inkway/core/api";
+import { useWorkspaceId } from "@inkway/core/hooks";
 import {
   skillListOptions,
   workspaceKeys,
-} from "@multica/core/workspace/queries";
-import { Button } from "@multica/ui/components/ui/button";
+} from "@inkway/core/workspace/queries";
+import { Button } from "@inkway/ui/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@multica/ui/components/ui/dialog";
+} from "@inkway/ui/components/ui/dialog";
 import { useT } from "../../i18n";
 import { SkillPickerList } from "./skill-picker-list";
 

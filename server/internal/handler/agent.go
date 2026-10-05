@@ -19,17 +19,17 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/multica-ai/multica/server/internal/analytics"
-	"github.com/multica-ai/multica/server/internal/attribution"
-	"github.com/multica-ai/multica/server/internal/logger"
-	obsmetrics "github.com/multica-ai/multica/server/internal/metrics"
-	"github.com/multica-ai/multica/server/internal/runtimeapps"
-	"github.com/multica-ai/multica/server/internal/service"
-	"github.com/multica-ai/multica/server/internal/util"
-	"github.com/multica-ai/multica/server/pkg/agent"
-	db "github.com/multica-ai/multica/server/pkg/db/generated"
-	"github.com/multica-ai/multica/server/pkg/protocol"
-	"github.com/multica-ai/multica/server/pkg/remotemcp"
+	"github.com/Devaretanmay/inkway/server/internal/analytics"
+	"github.com/Devaretanmay/inkway/server/internal/attribution"
+	"github.com/Devaretanmay/inkway/server/internal/logger"
+	obsmetrics "github.com/Devaretanmay/inkway/server/internal/metrics"
+	"github.com/Devaretanmay/inkway/server/internal/runtimeapps"
+	"github.com/Devaretanmay/inkway/server/internal/service"
+	"github.com/Devaretanmay/inkway/server/internal/util"
+	"github.com/Devaretanmay/inkway/server/pkg/agent"
+	db "github.com/Devaretanmay/inkway/server/pkg/db/generated"
+	"github.com/Devaretanmay/inkway/server/pkg/protocol"
+	"github.com/Devaretanmay/inkway/server/pkg/remotemcp"
 )
 
 // Mirrors AGENT_DESCRIPTION_MAX_LENGTH in packages/core/agents/constants.ts
@@ -78,7 +78,7 @@ type AgentResponse struct {
 	ConversationStarters []AgentConversationStarter `json:"conversation_starters"`
 	// SystemKey identifies a product-defined agent (e.g. "mika"). Empty for
 	// every user- or template-created agent. The UI keys "this is maintained
-	// by Multica" off this rather than off the display name, which owners may
+	// by Inkway" off this rather than off the display name, which owners may
 	// change.
 	SystemKey string `json:"system_key,omitempty"`
 	// SystemInstructions is the read-only product half of a system agent's
@@ -406,7 +406,9 @@ type AgentTaskResponse struct {
 	CompletedAt          *string               `json:"completed_at"`
 	Result               any                   `json:"result"`
 	Error                *string               `json:"error"`
-	FailureReason        string                `json:"failure_reason,omitempty"` // see TaskService.MaybeRetryFailedTask
+	FailureReason        string                `json:"failure_reason,omitempty"`       // see TaskService.MaybeRetryFailedTask
+	RetryFailureReason   string                `json:"retry_failure_reason,omitempty"` // claim-only: classified parent failure for an already-enqueued automatic retry
+	RetryOfTaskID        string                `json:"retry_of_task_id,omitempty"`     // claim-only: automatic retry lineage for Ink recovery
 	Attempt              int32                 `json:"attempt"`
 	MaxAttempts          int32                 `json:"max_attempts"`
 	ParentTaskID         *string               `json:"parent_task_id,omitempty"`
@@ -493,12 +495,12 @@ type AgentTaskResponse struct {
 	IssueAssigneeType        string               `json:"issue_assignee_type,omitempty"`         // "agent", "member" or "squad" at claim time; empty when unassigned. With IssueAssigneeID, lets the agent tell "mine" from "someone else's" without a read
 	IssueAssigneeID          string               `json:"issue_assignee_id,omitempty"`           // assignee UUID at claim time; empty when unassigned
 	ChatSessionID            string               `json:"chat_session_id,omitempty"`             // non-empty for chat tasks
-	ChatChannelType          string               `json:"chat_channel_type,omitempty"`           // "slack" when the chat session is backed by an IM channel; empty for a web-only chat. Makes the agent channel-aware (read history from the channel, not Multica)
+	ChatChannelType          string               `json:"chat_channel_type,omitempty"`           // "slack" when the chat session is backed by an IM channel; empty for a web-only chat. Makes the agent channel-aware (read history from the channel, not Inkway)
 	ChatChannelDeliversFiles bool                 `json:"chat_channel_delivers_files,omitempty"` // server capability: THIS deployment can put a file the agent produced into THIS conversation — the adapter goes back for the bound attachment AND object storage exists to go back to. Absent/false on a server predating it, which is the safe reading: the agent is told to describe its file in words. Never inferred daemon-side from chat_channel_type; see handler.Handler.channelDeliversFiles
 	ChatType                 string               `json:"chat_type,omitempty"`                   // channel_chat_session_binding.chat_type — "group" for a shared room, "p2p" for a 1:1 with the bot. Lets the per-turn prompt tell the agent who else can read its replies; empty for a web-only chat
-	ChatInThread             bool                 `json:"chat_in_thread,omitempty"`              // true when the latest @mention was a thread reply; tells the agent to start with `multica chat thread` vs `multica chat history`
+	ChatInThread             bool                 `json:"chat_in_thread,omitempty"`              // true when the latest @mention was a thread reply; tells the agent to start with `inkway chat thread` vs `inkway chat history`
 	ChatMessage              string               `json:"chat_message,omitempty"`                // user message for chat tasks
-	ChatMessageAttachments   []ChatAttachmentMeta `json:"chat_message_attachments,omitempty"`    // attachments on the user message — agent calls `multica attachment download <id>` per entry
+	ChatMessageAttachments   []ChatAttachmentMeta `json:"chat_message_attachments,omitempty"`    // attachments on the user message — agent calls `inkway attachment download <id>` per entry
 	ChatIntro                bool                 `json:"chat_intro,omitempty"`                  // legacy compatibility for historical is_agent_intro sessions; new agent creation no longer creates these chats
 	AutopilotRunID           string               `json:"autopilot_run_id,omitempty"`            // non-empty for autopilot-spawned tasks
 	AutopilotID              string               `json:"autopilot_id,omitempty"`                // autopilot that spawned this task
@@ -556,7 +558,7 @@ type AgentTaskResponse struct {
 	// free. omitempty keeps both off the wire.
 	Usage []TaskUsageData `json:"usage,omitempty"`
 	// AuthToken is the task-scoped `mat_` token the daemon must inject as
-	// MULTICA_TOKEN in the agent process environment. The server binds it to
+	// INKWAY_TOKEN in the agent process environment. The server binds it to
 	// this (agent_id, task_id) pair at claim time and treats any request
 	// authenticated with it as actor=agent, regardless of headers — so the
 	// agent process cannot use it to read another agent's secrets via the
@@ -704,7 +706,7 @@ func attributionsOf(resps []AgentTaskResponse) []*TaskAttribution {
 
 // ChatAttachmentMeta is the structured attachment metadata embedded in
 // claim responses for chat tasks. The agent uses these to run
-// `multica attachment download <id>` rather than guessing from the
+// `inkway attachment download <id>` rather than guessing from the
 // markdown URL (which is signed and 30-min expiring on private CDN).
 // The mirror struct on the daemon side lives in internal/daemon/types.go
 // and uses the same JSON field names.
@@ -1082,7 +1084,7 @@ func (h *Handler) loadAgentRuntimeAvailability(ctx context.Context, agents []db.
 
 	// Read directly rather than through RuntimeLookup: this resolves rows for a
 	// list of agents instead of resolving a runtime a caller asked for, so it
-	// has no honest source label on multica_agent_runtime_lookup_total yet. See
+	// has no honest source label on inkway_agent_runtime_lookup_total yet. See
 	// the exception noted on service.RuntimeLookup (MUL-6884).
 	runtimes, err := h.Queries.GetAgentRuntimes(ctx, runtimeIDs)
 	if err != nil {
@@ -1905,7 +1907,7 @@ func (h *Handler) UpdateAgent(w http.ResponseWriter, r *http.Request) {
 	// workspace owner/admin, denies agent actors, and writes a queryable
 	// audit row.
 	if _, ok := rawFields["custom_env"]; ok {
-		writeError(w, http.StatusBadRequest, "custom_env is no longer accepted on this endpoint; use PUT /api/agents/{id}/env (or `multica agent env set`)")
+		writeError(w, http.StatusBadRequest, "custom_env is no longer accepted on this endpoint; use PUT /api/agents/{id}/env (or `inkway agent env set`)")
 		return
 	}
 
@@ -2562,7 +2564,7 @@ func (h *Handler) ArchiveAgent(w http.ResponseWriter, r *http.Request) {
 	// the bootstrap endpoint, since its lookup skips archived rows but the
 	// unique index does not.
 	if agent.SystemKey.Valid && agent.SystemKey.String != "" {
-		writeError(w, http.StatusBadRequest, "this agent is built into Multica and cannot be archived")
+		writeError(w, http.StatusBadRequest, "this agent is built into Inkway and cannot be archived")
 		return
 	}
 

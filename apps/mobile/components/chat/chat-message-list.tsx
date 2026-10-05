@@ -51,8 +51,8 @@ import type {
   ChatPendingTask,
   ChatQuickAction,
   TaskMessagePayload,
-} from "@multica/core/types";
-import type { AgentAvailability } from "@multica/core/agents";
+} from "@inkway/core/types";
+import type { AgentAvailability } from "@inkway/core/agents";
 import { continuousCorners } from "@/lib/radius";
 import { taskMessagesOptions } from "@/data/queries/chat";
 import { Text } from "@/components/ui/text";

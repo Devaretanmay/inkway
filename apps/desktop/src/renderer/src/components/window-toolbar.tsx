@@ -10,18 +10,18 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import {
   SidebarTrigger,
   useSidebar,
-} from "@multica/ui/components/ui/sidebar";
+} from "@inkway/ui/components/ui/sidebar";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
-} from "@multica/ui/components/ui/dropdown-menu";
+} from "@inkway/ui/components/ui/dropdown-menu";
 import {
   ResourceLeadingVisual,
   useTabPresentation,
-} from "@multica/views/layout";
+} from "@inkway/views/layout";
 import { useTabHistory } from "@/hooks/use-tab-history";
 import { browsingHistoryKeyForUrl } from "@/stores/tab-store";
 

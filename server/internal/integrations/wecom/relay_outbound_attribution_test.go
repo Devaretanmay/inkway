@@ -19,7 +19,7 @@ import (
 
 	"github.com/redis/go-redis/v9"
 
-	"github.com/multica-ai/multica/server/internal/util"
+	"github.com/Devaretanmay/inkway/server/internal/util"
 )
 
 // ---------------------------------------------------------------------------

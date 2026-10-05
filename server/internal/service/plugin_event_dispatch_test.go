@@ -6,12 +6,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/multica-ai/multica/server/internal/events"
-	"github.com/multica-ai/multica/server/internal/featureflags"
-	db "github.com/multica-ai/multica/server/pkg/db/generated"
-	"github.com/multica-ai/multica/server/pkg/featureflag"
-	"github.com/multica-ai/multica/server/pkg/plugincontract"
-	"github.com/multica-ai/multica/server/pkg/protocol"
+	"github.com/Devaretanmay/inkway/server/internal/events"
+	"github.com/Devaretanmay/inkway/server/internal/featureflags"
+	db "github.com/Devaretanmay/inkway/server/pkg/db/generated"
+	"github.com/Devaretanmay/inkway/server/pkg/featureflag"
+	"github.com/Devaretanmay/inkway/server/pkg/plugincontract"
+	"github.com/Devaretanmay/inkway/server/pkg/protocol"
 )
 
 // The promise this file exists to keep: publishing an event NEVER waits for a

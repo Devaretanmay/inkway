@@ -16,17 +16,17 @@ import {
 } from "lucide-react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { useCurrentWorkspace, useWorkspacePaths } from "@multica/core/paths";
+import { useCurrentWorkspace, useWorkspacePaths } from "@inkway/core/paths";
 import {
   agentListOptions,
   memberListOptions,
   squadListOptions,
   workspaceKeys,
-} from "@multica/core/workspace/queries";
-import { resolvePublicFileUrl } from "@multica/core/workspace/avatar-url";
-import { useAuthStore } from "@multica/core/auth";
-import { api } from "@multica/core/api";
-import { useModalStore } from "@multica/core/modals";
+} from "@inkway/core/workspace/queries";
+import { resolvePublicFileUrl } from "@inkway/core/workspace/avatar-url";
+import { useAuthStore } from "@inkway/core/auth";
+import { api } from "@inkway/core/api";
+import { useModalStore } from "@inkway/core/modals";
 import {
   useSquadsViewStore,
   SQUAD_SCOPES,
@@ -35,9 +35,9 @@ import {
   type SquadListFilters,
   type SquadsScope,
   type SquadSortField,
-} from "@multica/core/squads/stores";
-import type { Agent, MemberWithUser, Squad } from "@multica/core/types";
-import { Button } from "@multica/ui/components/ui/button";
+} from "@inkway/core/squads/stores";
+import type { Agent, MemberWithUser, Squad } from "@inkway/core/types";
+import { Button } from "@inkway/ui/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -45,7 +45,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@multica/ui/components/ui/dialog";
+} from "@inkway/ui/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -58,7 +58,7 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "@multica/ui/components/ui/dropdown-menu";
+} from "@inkway/ui/components/ui/dropdown-menu";
 import {
   ListGrid,
   ListGridCell,
@@ -67,20 +67,20 @@ import {
   ListGridRow,
   LIST_GRID_BOTTOM_CLEARANCE,
   type ListGridSortDirection,
-} from "@multica/ui/components/ui/list-grid";
+} from "@inkway/ui/components/ui/list-grid";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@multica/ui/components/ui/popover";
-import { Skeleton } from "@multica/ui/components/ui/skeleton";
-import { Switch } from "@multica/ui/components/ui/switch";
+} from "@inkway/ui/components/ui/popover";
+import { Skeleton } from "@inkway/ui/components/ui/skeleton";
+import { Switch } from "@inkway/ui/components/ui/switch";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@multica/ui/components/ui/tooltip";
-import { ActorAvatar as ActorAvatarBase } from "@multica/ui/components/common/actor-avatar";
+} from "@inkway/ui/components/ui/tooltip";
+import { ActorAvatar as ActorAvatarBase } from "@inkway/ui/components/common/actor-avatar";
 import { ActorAvatar } from "../../common/actor-avatar";
 import { FILTER_ITEM_CLASS, HoverCheck } from "../../common/hover-check";
 import { useIntentNavigate, useRowLink } from "../../navigation";

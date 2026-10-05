@@ -11,8 +11,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/multica-ai/multica/server/internal/channelmedia"
-	db "github.com/multica-ai/multica/server/pkg/db/generated"
+	"github.com/Devaretanmay/inkway/server/internal/channelmedia"
+	db "github.com/Devaretanmay/inkway/server/pkg/db/generated"
 )
 
 func TestMergeIssueChannelMediaDescriptionProtectsLegacyClient(t *testing.T) {

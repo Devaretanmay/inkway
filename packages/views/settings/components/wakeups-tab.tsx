@@ -3,14 +3,14 @@
 import { useEffect, useId, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { useWorkspaceId } from "@multica/core/hooks";
-import { useAuthStore } from "@multica/core/auth";
-import { memberListOptions } from "@multica/core/workspace/queries";
-import { useUpdateWorkspaceSystemWakeup, workspaceSystemWakeupsOptions } from "@multica/core/issues";
-import type { WorkspaceSystemWakeup } from "@multica/core/types";
-import { Button } from "@multica/ui/components/ui/button";
-import { Switch } from "@multica/ui/components/ui/switch";
-import { Textarea } from "@multica/ui/components/ui/textarea";
+import { useWorkspaceId } from "@inkway/core/hooks";
+import { useAuthStore } from "@inkway/core/auth";
+import { memberListOptions } from "@inkway/core/workspace/queries";
+import { useUpdateWorkspaceSystemWakeup, workspaceSystemWakeupsOptions } from "@inkway/core/issues";
+import type { WorkspaceSystemWakeup } from "@inkway/core/types";
+import { Button } from "@inkway/ui/components/ui/button";
+import { Switch } from "@inkway/ui/components/ui/switch";
+import { Textarea } from "@inkway/ui/components/ui/textarea";
 import { useT } from "../../i18n";
 import { SettingsCard, SettingsRow, SettingsSection, SettingsTab } from "./settings-layout";
 

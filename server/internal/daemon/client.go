@@ -14,9 +14,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/multica-ai/multica/server/pkg/agent"
-	"github.com/multica-ai/multica/server/pkg/protocol"
-	"github.com/multica-ai/multica/server/pkg/remotemcp"
+	"github.com/Devaretanmay/inkway/server/internal/ink"
+	"github.com/Devaretanmay/inkway/server/pkg/agent"
+	"github.com/Devaretanmay/inkway/server/pkg/protocol"
+	"github.com/Devaretanmay/inkway/server/pkg/remotemcp"
 )
 
 // requestError is returned by postJSON/getJSON when the server responds with an error status.
@@ -92,7 +93,7 @@ func isRuntimeNotFoundError(err error) bool {
 	return strings.Contains(strings.ToLower(reqErr.Body), "runtime not found")
 }
 
-// Client handles HTTP communication with the Multica server daemon API.
+// Client handles HTTP communication with the Inkway server daemon API.
 type Client struct {
 	baseURL string
 	token   string
@@ -202,7 +203,7 @@ func daemonHTTPClientCapabilities() string {
 }
 
 func daemonCommonCapabilities() []string {
-	return []string{
+	caps := []string{
 		protocol.DaemonCapabilitySkillBundlesV1,
 		protocol.DaemonCapabilityCoalescedCommentsV1,
 		protocol.DaemonCapabilityExecutionManifestV1,
@@ -215,6 +216,10 @@ func daemonCommonCapabilities() []string {
 		protocol.DaemonCapabilityCheckoutKeepsWorkV1,
 		protocol.DaemonCapabilityJoinedWakeupsV1,
 	}
+	if ink.Enabled() {
+		caps = append(caps, protocol.DaemonCapabilityInkRecoveryV1)
+	}
+	return caps
 }
 
 // SetToken sets the auth token for authenticated requests.
@@ -735,11 +740,19 @@ type (
 )
 
 func (c *Client) SendHeartbeat(ctx context.Context, runtimeID string) (*HeartbeatResponse, error) {
+	return c.SendHeartbeatWithInk(ctx, runtimeID, nil)
+}
+
+func (c *Client) SendHeartbeatWithInk(ctx context.Context, runtimeID string, snapshot *ink.Snapshot) (*HeartbeatResponse, error) {
 	var resp HeartbeatResponse
-	if err := c.postJSON(ctx, "/api/daemon/heartbeat", map[string]any{
+	body := map[string]any{
 		"runtime_id":            runtimeID,
 		"supports_batch_import": true,
-	}, &resp); err != nil {
+	}
+	if snapshot != nil {
+		body["ink"] = snapshot
+	}
+	if err := c.postJSON(ctx, "/api/daemon/heartbeat", body, &resp); err != nil {
 		return nil, err
 	}
 	return &resp, nil

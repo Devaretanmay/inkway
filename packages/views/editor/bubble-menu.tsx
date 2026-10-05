@@ -33,25 +33,25 @@ import type { Editor } from "@tiptap/core";
 import { posToDOMRect } from "@tiptap/core";
 import { NodeSelection } from "@tiptap/pm/state";
 import { toast } from "sonner";
-import { useCreateIssue } from "@multica/core/issues/mutations";
+import { useCreateIssue } from "@inkway/core/issues/mutations";
 import { useT } from "../i18n";
-import { createShortcutChord, type ShortcutChord } from "@multica/core/shortcuts";
+import { createShortcutChord, type ShortcutChord } from "@inkway/core/shortcuts";
 import { ShortcutKeycaps } from "../common/shortcut-keycaps";
-import { Toggle, toggleVariants } from "@multica/ui/components/ui/toggle";
-import { Separator } from "@multica/ui/components/ui/separator";
+import { Toggle, toggleVariants } from "@inkway/ui/components/ui/toggle";
+import { Separator } from "@inkway/ui/components/ui/separator";
 import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
   TooltipProvider,
-} from "@multica/ui/components/ui/tooltip";
+} from "@inkway/ui/components/ui/tooltip";
 import {
   Popover,
   PopoverTrigger,
   PopoverContent,
-} from "@multica/ui/components/ui/popover";
-import { Input } from "@multica/ui/components/ui/input";
-import { Button } from "@multica/ui/components/ui/button";
+} from "@inkway/ui/components/ui/popover";
+import { Input } from "@inkway/ui/components/ui/input";
+import { Button } from "@inkway/ui/components/ui/button";
 import {
   Bold,
   Italic,

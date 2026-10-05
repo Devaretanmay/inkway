@@ -3,18 +3,18 @@
 import { useState } from "react";
 import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ChevronDown, ChevronRight, ExternalLink, Info, Trash2 } from "lucide-react";
-import { cn } from "@multica/ui/lib/utils";
-import { Button } from "@multica/ui/components/ui/button";
-import { Card, CardContent } from "@multica/ui/components/ui/card";
+import { ChevronDown, ChevronRight, Info, Trash2 } from "lucide-react";
+import { cn } from "@inkway/ui/lib/utils";
+import { Button } from "@inkway/ui/components/ui/button";
+import { Card, CardContent } from "@inkway/ui/components/ui/card";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@multica/ui/components/ui/dialog";
-import { Input } from "@multica/ui/components/ui/input";
-import { Label } from "@multica/ui/components/ui/label";
+} from "@inkway/ui/components/ui/dialog";
+import { Input } from "@inkway/ui/components/ui/input";
+import { Label } from "@inkway/ui/components/ui/label";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,35 +24,33 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@multica/ui/components/ui/alert-dialog";
+} from "@inkway/ui/components/ui/alert-dialog";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@multica/ui/components/ui/tooltip";
-import { useAuthStore } from "@multica/core/auth";
-import { useWorkspaceId } from "@multica/core/hooks";
+} from "@inkway/ui/components/ui/tooltip";
+import { useAuthStore } from "@inkway/core/auth";
+import { useWorkspaceId } from "@inkway/core/hooks";
 import {
   agentListOptions,
   memberListOptions,
-} from "@multica/core/workspace/queries";
+} from "@inkway/core/workspace/queries";
 import { DingTalkMark } from "./dingtalk-mark";
-import { useActorName } from "@multica/core/workspace/hooks";
+import { useActorName } from "@inkway/core/workspace/hooks";
 import {
   dingtalkGroupsOptions,
   dingtalkInstallationsOptions,
   dingtalkKeys,
-} from "@multica/core/dingtalk";
-import { api } from "@multica/core/api";
+} from "@inkway/core/dingtalk";
+import { api } from "@inkway/core/api";
 import type {
   DingTalkGroup,
   DingTalkGroupBot,
   DingTalkInstallation,
-} from "@multica/core/types";
+} from "@inkway/core/types";
 import { ActorAvatar } from "../../common/actor-avatar";
-import { docsLocalePrefix } from "../../common/docs-locale";
-import { openExternal } from "../../platform";
 import { useT, useTimeAgo } from "../../i18n";
 
 const dingTalkChatManagePermission = "qyapi_chat_manage";
@@ -508,7 +506,7 @@ export function DingTalkBotGroups({
 // workspace owner/admin-only in Settings.
 //
 // Adding a new installation flows through the Agent detail page: the install
-// path is per-agent (each Multica agent gets exactly one robot — the
+// path is per-agent (each Inkway agent gets exactly one robot — the
 // (workspace_id, agent_id, channel_type) UNIQUE in channel_installation), so
 // asking the user to pick an agent here would re-create that page's picker.
 export function DingTalkTab() {
@@ -589,7 +587,7 @@ export function DingTalkTab() {
             <p className="text-caption text-muted-foreground">
               {t(($) => $.dingtalk.not_enabled_description_prefix)}{" "}
               <code className="rounded-xs bg-muted px-1 py-0.5 text-micro">
-                MULTICA_DINGTALK_SECRET_KEY
+                INKWAY_DINGTALK_SECRET_KEY
               </code>{" "}
               {t(($) => $.dingtalk.not_enabled_description_suffix)}{" "}
               {t(($) => $.dingtalk.not_enabled_self_host_hint)}
@@ -794,13 +792,6 @@ function InstallationRow({
   );
 }
 
-// dingtalkDocsUrl points at the DingTalk integration guide on the docs site,
-// localized to the viewer's language. The docs site uses /<lang>/ path
-// prefixes (English has none), matching the convention used elsewhere in the
-// app for doc links.
-function dingtalkDocsUrl(lang: string | undefined): string {
-  return `https://multica.ai/docs${docsLocalePrefix(lang)}/dingtalk-bot-integration`;
-}
 
 // DingTalkAgentBindButton is the per-agent CTA exposed from the agent detail
 // page. DingTalk uses the bring-your-own-app model: the button opens a dialog
@@ -835,7 +826,7 @@ export function DingTalkAgentBindButton({
    */
   onShowConnectedDetails?: () => void;
 }) {
-  const { t, i18n } = useT("settings");
+  const { t } = useT("settings");
   const wsId = useWorkspaceId();
   const qc = useQueryClient();
   const user = useAuthStore((s) => s.user);
@@ -954,15 +945,6 @@ export function DingTalkAgentBindButton({
               {t(($) => $.dingtalk.byo_dialog_title)}
             </DialogTitle>
 
-            <button
-              type="button"
-              onClick={() => openExternal(dingtalkDocsUrl(i18n.language))}
-              className="inline-flex w-fit items-center gap-1.5 text-caption text-muted-foreground underline-offset-2 transition-colors hover:text-foreground hover:underline"
-              data-testid="dingtalk-byo-docs-link"
-            >
-              <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
-              {t(($) => $.dingtalk.byo_docs_link)}
-            </button>
           </DialogHeader>
 
           <div className="space-y-4 p-5">

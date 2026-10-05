@@ -36,21 +36,21 @@ import {
   useCreateCloudBillingCheckoutSession,
   useCreateCloudBillingPortalSession,
   useInvalidateBillingDataAfterCredit,
-} from "@multica/core/billing";
+} from "@inkway/core/billing";
 import type {
   BillingBatch,
   BillingPriceTier,
   BillingTopup,
   BillingTransaction,
-} from "@multica/core/types";
-import { Button } from "@multica/ui/components/ui/button";
+} from "@inkway/core/types";
+import { Button } from "@inkway/ui/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@multica/ui/components/ui/card";
+} from "@inkway/ui/components/ui/card";
 import { useLocale, useT } from "../i18n";
 import { useNavigation } from "../navigation";
 

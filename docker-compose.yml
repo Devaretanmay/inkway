@@ -1,12 +1,12 @@
-name: multica
+name: inkway
 
 services:
   postgres:
     image: pgvector/pgvector:pg17
     environment:
-      POSTGRES_DB: multica
-      POSTGRES_USER: ${POSTGRES_USER:-multica}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-multica}
+      POSTGRES_DB: inkway
+      POSTGRES_USER: ${POSTGRES_USER:-inkway}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-inkway}
     ports:
       - "127.0.0.1:5432:5432"
     volumes:

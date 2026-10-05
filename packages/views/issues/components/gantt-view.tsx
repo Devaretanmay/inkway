@@ -2,22 +2,22 @@
 
 import { useEffect, useMemo, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useWorkspaceId } from "@multica/core/hooks";
-import { useIssueStatuses } from "@multica/core/issue-statuses/hooks";
-import { useWorkspacePaths } from "@multica/core/paths";
-import { useViewStore, useViewStoreApi } from "@multica/core/issues/stores/view-store-context";
-import type { GanttZoom } from "@multica/core/issues/stores/view-store";
-import { projectListOptions } from "@multica/core/projects/queries";
-import type { Issue, IssueStatusCategory } from "@multica/core/types";
-import { issueStatusCategory, statusColumnKeys } from "@multica/core/issues";
-import { dateOnlyToUTCDate } from "@multica/core/issues/date";
-import { cn } from "@multica/ui/lib/utils";
+import { useWorkspaceId } from "@inkway/core/hooks";
+import { useIssueStatuses } from "@inkway/core/issue-statuses/hooks";
+import { useWorkspacePaths } from "@inkway/core/paths";
+import { useViewStore, useViewStoreApi } from "@inkway/core/issues/stores/view-store-context";
+import type { GanttZoom } from "@inkway/core/issues/stores/view-store";
+import { projectListOptions } from "@inkway/core/projects/queries";
+import type { Issue, IssueStatusCategory } from "@inkway/core/types";
+import { issueStatusCategory, statusColumnKeys } from "@inkway/core/issues";
+import { dateOnlyToUTCDate } from "@inkway/core/issues/date";
+import { cn } from "@inkway/ui/lib/utils";
 import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
-} from "@multica/ui/components/ui/tooltip";
-import { Button } from "@multica/ui/components/ui/button";
+} from "@inkway/ui/components/ui/tooltip";
+import { Button } from "@inkway/ui/components/ui/button";
 import { AppLink } from "../../navigation";
 import {
   PEEK_TARGET_ATTR,
@@ -54,7 +54,7 @@ function daysBetween(a: Date, b: Date): number {
 
 // Issue dates arrive as date-only "YYYY-MM-DD" strings (calendar days). Anchor
 // each to UTC midnight so the bar lands on exactly that day, independent of the
-// viewer's timezone. See @multica/core/issues/date.
+// viewer's timezone. See @inkway/core/issues/date.
 function parseDay(iso: string | null): Date | null {
   return dateOnlyToUTCDate(iso);
 }

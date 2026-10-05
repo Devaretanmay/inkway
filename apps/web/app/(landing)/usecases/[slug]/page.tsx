@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { cn } from "@multica/ui/lib/utils";
+import { cn } from "@inkway/ui/lib/utils";
 import { LandingHeader } from "@/features/landing/components/landing-header";
 import { LandingFooter } from "@/features/landing/components/landing-footer";
 import { Screenshot } from "@/features/landing/components/mdx/screenshot";
@@ -12,31 +12,16 @@ import {
   getUseCaseLocale,
   useCaseText,
 } from "@/lib/use-cases-i18n";
-import type { SupportedLocale } from "@multica/core/i18n";
+import type { SupportedLocale } from "@inkway/core/i18n";
 
 type Params = { slug: string };
 
 type TocItem = { title: ReactNode; url: string; depth: number };
 
-export async function generateMetadata(props: {
-  params: Promise<Params>;
-}): Promise<Metadata> {
-  const { slug } = await props.params;
-  const locale = await getUseCaseLocale();
-  const page = getUseCasePageForLocale([slug], locale);
-  if (!page) return {};
-
+export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: page.data.title,
-    description: page.data.description,
-    openGraph: {
-      title: page.data.title,
-      description: page.data.description,
-      url: `/usecases/${slug}`,
-    },
-    alternates: {
-      canonical: `/usecases/${slug}`,
-    },
+    title: "Inkway",
+    description: "AI agents with verified local decisions called Inks.",
   };
 }
 

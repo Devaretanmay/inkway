@@ -3,21 +3,21 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AlertCircle, Cloud, Monitor, Pencil, Plus, Server } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useAuthStore } from "@multica/core/auth";
-import { useWorkspaceId } from "@multica/core/hooks";
-import { useWorkspacePaths } from "@multica/core/paths";
-import { agentTaskSnapshotOptions } from "@multica/core/agents";
-import { runtimeProfileListOptions } from "@multica/core/runtimes";
-import { runtimeKeys, runtimeListOptions } from "@multica/core/runtimes/queries";
-import { useWSEvent } from "@multica/core/realtime";
+import { useAuthStore } from "@inkway/core/auth";
+import { useWorkspaceId } from "@inkway/core/hooks";
+import { useWorkspacePaths } from "@inkway/core/paths";
+import { agentTaskSnapshotOptions } from "@inkway/core/agents";
+import { runtimeProfileListOptions } from "@inkway/core/runtimes";
+import { runtimeKeys, runtimeListOptions } from "@inkway/core/runtimes/queries";
+import { useWSEvent } from "@inkway/core/realtime";
 import {
   agentListOptions,
   memberListOptions,
-} from "@multica/core/workspace/queries";
-import { Button } from "@multica/ui/components/ui/button";
-import { Skeleton } from "@multica/ui/components/ui/skeleton";
+} from "@inkway/core/workspace/queries";
+import { Button } from "@inkway/ui/components/ui/button";
+import { Skeleton } from "@inkway/ui/components/ui/skeleton";
 import { PAGE_GUTTER, PAGE_RAIL } from "../../layout/page-header";
-import { cn } from "@multica/ui/lib/utils";
+import { cn } from "@inkway/ui/lib/utils";
 import { AppLink } from "../../navigation";
 import { buildWorkloadIndex, RuntimeList } from "./runtime-list";
 import {

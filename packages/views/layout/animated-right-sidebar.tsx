@@ -14,9 +14,9 @@ import {
   isEditableShortcutTarget,
   shortcutMatchesEvent,
   useShortcut,
-} from "@multica/core/shortcuts";
-import { isImeComposing } from "@multica/core/utils";
-import { cn } from "@multica/ui/lib/utils";
+} from "@inkway/core/shortcuts";
+import { isImeComposing } from "@inkway/core/utils";
+import { cn } from "@inkway/ui/lib/utils";
 
 export const rightSidebarPanelMotionProps = {
   "data-right-sidebar-panel": "true",

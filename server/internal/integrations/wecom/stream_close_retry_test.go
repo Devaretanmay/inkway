@@ -16,8 +16,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/multica-ai/multica/server/internal/events"
-	"github.com/multica-ai/multica/server/pkg/protocol"
+	"github.com/Devaretanmay/inkway/server/internal/events"
+	"github.com/Devaretanmay/inkway/server/pkg/protocol"
 )
 
 // retryRig is a bubbleRig whose closing frames give up on an ack quickly and

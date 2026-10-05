@@ -6,11 +6,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/multica-ai/multica/server/internal/analytics"
-	"github.com/multica-ai/multica/server/internal/auth"
-	"github.com/multica-ai/multica/server/internal/events"
-	"github.com/multica-ai/multica/server/internal/handler"
-	"github.com/multica-ai/multica/server/internal/realtime"
+	"github.com/Devaretanmay/inkway/server/internal/analytics"
+	"github.com/Devaretanmay/inkway/server/internal/auth"
+	"github.com/Devaretanmay/inkway/server/internal/events"
+	"github.com/Devaretanmay/inkway/server/internal/handler"
+	"github.com/Devaretanmay/inkway/server/internal/realtime"
 )
 
 func TestRouterCORSContract(t *testing.T) {

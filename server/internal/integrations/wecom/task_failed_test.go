@@ -16,8 +16,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/multica-ai/multica/server/internal/events"
-	"github.com/multica-ai/multica/server/pkg/protocol"
+	"github.com/Devaretanmay/inkway/server/internal/events"
+	"github.com/Devaretanmay/inkway/server/pkg/protocol"
 )
 
 // failedWithReason publishes the task:failed FailTask broadcasts for a run

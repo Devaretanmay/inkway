@@ -1,26 +1,14 @@
 import { cloneElement, type ReactElement, type ReactNode } from "react";
 import { render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { configStore } from "@multica/core/config";
+import { configStore } from "@inkway/core/config";
 import enLayout from "../locales/en/layout.json";
-import { isDesktopShell } from "../platform/local-directory";
 import { HelpLauncher } from "./help-launcher";
-
-// The download entry is gated on the desktop-shell probe, which reads a
-// preload-injected bridge that jsdom never has. Mock it so both platforms are
-// reachable from the same suite.
-vi.mock("../platform/local-directory", () => ({
-  isDesktopShell: vi.fn(() => false),
-}));
-
-// The UI language the mocked i18n instance reports; drives locale-aware links.
-const i18nState = vi.hoisted(() => ({ language: "en" }));
 
 // react-i18next isn't initialised in the views test env, so resolve the
 // selector against the real en/layout.json to assert on actual copy.
 vi.mock("../i18n", () => ({
   useT: () => ({
-    i18n: i18nState,
     t: (
       sel: (r: typeof enLayout) => string,
       vars?: Record<string, string>,
@@ -44,7 +32,7 @@ vi.mock("../i18n", () => ({
 // DropdownMenuGroup crashed the whole app (no error boundary above the sidebar)
 // the moment the Help menu opened. Mirroring the throw here keeps the guard.
 // The group context lives inside the factory so it survives vi.mock hoisting.
-vi.mock("@multica/ui/components/ui/dropdown-menu", async () => {
+vi.mock("@inkway/ui/components/ui/dropdown-menu", async () => {
   const { createContext, useContext } = await import("react");
   const GroupContext = createContext(false);
   return {
@@ -78,8 +66,7 @@ vi.mock("@multica/ui/components/ui/dropdown-menu", async () => {
 });
 
 beforeEach(() => {
-  vi.mocked(isDesktopShell).mockReturnValue(false);
-  i18nState.language = "en";
+  configStore.getState().setServerVersion("");
 });
 
 afterEach(() => {
@@ -98,35 +85,9 @@ describe("HelpLauncher", () => {
     expect(screen.getByText("Server version 1.2.3")).toBeInTheDocument();
   });
 
-  // MUL-6462: after web onboarding the desktop download CTA was unreachable —
-  // no entry anywhere in the app, so users had to remember the URL or detour
-  // through the marketing site. The Help menu is the persistent home for it.
-  it("links to the download page on web", () => {
+  it("omits retired help and download destinations", () => {
     render(<HelpLauncher />);
-    const link = screen.getByRole("link", { name: /Desktop app/ });
-    expect(link).toHaveAttribute("href", "https://multica.ai/download");
-  });
-
-  it.each([
-    ["en", "https://multica.ai/docs"],
-    ["zh-Hans", "https://multica.ai/docs/zh"],
-    ["fr", "https://multica.ai/docs/fr"],
-  ])("links Docs to the %s docs", (language, href) => {
-    i18nState.language = language;
-    render(<HelpLauncher />);
-    expect(screen.getByRole("link", { name: /Docs/ })).toHaveAttribute(
-      "href",
-      href,
-    );
-  });
-
-  // AppSidebar is shared: apps/desktop renders the same component tree. Without
-  // this gate the desktop app would offer to download the desktop app.
-  it("hides the download entry inside the desktop shell", () => {
-    vi.mocked(isDesktopShell).mockReturnValue(true);
-    render(<HelpLauncher />);
-    expect(screen.queryByText("Desktop app")).not.toBeInTheDocument();
-    // The rest of the menu is unaffected by the gate.
-    expect(screen.getByText("Docs")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Desktop app|Docs|Changelog/ })).not.toBeInTheDocument();
+    expect(document.querySelector('a[href*="multica.ai"]')).not.toBeInTheDocument();
   });
 });

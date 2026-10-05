@@ -2,14 +2,14 @@
 
 import { useMemo, useState } from "react";
 import { Lock, UserMinus } from "lucide-react";
-import type { Agent, IssueAssigneeType, UpdateIssueRequest } from "@multica/core/types";
+import type { Agent, IssueAssigneeType, UpdateIssueRequest } from "@inkway/core/types";
 import { useQuery } from "@tanstack/react-query";
-import { useAuthStore } from "@multica/core/auth";
-import { isAgentRuntimeBound } from "@multica/core/agents";
-import { canAssignAgentToIssue } from "@multica/core/permissions";
-import { useActorName } from "@multica/core/workspace/hooks";
-import { useWorkspaceId } from "@multica/core/hooks";
-import { memberListOptions, agentListOptions, squadListOptions, assigneeFrequencyOptions } from "@multica/core/workspace/queries";
+import { useAuthStore } from "@inkway/core/auth";
+import { isAgentRuntimeBound } from "@inkway/core/agents";
+import { canAssignAgentToIssue } from "@inkway/core/permissions";
+import { useActorName } from "@inkway/core/workspace/hooks";
+import { useWorkspaceId } from "@inkway/core/hooks";
+import { memberListOptions, agentListOptions, squadListOptions, assigneeFrequencyOptions } from "@inkway/core/workspace/queries";
 import { ActorAvatar } from "../../../common/actor-avatar";
 import { DeferredPopup } from "../../../common/deferred-popup";
 import {

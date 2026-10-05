@@ -7,7 +7,7 @@ import {
   Filter,
   X,
 } from "lucide-react";
-import type { Autopilot } from "@multica/core/types";
+import type { Autopilot } from "@inkway/core/types";
 import {
   AUTOPILOT_SCOPES,
   type AutopilotColumnKey,
@@ -15,9 +15,9 @@ import {
   type AutopilotScope,
   type AutopilotSortDirection,
   type AutopilotSortField,
-} from "@multica/core/autopilots/stores";
-import { useActorName } from "@multica/core/workspace/hooks";
-import { Button } from "@multica/ui/components/ui/button";
+} from "@inkway/core/autopilots/stores";
+import { useActorName } from "@inkway/core/workspace/hooks";
+import { Button } from "@inkway/ui/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -28,18 +28,18 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "@multica/ui/components/ui/dropdown-menu";
+} from "@inkway/ui/components/ui/dropdown-menu";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@multica/ui/components/ui/popover";
-import { Switch } from "@multica/ui/components/ui/switch";
+} from "@inkway/ui/components/ui/popover";
+import { Switch } from "@inkway/ui/components/ui/switch";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@multica/ui/components/ui/tooltip";
+} from "@inkway/ui/components/ui/tooltip";
 import { ActorAvatar } from "../../common/actor-avatar";
 import { FILTER_ITEM_CLASS, HoverCheck } from "../../common/hover-check";
 import { useT } from "../../i18n";

@@ -11,42 +11,42 @@ import {
   type ReactNode,
 } from "react";
 import type { QueryClient } from "@tanstack/react-query";
-import { getCurrentWsId } from "@multica/core/platform";
-import { flattenIssueBuckets, issueKeys } from "@multica/core/issues/queries";
-import { issueStatusCategory } from "@multica/core/issues";
-import { useIssueStatuses } from "@multica/core/issue-statuses/hooks";
-import { workspaceKeys } from "@multica/core/workspace/queries";
-import { useAuthStore } from "@multica/core/auth";
-import { canAssignAgentToIssue } from "@multica/core/permissions";
-import { isAgentRuntimeBound } from "@multica/core/agents";
-import { searchIssues, searchProjects } from "@multica/core/search-index";
+import { getCurrentWsId } from "@inkway/core/platform";
+import { flattenIssueBuckets, issueKeys } from "@inkway/core/issues/queries";
+import { issueStatusCategory } from "@inkway/core/issues";
+import { useIssueStatuses } from "@inkway/core/issue-statuses/hooks";
+import { workspaceKeys } from "@inkway/core/workspace/queries";
+import { useAuthStore } from "@inkway/core/auth";
+import { canAssignAgentToIssue } from "@inkway/core/permissions";
+import { isAgentRuntimeBound } from "@inkway/core/agents";
+import { searchIssues, searchProjects } from "@inkway/core/search-index";
 import {
   isIssueDirectHit,
   isProjectDirectHit,
-} from "@multica/core/search/cancelled-rank";
-import { isImeComposing } from "@multica/core/utils";
-import { isMentionBoundaryAfter } from "@multica/core/markdown";
+} from "@inkway/core/search/cancelled-rank";
+import { isImeComposing } from "@inkway/core/utils";
+import { isMentionBoundaryAfter } from "@inkway/core/markdown";
 import type {
   Issue,
   ListIssuesCache,
   MemberWithUser,
   Agent,
   Squad,
-} from "@multica/core/types";
+} from "@inkway/core/types";
 import { ListTodo } from "lucide-react";
 import { ActorAvatar } from "../../common/actor-avatar";
 import { StatusIcon } from "../../issues/components/status-icon";
 import { ProjectIcon } from "../../projects/components/project-icon";
 import { useT } from "../../i18n";
-import { Badge } from "@multica/ui/components/ui/badge";
+import { Badge } from "@inkway/ui/components/ui/badge";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@multica/ui/components/ui/tooltip";
-import { cn } from "@multica/ui/lib/utils";
-import type { IssueStatus, IssueStatusCategory, ProjectStatus } from "@multica/core/types";
-import { PROJECT_STATUS_CONFIG } from "@multica/core/projects/config";
+} from "@inkway/ui/components/ui/tooltip";
+import { cn } from "@inkway/ui/lib/utils";
+import type { IssueStatus, IssueStatusCategory, ProjectStatus } from "@inkway/core/types";
+import { PROJECT_STATUS_CONFIG } from "@inkway/core/projects/config";
 import type { SuggestionOptions } from "@tiptap/suggestion";
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import { PluginKey } from "@tiptap/pm/state";
@@ -706,7 +706,7 @@ function projectToMention(p: { id: string; title: string; description?: string |
  * True when the `@` at `pos` starts a token instead of continuing one.
  *
  * The rule itself — which characters make an `@` part of the word it follows,
- * and why CJK needs the exception — lives in @multica/core/markdown, shared
+ * and why CJK needs the exception — lives in @inkway/core/markdown, shared
  * with the mobile composer so the two clients cannot drift apart.
  */
 function isMentionBoundary(doc: ProseMirrorNode, pos: number): boolean {

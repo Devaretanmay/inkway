@@ -2,9 +2,9 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@multica/core/auth";
-import { useWorkspaceList } from "@multica/core/workspace";
-import { resolvePostAuthDestination, useHasOnboarded } from "@multica/core/paths";
+import { useAuthStore } from "@inkway/core/auth";
+import { useWorkspaceList } from "@inkway/core/workspace";
+import { resolvePostAuthDestination, useHasOnboarded } from "@inkway/core/paths";
 import { isOfficialMarketingHost } from "@/lib/public-host";
 
 /**

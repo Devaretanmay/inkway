@@ -27,7 +27,7 @@ function searchIndexDatabases(page: Page): Promise<string[]> {
   return page.evaluate(async () =>
     (await indexedDB.databases())
       .map((db) => db.name ?? "")
-      .filter((name) => name.startsWith("multica-search-index:")),
+      .filter((name) => name.startsWith("inkway-search-index:")),
   );
 }
 
@@ -132,7 +132,7 @@ test.describe("Local search index", () => {
       // workspace's copy must not survive on the device. A read that fails
       // mid-navigation counts as "still there", so polling continues until a
       // successful read confirms the deletion.
-      const unreadable = [`multica-search-index:unreadable:${shared.id}`];
+      const unreadable = [`inkway-search-index:unreadable:${shared.id}`];
       await expect
         .poll(async () => sharedCopy(await searchIndexDatabases(page).catch(() => unreadable)), { timeout: 20_000 })
         .toBe(false);

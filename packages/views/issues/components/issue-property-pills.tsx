@@ -1,6 +1,6 @@
 "use client";
 
-import type { Issue, UpdateIssueRequest } from "@multica/core/types";
+import type { Issue, UpdateIssueRequest } from "@inkway/core/types";
 import { PillButton } from "../../common/pill-button";
 import { ProjectPicker } from "../../projects/components/project-picker";
 import {
@@ -55,11 +55,13 @@ export function IssuePropertyPills({
         triggerRender={<PillButton />}
         align="start"
       />
-      <ProjectPicker
-        projectId={issue.project_id}
-        onUpdate={onUpdate}
-        triggerRender={<PillButton />}
-      />
+      {issue.project_id && (
+        <ProjectPicker
+          projectId={issue.project_id}
+          onUpdate={onUpdate}
+          triggerRender={<PillButton />}
+        />
+      )}
       {issue.start_date && (
         <StartDatePicker
           startDate={issue.start_date}

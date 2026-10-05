@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest";
-import type { AgentTask, TaskUsage } from "@multica/core/types";
+import type { AgentTask, TaskUsage } from "@inkway/core/types";
 import {
   buildRunTimeline,
   cumulativeCostAt,

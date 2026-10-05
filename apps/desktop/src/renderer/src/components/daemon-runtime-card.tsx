@@ -10,10 +10,10 @@ import {
   Info,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { useWorkspaceId } from "@multica/core/hooks";
-import { runtimeListOptions } from "@multica/core/runtimes";
-import { agentTaskSnapshotOptions } from "@multica/core/agents";
-import { Button } from "@multica/ui/components/ui/button";
+import { useWorkspaceId } from "@inkway/core/hooks";
+import { runtimeListOptions } from "@inkway/core/runtimes";
+import { agentTaskSnapshotOptions } from "@inkway/core/agents";
+import { Button } from "@inkway/ui/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -21,9 +21,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@multica/ui/components/ui/dialog";
+} from "@inkway/ui/components/ui/dialog";
 import { toast } from "sonner";
-import { useT } from "@multica/views/i18n";
+import { useT } from "@inkway/views/i18n";
 import { DaemonPanel } from "./daemon-panel";
 import { reauthenticateDaemon } from "../platform/daemon-reauth";
 import type { DaemonStatus } from "../../../shared/daemon-types";

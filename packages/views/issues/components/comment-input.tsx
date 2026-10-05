@@ -1,15 +1,15 @@
 "use client";
 
 import { useRef, useState, useEffect, useMemo } from "react";
-import { cn } from "@multica/ui/lib/utils";
+import { cn } from "@inkway/ui/lib/utils";
 import { ContentEditor, type ContentEditorRef, useFileDropZone, FileDropOverlay, useLazyEditor, useUploadGate, useComposerSubmit } from "../../editor";
-import { FileUploadButton } from "@multica/ui/components/common/file-upload-button";
-import { SubmitButton } from "@multica/ui/components/common/submit-button";
-import { Button } from "@multica/ui/components/ui/button";
-import { contentReferencesAttachment, type AgentTask } from "@multica/core/types";
-import { formatShortcut, useShortcut } from "@multica/core/shortcuts";
-import { useCommentDraftStore } from "@multica/core/issues/stores";
-import { composeAnnotatedReply, hasReplyIntent } from "@multica/core/drafts/reply-annotation";
+import { FileUploadButton } from "@inkway/ui/components/common/file-upload-button";
+import { SubmitButton } from "@inkway/ui/components/common/submit-button";
+import { Button } from "@inkway/ui/components/ui/button";
+import { contentReferencesAttachment, type AgentTask } from "@inkway/core/types";
+import { formatShortcut, useShortcut } from "@inkway/core/shortcuts";
+import { useCommentDraftStore } from "@inkway/core/issues/stores";
+import { composeAnnotatedReply, hasReplyIntent } from "@inkway/core/drafts/reply-annotation";
 import { ReplyAnnotations } from "./reply-annotations";
 import { useT } from "../../i18n";
 import { CommentTriggerChips } from "./comment-trigger-chips";

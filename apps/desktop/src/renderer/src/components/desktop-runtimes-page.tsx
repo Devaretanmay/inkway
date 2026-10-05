@@ -1,4 +1,5 @@
-import { RuntimesPage } from "@multica/views/runtimes";
+import { ProviderSettingsTab } from "./provider-settings-tab";
+import { RuntimesPage } from "@inkway/views/runtimes";
 import { useDesktopRuntimeContext } from "./use-desktop-runtime-context";
 
 /**
@@ -6,7 +7,7 @@ import { useDesktopRuntimeContext } from "./use-desktop-runtime-context";
  * `daemonAPI` (main-process daemon state) into the page so its empty
  * state can distinguish "no runtime registered" from "runtime is on its
  * way" — without the bundled daemon's status, the page shows a
- * misleading "Run multica daemon start" hint during the few seconds
+ * misleading "Run inkway daemon start" hint during the few seconds
  * between page load and the daemon's first registration.
  *
  * `bootstrapping` is true while the daemon is installing, starting, or
@@ -28,6 +29,7 @@ export function DesktopRuntimesPage() {
       // consistent with every other machine row.
       hasLocalMachine
       bootstrapping={context.bootstrapping}
+      apiProviders={<ProviderSettingsTab localDaemonId={context.localDaemonId} />}
     />
   );
 }

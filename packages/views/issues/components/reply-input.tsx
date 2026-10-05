@@ -1,18 +1,18 @@
 "use client";
 
-import { composeAnnotatedReply, EMPTY_REPLY_ANNOTATIONS, hasReplyIntent } from "@multica/core/drafts/reply-annotation";
+import { composeAnnotatedReply, EMPTY_REPLY_ANNOTATIONS, hasReplyIntent } from "@inkway/core/drafts/reply-annotation";
 import { ReplyAnnotations } from "./reply-annotations";
 import { useRef, useState, useEffect, useMemo } from "react";
 import { ContentEditor, type ContentEditorRef, useFileDropZone, FileDropOverlay, useLazyEditor, useUploadGate, useComposerSubmit } from "../../editor";
-import { FileUploadButton } from "@multica/ui/components/common/file-upload-button";
-import { SubmitButton } from "@multica/ui/components/common/submit-button";
-import { Button } from "@multica/ui/components/ui/button";
+import { FileUploadButton } from "@inkway/ui/components/common/file-upload-button";
+import { SubmitButton } from "@inkway/ui/components/common/submit-button";
+import { Button } from "@inkway/ui/components/ui/button";
 import { ActorAvatar } from "../../common/actor-avatar";
-import { contentReferencesAttachment, type AgentTask } from "@multica/core/types";
-import { formatShortcut, useShortcut } from "@multica/core/shortcuts";
-import { useCommentDraftStore, type CommentDraftKey } from "@multica/core/issues/stores";
-import { cn } from "@multica/ui/lib/utils";
-import type { AvatarSize } from "@multica/ui/lib/avatar-size";
+import { contentReferencesAttachment, type AgentTask } from "@inkway/core/types";
+import { formatShortcut, useShortcut } from "@inkway/core/shortcuts";
+import { useCommentDraftStore, type CommentDraftKey } from "@inkway/core/issues/stores";
+import { cn } from "@inkway/ui/lib/utils";
+import type { AvatarSize } from "@inkway/ui/lib/avatar-size";
 import { useT } from "../../i18n";
 import { CommentTriggerChips } from "./comment-trigger-chips";
 import { useCommentTriggerPreview } from "../hooks/use-comment-trigger-preview";

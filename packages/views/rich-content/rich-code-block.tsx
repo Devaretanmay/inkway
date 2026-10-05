@@ -27,8 +27,8 @@
 import { memo, useEffect, useMemo, useState, type ReactNode } from "react";
 import { toHtml } from "hast-util-to-html";
 import { Check, Copy } from "lucide-react";
-import { cn } from "@multica/ui/lib/utils";
-import { copyText } from "@multica/ui/lib/clipboard";
+import { cn } from "@inkway/ui/lib/utils";
+import { copyText } from "@inkway/ui/lib/clipboard";
 import { useT } from "../i18n";
 import {
   MermaidBlock,

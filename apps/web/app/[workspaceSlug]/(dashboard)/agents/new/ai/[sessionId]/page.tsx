@@ -1,7 +1,7 @@
 "use client";
 
 import { use } from "react";
-import { AiBuilderSessionPage } from "@multica/views/agents/ai-builder-session-page";
+import { AiBuilderSessionPage } from "@inkway/views/agents/ai-builder-session-page";
 
 export default function NewAgentAiSessionRoute({
   params,

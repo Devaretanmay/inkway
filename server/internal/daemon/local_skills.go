@@ -11,9 +11,9 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/multica-ai/multica/server/internal/daemon/execenv"
-	"github.com/multica-ai/multica/server/internal/skill"
-	"github.com/multica-ai/multica/server/pkg/agent"
+	"github.com/Devaretanmay/inkway/server/internal/daemon/execenv"
+	"github.com/Devaretanmay/inkway/server/internal/skill"
+	"github.com/Devaretanmay/inkway/server/pkg/agent"
 )
 
 const (

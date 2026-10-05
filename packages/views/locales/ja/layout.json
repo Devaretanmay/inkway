@@ -1,6 +1,8 @@
 {
   "nav": {
     "inbox": "インボックス",
+    "providers": "Providers",
+    "fastpaths": "Inks",
     "chat": "チャット",
     "my_issues": "マイタスク",
     "issues": "タスク",
@@ -12,6 +14,36 @@
     "runtimes": "ランタイム",
     "skills": "スキル",
     "settings": "設定"
+  },
+  "fastpaths": {
+    "title": "Inks",
+    "empty_heading": "No Inks connected",
+    "empty_body": "No Inks yet. Once Inkway is connected, repeated agent decisions will move through Learning, Shadow and Active as they are independently verified against real outcomes.",
+    "stage_learning": "Learning",
+    "stage_shadow": "Shadow",
+    "stage_active": "Active",
+    "stage_note": "Explanatory only. Inkway is not connected, so there is no Ink data to show.",
+    "subtitle": "Verified local decisions for common agent tasks.",
+    "stage_learning_detail": "Collect decision and outcome evidence from real agent runs. Nothing is served locally yet.",
+    "stage_shadow_detail": "Compare local decisions against the cloud decisions they would have replaced.",
+    "stage_active_detail": "Serve a verified decision locally, and fall back the moment it stops matching reality.",
+    "loading": "Ink データを読み込み中…",
+    "load_error": "Ink データを読み込めませんでした。",
+    "observations": "観測数",
+    "fast_served": "Ink の提供数",
+    "coverage": "カバレッジ",
+    "false_serves": "誤提供数",
+    "last_maintenance": "最終メンテナンス",
+    "runtime": "ランタイム",
+    "connected": "接続済み",
+    "degraded": "低下",
+    "unavailable": "利用不可",
+    "candidate": "候補",
+    "demoted": "降格",
+    "retired": "廃止",
+    "updated": "更新",
+    "verified_outcomes": "検証済みの結果",
+    "model_calls_avoided": "削減したモデル呼び出し"
   },
   "tab": {
     "issue": "タスク",
@@ -53,7 +85,7 @@
     "new_issue_shortcut": "C",
     "pinned_label": "ピン留め済み",
     "work_group": "仕事",
-    "ai_team_group": "AI チーム",
+    "ai_team_group": "AI 作業",
     "show_more_pins": "さらに {{count}} 件を表示…",
     "show_fewer_pins": "表示を減らす",
     "unread_overflow": "99+",
@@ -61,5 +93,6 @@
       "title": "Discord に参加",
       "dismiss": "閉じる"
     }
-  }
+  },
+  "brand_name": "Inkway"
 }

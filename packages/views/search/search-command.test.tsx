@@ -1,16 +1,16 @@
 import { act, type ReactNode } from "react";
-import { buildIssueStatusCatalog } from "@multica/core/issue-statuses/queries";
+import { buildIssueStatusCatalog } from "@inkway/core/issue-statuses/queries";
 
-vi.mock("@multica/core/issue-statuses/hooks", () => ({
+vi.mock("@inkway/core/issue-statuses/hooks", () => ({
   useIssueStatuses: () => buildIssueStatusCatalog([]),
 }));
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { I18nProvider } from "@multica/core/i18n/react";
-import { WORKSPACE_PAGES } from "@multica/core/paths";
+import { I18nProvider } from "@inkway/core/i18n/react";
+import { WORKSPACE_PAGES } from "@inkway/core/paths";
 import { SearchCommand } from "./search-command";
-vi.mock("@multica/core/hooks", () => ({ useWorkspaceId: () => "ws-1" }));
+vi.mock("@inkway/core/hooks", () => ({ useWorkspaceId: () => "ws-1" }));
 import { useSearchStore } from "./search-store";
 import enCommon from "../locales/en/common.json";
 import enAuth from "../locales/en/auth.json";
@@ -100,7 +100,7 @@ const {
   mockSetTheme: vi.fn(),
   mockTheme: { current: "system" as "light" | "dark" | "system" },
   mockPathname: { current: "/ws-test/issues" as string },
-  mockGetShareableUrl: vi.fn((p: string) => `https://app.multica/${p}`),
+  mockGetShareableUrl: vi.fn((p: string) => `https://app.inkway/${p}`),
   mockMembers: {
     current: [] as Array<{
       id: string;
@@ -137,7 +137,7 @@ const {
   mockResolvedExpandAll: vi.fn(),
 }));
 
-vi.mock("@multica/core/api", () => ({
+vi.mock("@inkway/core/api", () => ({
   api: {
     getBaseUrl: () => "http://127.0.0.1:8080",
     searchIssues: mockSearchIssues,
@@ -170,7 +170,7 @@ vi.mock("../common/actor-avatar", () => ({
   },
 }));
 
-vi.mock("@multica/core/issues/stores", () => {
+vi.mock("@inkway/core/issues/stores", () => {
   const EMPTY: Array<{ id: string; visitedAt: number }> = [];
   return {
     useRecentIssuesStore: (
@@ -202,16 +202,17 @@ vi.mock("@multica/core/issues/stores", () => {
   };
 });
 
-vi.mock("@multica/core", () => ({
+vi.mock("@inkway/core", () => ({
   useWorkspaceId: () => "ws-test",
 }));
 
-vi.mock("@multica/core/paths", async (importOriginal) => ({
+vi.mock("@inkway/core/paths", async (importOriginal) => ({
   // Spread the real module so pure helpers (resolveRouteIconName, used to
   // derive each nav page's icon from its href) stay intact.
-  ...(await importOriginal<typeof import("@multica/core/paths")>()),
+  ...(await importOriginal<typeof import("@inkway/core/paths")>()),
   useWorkspacePaths: () => ({
     inbox: () => "/ws-test/inbox",
+    inks: () => "/ws-test/inks",
     chat: () => "/ws-test/chat",
     myIssues: () => "/ws-test/my-issues",
     issues: () => "/ws-test/issues",
@@ -231,7 +232,7 @@ vi.mock("@multica/core/paths", async (importOriginal) => ({
   }),
 }));
 
-vi.mock("@multica/core/issues/queries", () => ({
+vi.mock("@inkway/core/issues/queries", () => ({
   issueDetailOptions: (_wsId: string, id: string) => ({
     queryKey: ["issues", "ws-test", "detail", id],
   }),
@@ -240,13 +241,13 @@ vi.mock("@multica/core/issues/queries", () => ({
   }),
 }));
 
-vi.mock("@multica/core/workspace/queries", () => ({
+vi.mock("@inkway/core/workspace/queries", () => ({
   memberListOptions: () => ({ queryKey: ["workspaces", "ws-test", "members"] }),
   agentListOptions: () => ({ queryKey: ["workspaces", "ws-test", "agents"] }),
   squadListOptions: () => ({ queryKey: ["workspaces", "ws-test", "squads"] }),
 }));
 
-vi.mock("@multica/core/modals", () => ({
+vi.mock("@inkway/core/modals", () => ({
   useModalStore: Object.assign(vi.fn(), {
     getState: () => ({ open: mockOpenModal }),
   }),
@@ -301,7 +302,7 @@ vi.mock("../navigation/context", () => {
   };
 });
 
-vi.mock("@multica/ui/components/common/theme-provider", () => ({
+vi.mock("@inkway/ui/components/common/theme-provider", () => ({
   useTheme: () => ({ theme: mockTheme.current, setTheme: mockSetTheme }),
 }));
 
@@ -321,7 +322,7 @@ describe("SearchCommand", () => {
     mockSetTheme.mockReset();
     mockTheme.current = "system";
     mockPathname.current = "/ws-test/issues";
-    mockGetShareableUrl.mockReset().mockImplementation((p: string) => `https://app.multica/${p}`);
+    mockGetShareableUrl.mockReset().mockImplementation((p: string) => `https://app.inkway/${p}`);
     mockMembers.current = [];
     mockOpenModal.mockReset();
     mockToastSuccess.mockReset();
@@ -388,16 +389,13 @@ describe("SearchCommand", () => {
     expect(screen.queryByText("Inbox")).not.toBeInTheDocument();
   });
 
-  it("offers every workspace nav page, not a hand-maintained subset", async () => {
+  it("offers only the Ink release-candidate pages", async () => {
     const user = userEvent.setup();
     renderSearch();
     const input = screen.getByPlaceholderText("Type a command or search...");
 
-    // The Pages group is generated from WORKSPACE_PAGES — the same registry
-    // the sidebar and the desktop tab bar read — so searching a page by the
-    // exact name the sidebar shows must always reach it. The hand-written
-    // list this replaced had gone stale by four pages (MUL-6272).
-    for (const page of Object.values(WORKSPACE_PAGES)) {
+    for (const key of ["inbox", "issues", "agents", "inks", "settings"] as const) {
+      const page = WORKSPACE_PAGES[key];
       const label = enLayout.nav[page.navKey];
       await user.clear(input);
       await user.type(input, label);
@@ -406,6 +404,11 @@ describe("SearchCommand", () => {
           (_, el) => el?.textContent === label && el?.tagName === "SPAN",
         ),
       ).toBeInTheDocument();
+    }
+    for (const key of ["chat", "myIssues", "projects", "autopilots", "squads", "usage", "runtimes", "skills"] as const) {
+      await user.clear(input);
+      await user.type(input, enLayout.nav[WORKSPACE_PAGES[key].navKey]);
+      expect(screen.queryByText((_, el) => el?.textContent === enLayout.nav[WORKSPACE_PAGES[key].navKey] && el?.tagName === "SPAN")).toBeNull();
     }
   });
 
@@ -427,18 +430,16 @@ describe("SearchCommand", () => {
     expect(screen.queryByText("Inbox")).not.toBeInTheDocument();
   });
 
-  it("navigates to a page whose label differs from its route segment", async () => {
+  it("navigates to Inks within the current workspace", async () => {
     const user = userEvent.setup();
     renderSearch();
 
-    // Analytics lives at /usage: proof the row resolves its destination from
-    // the page key rather than from the words on screen.
     const input = screen.getByPlaceholderText("Type a command or search...");
-    await user.type(input, "analytics");
+    await user.type(input, "inks");
 
-    await user.click(await screen.findByText("Analytics"));
+    await user.click(await screen.findByText("Inks"));
 
-    expect(mockPush).toHaveBeenCalledWith("/ws-test/usage");
+    expect(mockPush).toHaveBeenCalledWith("/ws-test/inks");
     expect(useSearchStore.getState().open).toBe(false);
   });
 
@@ -468,7 +469,7 @@ describe("SearchCommand", () => {
     fireEvent.click(settingsItem, { metaKey: true });
 
     expect(open).toHaveBeenCalledWith(
-      "https://app.multica//ws-test/settings",
+      "https://app.inkway//ws-test/settings",
       "_blank",
       "noopener,noreferrer",
     );
@@ -488,7 +489,7 @@ describe("SearchCommand", () => {
     fireEvent.keyDown(input, { key: "Enter", metaKey: true });
 
     expect(open).toHaveBeenCalledWith(
-      "https://app.multica//ws-test/settings",
+      "https://app.inkway//ws-test/settings",
       "_blank",
       "noopener,noreferrer",
     );
@@ -643,7 +644,7 @@ describe("SearchCommand", () => {
     await user.click(linkItem);
 
     expect(mockGetShareableUrl).toHaveBeenCalledWith("/ws-test/issues/issue-1");
-    expect(mockClipboardWrite).toHaveBeenCalledWith("https://app.multica//ws-test/issues/issue-1");
+    expect(mockClipboardWrite).toHaveBeenCalledWith("https://app.inkway//ws-test/issues/issue-1");
     expect(mockToastSuccess).toHaveBeenCalledWith("Link copied");
 
     // Reopen palette and test identifier copy

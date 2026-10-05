@@ -1,5 +1,5 @@
-import type { ChatMessage } from "@multica/core/types";
-import type { ChatTimelineItem } from "@multica/core/chat";
+import type { ChatMessage } from "@inkway/core/types";
+import type { ChatTimelineItem } from "@inkway/core/chat";
 import { stripChatQuickActionsProtocol } from "./quick-actions";
 
 /**

@@ -10,8 +10,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/multica-ai/multica/server/internal/events"
-	"github.com/multica-ai/multica/server/pkg/protocol"
+	"github.com/Devaretanmay/inkway/server/internal/events"
+	"github.com/Devaretanmay/inkway/server/pkg/protocol"
 )
 
 // gatedTelegramAPI records every Bot API call and holds the first sendMessage

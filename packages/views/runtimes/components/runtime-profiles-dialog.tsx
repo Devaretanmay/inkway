@@ -5,7 +5,6 @@ import type { FormEvent } from "react";
 import {
   ChevronDown,
   ChevronLeft,
-  ExternalLink,
   Loader2,
   Pencil,
   Plus,
@@ -15,17 +14,17 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
-import { ApiError } from "@multica/core/api";
+import { ApiError } from "@inkway/core/api";
 import type {
   RuntimeProfile,
   RuntimeProfileType,
-} from "@multica/core/types";
+} from "@inkway/core/types";
 import {
   runtimeProfileListOptions,
   useCreateRuntimeProfile,
   useUpdateRuntimeProfile,
-} from "@multica/core/runtimes";
-import { Button } from "@multica/ui/components/ui/button";
+} from "@inkway/core/runtimes";
+import { Button } from "@inkway/ui/components/ui/button";
 import {
   Dialog,
   DialogClose,
@@ -33,11 +32,11 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@multica/ui/components/ui/dialog";
-import { Input } from "@multica/ui/components/ui/input";
-import { Label } from "@multica/ui/components/ui/label";
-import { Textarea } from "@multica/ui/components/ui/textarea";
-import { cn } from "@multica/ui/lib/utils";
+} from "@inkway/ui/components/ui/dialog";
+import { Input } from "@inkway/ui/components/ui/input";
+import { Label } from "@inkway/ui/components/ui/label";
+import { Textarea } from "@inkway/ui/components/ui/textarea";
+import { cn } from "@inkway/ui/lib/utils";
 import { ProviderLogo } from "./provider-logo";
 import { DeleteRuntimeProfileDialog } from "./delete-runtime-profile-dialog";
 import {
@@ -54,7 +53,6 @@ import {
   type RuntimeCatalogSections,
 } from "./runtime-profile-catalog";
 import { useT } from "../../i18n";
-import { customRuntimeDocsHref } from "./runtime-docs";
 
 // The dialog runs in two surfaces that swap inside one Popup:
 //   - "browse": custom-first master list + adaptive detail
@@ -79,7 +77,7 @@ export function RuntimeProfilesDialog({
   onProfileCreated?: (profile: RuntimeProfile) => void;
   onClose: () => void;
 }) {
-  const { t, i18n } = useT("runtimes");
+  const { t } = useT("runtimes");
   const { data: profiles = [], isLoading } = useQuery(
     runtimeProfileListOptions(wsId),
   );
@@ -107,7 +105,6 @@ export function RuntimeProfilesDialog({
     entries.find((entry) => entry.id === selectedId) ?? null;
   const openCreateForm = () =>
     setState({ surface: "form", mode: "create", step: "family" });
-  const docsHref = customRuntimeDocsHref(i18n.language);
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
@@ -168,16 +165,7 @@ export function RuntimeProfilesDialog({
                     machine: machineName ?? t(($) => $.profiles.this_machine),
                   })
                 : t(($) => $.profiles.dialog_description)}
-            </span>{" "}
-            <a
-              href={docsHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-1 inline-flex items-center gap-1 rounded-sm font-medium text-foreground underline underline-offset-2 transition-colors hover:text-foreground/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              {t(($) => $.profiles.learn_more)}
-              <ExternalLink aria-hidden="true" className="h-3 w-3" />
-            </a>
+            </span>
           </DialogDescription>
         </DialogHeader>
 

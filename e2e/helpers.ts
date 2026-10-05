@@ -9,7 +9,7 @@ const DEFAULT_E2E_WORKSPACE = `e2e-workspace-${E2E_WORKER}-${E2E_RUN_ID}`;
 
 async function waitForIssuesPage(page: Page) {
   await waitForPageText(page, "New Issue");
-  await expect(page.getByRole("button", { name: "New Issue" })).toBeVisible({
+  await expect(page.getByRole("button", { name: "New Issue", exact: true }).first()).toBeVisible({
     timeout: 15000,
   });
 }
@@ -49,8 +49,8 @@ export async function loginAsDefault(page: Page): Promise<string> {
   }
 
   await page.addInitScript((t) => {
-    localStorage.setItem("multica_token", t);
-    localStorage.setItem("multica:chat:isOpen", "false");
+    localStorage.setItem("inkway_token", t);
+    localStorage.setItem("inkway:chat:isOpen", "false");
   }, token);
   await page.goto(`/${workspace.slug}/issues`, { waitUntil: "domcontentloaded" });
   await waitForIssuesPage(page);
@@ -72,7 +72,7 @@ export async function createTestApi(): Promise<TestApiClient> {
 export async function preferManualCreateMode(page: Page) {
   await page.evaluate(() => {
     localStorage.setItem(
-      "multica_create_mode",
+      "inkway_create_mode",
       JSON.stringify({ state: { lastMode: "manual" }, version: 0 }),
     );
   });

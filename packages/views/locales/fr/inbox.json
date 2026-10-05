@@ -1,7 +1,8 @@
 {
   "page": {
     "title": "Boîte de réception",
-    "back": "Boîte de réception"
+    "back": "Boîte de réception",
+    "subtitle": "Items that need your attention"
   },
   "menu": {
     "mark_all_read": "Tout marquer comme lu",
@@ -118,5 +119,14 @@
     "unarchive_failed": "Échec du désarchivage",
     "archived_load_failed": "Échec du chargement des notifications archivées",
     "filters_load_failed": "Impossible de charger les filtres"
+  },
+  "tabs": {
+    "all": "All",
+    "attention": "Needs attention",
+    "review": "Review",
+    "updates": "Updates",
+    "empty_attention": "Nothing needs your attention.",
+    "empty_review": "Nothing is waiting for review.",
+    "empty_updates": "No updates."
   }
 }

@@ -16,7 +16,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/multica-ai/multica/server/internal/daemon/execenv"
+	"github.com/Devaretanmay/inkway/server/internal/daemon/execenv"
 )
 
 // TestRunTaskSquadLeaderReusesWorkdirBeforeGCMetaWritten drives two real
@@ -380,8 +380,10 @@ printf '%s\n' '{"type":"result","subtype":"success","is_error":false,"session_id
 		activeEnvRoots: make(map[string]int),
 		cfg: Config{
 			WorkspacesRoot: t.TempDir(),
-			AgentTimeout:   5 * time.Second,
-			ServerBaseURL:  srv.URL,
+			// The full race-enabled daemon suite runs several end-to-end task
+			// fixtures in parallel; leave enough room for instrumented startup.
+			AgentTimeout:  15 * time.Second,
+			ServerBaseURL: srv.URL,
 			Agents: map[string]AgentEntry{
 				"claude": {Path: fakeBin},
 			},

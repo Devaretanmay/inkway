@@ -14,7 +14,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/multica-ai/multica/server/pkg/agent"
+	"github.com/Devaretanmay/inkway/server/pkg/agent"
 )
 
 // freshDaemon builds a Daemon with every map field the production New() seeds

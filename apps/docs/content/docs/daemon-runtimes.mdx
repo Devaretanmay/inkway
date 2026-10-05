@@ -1,22 +1,22 @@
 ---
 title: Daemon and runtimes
-description: How Multica connects computers, discovers AI coding tools, and executes runs.
+description: How Inkway connects computers, discovers AI coding tools, and executes runs.
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";
 
-Multica records and coordinates the work; connected computers execute it. The **daemon** on a computer claims runs and invokes the AI coding tools installed on that machine.
+Inkway records and coordinates the work; connected computers execute it. The **daemon** on a computer claims runs and invokes the AI coding tools installed on that machine.
 
 ## Daemon vs runtime
 
-- The **daemon** is the Multica background process running on one computer. It connects to the server, discovers local tools, claims runs, and reports results back.
+- The **daemon** is the Inkway background process running on one computer. It connects to the server, discovers local tools, claims runs, and reports results back.
 - A **runtime** represents one concrete execution environment available to a workspace. It corresponds to one computer plus one AI coding tool — or one custom runtime profile — on that computer.
 
 For example, a computer has both Claude Code and Codex installed and is connected to two workspaces. The daemon registers Claude Code and Codex runtimes for each workspace. Restarting the daemon updates the existing records; it does not keep creating new runtimes for the same combination.
 
 ## Execution location and data boundaries
 
-The AI coding tools a local runtime invokes, those tools' own login credentials, and your local code directories all stay on the connected computer. The Multica server does not execute commands on behalf of local tools, and it does not automatically upload your entire working directory.
+The AI coding tools a local runtime invokes, those tools' own login credentials, and your local code directories all stay on the connected computer. The Inkway server does not execute commands on behalf of local tools, and it does not automatically upload your entire working directory.
 
 So the team can collaborate, the server stores issues, comments, agent configuration, run context, run records, and the results agents write back. That content can include code snippets or other project context an agent chose to read and include in its replies.
 
@@ -26,25 +26,25 @@ An agent's custom environment variables are stored server-side and sent to the r
 
 ## Starting the daemon
 
-With Multica Desktop, the app starts the daemon automatically — no extra command needed.
+With Inkway Desktop, the app starts the daemon automatically — no extra command needed.
 
-On the web, a remote computer, or a headless environment, [install the Multica CLI](/cli) first, then run:
+On the web, a remote computer, or a headless environment, [install the Inkway CLI](/cli) first, then run:
 
 ```bash
-multica daemon start
+inkway daemon start
 ```
 
 The daemon runs in the background by default. Common commands:
 
 | Command | Purpose |
 | --- | --- |
-| `multica daemon status` | Show daemon and connection status |
-| `multica daemon logs -f` | Follow the logs |
-| `multica daemon restart` | Restart the daemon and re-detect local tools |
-| `multica daemon stop` | Stop the daemon |
-| `multica daemon start --foreground` | Run in the current terminal, for debugging |
+| `inkway daemon status` | Show daemon and connection status |
+| `inkway daemon logs -f` | Follow the logs |
+| `inkway daemon restart` | Restart the daemon and re-detect local tools |
+| `inkway daemon stop` | Stop the daemon |
+| `inkway daemon start --foreground` | Run in the current terminal, for debugging |
 
-To place run workspaces on another disk, persist a root for the current profile with `multica config set workspaces_root <path>`, or pass `--workspaces-root <path>` to `daemon start` or `daemon restart`. The flag overrides `MULTICA_WORKSPACES_ROOT`, which overrides the profile config. Existing run directories are not moved when the root changes.
+To place run workspaces on another disk, persist a root for the current profile with `inkway config set workspaces_root <path>`, or pass `--workspaces-root <path>` to `daemon start` or `daemon restart`. The flag overrides `INKWAY_WORKSPACES_ROOT`, which overrides the profile config. Existing run directories are not moved when the root changes.
 
 On startup, the daemon detects supported AI coding tools on `PATH` and registers runtimes for the workspaces you are allowed to connect. If a tool was just installed or signed in, restart the daemon to detect it again.
 
@@ -71,7 +71,7 @@ Detailed states and retry rules are in [Runs](/tasks).
 
 One daemon executes at most 20 runs at a time by default; each agent at most 6. Effective concurrency is the smaller of the two.
 
-Once a limit is reached, new runs keep queueing. You can adjust a single agent's concurrency in the agent settings, and the machine-wide cap through `MULTICA_DAEMON_MAX_CONCURRENT_TASKS`. Parallel runs compete for machine capacity, tool account quota, and the same working directory all at once.
+Once a limit is reached, new runs keep queueing. You can adjust a single agent's concurrency in the agent settings, and the machine-wide cap through `INKWAY_DAEMON_MAX_CONCURRENT_TASKS`. Parallel runs compete for machine capacity, tool account quota, and the same working directory all at once.
 
 ## Private and public runtimes
 
@@ -83,32 +83,32 @@ Only the runtime owner can make it **public** — workspace admins can rename or
 
 If your team uses an internal wrapper, a version-pinned executable, or needs fixed extra arguments for a compatible tool, create a **custom runtime profile**.
 
-A custom profile does not add a new communication protocol. You still pick one of the protocol families Multica already supports (the tool's integration protocol type; see [AI coding tools comparison](/providers)), and the command itself must be compatible with that family.
+A custom profile does not add a new communication protocol. You still pick one of the protocol families Inkway already supports (the tool's integration protocol type; see [AI coding tools comparison](/providers)), and the command itself must be compatible with that family.
 
 ### Task runtime environment
 
-When the daemon starts an agent task, it injects task context into the runtime process. These values are owned by the daemon: an agent's custom environment cannot override any `MULTICA_` variable or the task temporary-directory variables.
+When the daemon starts an agent task, it injects task context into the runtime process. These values are owned by the daemon: an agent's custom environment cannot override any `INKWAY_` variable or the task temporary-directory variables.
 
 The table lists the variables that custom runtimes can use today. It is intentionally not exhaustive and is not a versioned API surface. Build integrations only on the five variables marked **integration contract**; treat the rest as informational details that may change.
 
 | Variable | Value in a task | Stability |
 | --- | --- | --- |
-| `MULTICA_TOKEN` | Task-scoped `mat_` API credential | **Integration contract** |
-| `MULTICA_TASK_ID` | ID of the active task | **Integration contract** |
-| `MULTICA_AGENT_ID` | ID of the assigned agent | **Integration contract** |
-| `MULTICA_WORKSPACE_ID` | ID of the task's workspace | **Integration contract** |
-| `MULTICA_SERVER_URL` | Multica server URL selected by the daemon | **Integration contract** |
-| `MULTICA_TASK_CONFIG_ROOT` | Private task-local Multica CLI configuration root | Informational |
-| `MULTICA_TASK_WORKSPACES_ROOT` | Root of the daemon-managed task workspaces | Informational |
-| `MULTICA_AGENT_NAME` | Display name of the assigned agent | Informational |
-| `MULTICA_DAEMON_PORT` | Local daemon health/API port used by task-only commands such as `multica repo checkout` | Informational |
-| `MULTICA_TASK_SLOT` | Slot in the daemon-wide concurrency pool; useful for slot-indexed resources such as GPUs | Informational |
+| `INKWAY_TOKEN` | Task-scoped `mat_` API credential | **Integration contract** |
+| `INKWAY_TASK_ID` | ID of the active task | **Integration contract** |
+| `INKWAY_AGENT_ID` | ID of the assigned agent | **Integration contract** |
+| `INKWAY_WORKSPACE_ID` | ID of the task's workspace | **Integration contract** |
+| `INKWAY_SERVER_URL` | Inkway server URL selected by the daemon | **Integration contract** |
+| `INKWAY_TASK_CONFIG_ROOT` | Private task-local Inkway CLI configuration root | Informational |
+| `INKWAY_TASK_WORKSPACES_ROOT` | Root of the daemon-managed task workspaces | Informational |
+| `INKWAY_AGENT_NAME` | Display name of the assigned agent | Informational |
+| `INKWAY_DAEMON_PORT` | Local daemon health/API port used by task-only commands such as `inkway repo checkout` | Informational |
+| `INKWAY_TASK_SLOT` | Slot in the daemon-wide concurrency pool; useful for slot-indexed resources such as GPUs | Informational |
 | `TMPDIR` | Private temporary directory for the active task; also supplied as `TMP` and `TEMP` for cross-platform tools | Informational |
 
-The server determines authorship for requests made with `MULTICA_TOKEN`; writes such as issue comments are attributed to the assigned agent and active task. For the token's complete binding, permissions, attribution, 24-hour maximum lifetime, and cleanup behavior, see [Temporary tokens for agent runs](/auth-tokens#temporary-tokens-for-agent-runs).
+The server determines authorship for requests made with `INKWAY_TOKEN`; writes such as issue comments are attributed to the assigned agent and active task. For the token's complete binding, permissions, attribution, 24-hour maximum lifetime, and cleanup behavior, see [Temporary tokens for agent runs](/auth-tokens#temporary-tokens-for-agent-runs).
 
 <Callout type="warning">
-These values live in the runtime process's real environment. Any child process the runtime starts inherits all of them by default, including `MULTICA_TOKEN`. If a child should not hold the credential, strip it explicitly; do not rely on process isolation that is not there. The exception runs the other way: tools that filter their own subprocess environment may require an explicit allow rule. For example, Codex's shell tool drops names containing `TOKEN`, `KEY`, or `SECRET`, so the daemon installs a managed shell policy that allows the required task variables. Keep the token in process environments only—never in a prompt, log, repository file, or persistent configuration. A child shares the parent task's identity and permissions; it does not receive a new, independently scoped identity.
+These values live in the runtime process's real environment. Any child process the runtime starts inherits all of them by default, including `INKWAY_TOKEN`. If a child should not hold the credential, strip it explicitly; do not rely on process isolation that is not there. The exception runs the other way: tools that filter their own subprocess environment may require an explicit allow rule. For example, Codex's shell tool drops names containing `TOKEN`, `KEY`, or `SECRET`, so the daemon installs a managed shell policy that allows the required task variables. Keep the token in process environments only—never in a prompt, log, repository file, or persistent configuration. A child shares the parent task's identity and permissions; it does not receive a new, independently scoped identity.
 </Callout>
 
 ### Creating a profile
@@ -126,31 +126,31 @@ The command field takes an executable and arguments, not a shell script. Plain a
 
 ### How your arguments are ordered
 
-Everything you type in the command field stays directly after the executable, ahead of the arguments Multica adds:
+Everything you type in the command field stays directly after the executable, ahead of the arguments Inkway adds:
 
 ```text
-<your command> <your fixed arguments> <Multica's protocol arguments> <the agent's custom arguments>
+<your command> <your fixed arguments> <Inkway's protocol arguments> <the agent's custom arguments>
 ```
 
-This is what makes a subcommand-style wrapper work. If your command is `ccms start q36`, the tool sees `start q36` first and can select its subcommand before Multica's `-p` and the rest arrive — which is the only order such a wrapper accepts.
+This is what makes a subcommand-style wrapper work. If your command is `ccms start q36`, the tool sees `start q36` first and can select its subcommand before Inkway's `-p` and the rest arrive — which is the only order such a wrapper accepts.
 
 Your arguments used to be appended last instead. Most flag-style commands parse the same either way, but not all of them do — a command that distinguishes global flags from subcommand flags can care where a flag sits. If you already have a profile with fixed arguments, start one run on it after upgrading to confirm it still works.
 
 Two more consequences worth knowing:
 
-- **Multica's own values win a conflict.** If your fixed arguments set a flag Multica also sets, Multica's value comes later and takes effect. Most importantly, a model chosen on the agent overrides a `--model` pinned in the profile. To pin a model for everyone, leave the agents' model field empty.
+- **Inkway's own values win a conflict.** If your fixed arguments set a flag Inkway also sets, Inkway's value comes later and takes effect. Most importantly, a model chosen on the agent overrides a `--model` pinned in the profile. To pin a model for everyone, leave the agents' model field empty.
 - **Protocol-critical flags are ignored.** `-p`, `--output-format`, `--input-format`, `--permission-mode`, and the equivalents for other families are dropped from your fixed arguments, because overriding them would break the daemon's connection to the tool. Subcommands and other positional arguments always pass through.
 
 If a Desktop-launched daemon cannot find a command your terminal can run, set an absolute path for the current computer:
 
 ```bash
-multica runtime profile set-path <profile-id> --path /absolute/path/to/command
+inkway runtime profile set-path <profile-id> --path /absolute/path/to/command
 ```
 
 Remove the path override:
 
 ```bash
-multica runtime profile unset-path <profile-id>
+inkway runtime profile unset-path <profile-id>
 ```
 
 Editing a profile only affects runs claimed afterwards. Before deleting a profile, deal with the active agents still bound to its runtimes. Deleting only the runtime instance on one computer does not delete the profile — a running daemon will re-register it.
@@ -159,11 +159,11 @@ Editing a profile only affects runs claimed afterwards. Before deleting a profil
 
 Check in this order:
 
-1. Run `multica daemon status` to confirm the daemon is running.
-2. Run `multica daemon logs -f` to look for login, network, or tool-detection errors.
+1. Run `inkway daemon status` to confirm the daemon is running.
+2. Run `inkway daemon logs -f` to look for login, network, or tool-detection errors.
 3. Run `command -v <tool-command>` in the same environment to confirm the daemon can find it.
-4. Open Multica's **Runtimes** page and check whether the target computer and the matching AI coding tool show as online.
-5. After a tool install, a path change, or a profile update, run `multica daemon restart`.
+4. Open Inkway's **Runtimes** page and check whether the target computer and the matching AI coding tool show as online.
+5. After a tool install, a path change, or a profile update, run `inkway daemon restart`.
 
 If the problem persists, see [Troubleshooting](/troubleshooting).
 

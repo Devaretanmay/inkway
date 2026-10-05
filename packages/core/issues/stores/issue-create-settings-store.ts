@@ -29,7 +29,7 @@ export const MANUAL_CREATE_FIELDS: ManualCreateField[] = [
   "start_date",
 ];
 
-export const DEFAULT_QUICK_CREATE_FIELDS: QuickCreateField[] = ["project"];
+export const DEFAULT_QUICK_CREATE_FIELDS: QuickCreateField[] = [];
 // Mirrors the manual dialog's historical toolbar: these five always rendered,
 // while due/start date lived behind the ⋯ overflow.
 export const DEFAULT_MANUAL_CREATE_FIELDS: ManualCreateField[] = [
@@ -73,7 +73,7 @@ export const useIssueCreateSettingsStore = create<IssueCreateSettingsState>()(
         })),
     }),
     {
-      name: "multica_issue_create_settings",
+      name: "inkway_issue_create_settings",
       storage: createJSONStorage(() => createWorkspaceAwareStorage(defaultStorage)),
       merge: (persistedState, currentState) => {
         const persisted = (persistedState ?? {}) as Partial<IssueCreateSettingsState>;

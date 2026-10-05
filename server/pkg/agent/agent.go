@@ -29,7 +29,7 @@ type ExecOptions struct {
 	EnableTaskSupplement bool
 	Cwd                  string
 	Model                string
-	// SystemPrompt carries the Multica runtime brief for the few providers
+	// SystemPrompt carries the Inkway runtime brief for the few providers
 	// that cannot pick it up from disk. The daemon leaves it empty for every
 	// other provider (see daemon.providerNeedsInlineSystemPrompt), because the
 	// brief is already delivered as a per-task context file in the workdir —
@@ -96,7 +96,7 @@ type ExecOptions struct {
 	ResumeContinuityNotice string
 	// ExtraArgs is honoured only by backends that opt in by reading it; the
 	// rest ignore it. Deliberately not enumerated here — the previous list
-	// went stale as backends were added, which is how MULTICA_QWENPAW_ARGS
+	// went stale as backends were added, which is how INKWAY_QWENPAW_ARGS
 	// shipped plumbed but dropped. Grep for ExtraArgs to see today's set.
 	ExtraArgs        []string        // daemon-wide default CLI arguments appended before CustomArgs
 	CustomArgs       []string        // per-agent CLI arguments appended after ExtraArgs
@@ -353,7 +353,7 @@ type Config struct {
 // migration 254 to add reasonix, migration 313 to add dsh, migration 342 to
 // add mcode, migration 370 to add dim, migration 403 to add zeroclaw, and
 // migration 441 to add codearts): a custom runtime profile may
-// only be based on a backend Multica officially supports.
+// only be based on a backend Inkway officially supports.
 // qoder and qoderclicn share the same ACP backend; keeping both provider keys
 // lets the daemon auto-detect and register the international and China-region
 // binaries independently. traecli (Trae) has a New backend, launch
@@ -525,7 +525,7 @@ var launchHeaders = map[string]string{
 	"hermes":      "hermes acp",
 	"kimi":        "kimi acp",
 	"reasonix":    "reasonix acp",
-	"dsh":         "dsh --profile multica (stdio)",
+	"dsh":         "dsh --profile inkway (stdio)",
 	"kiro":        "kiro-cli acp",
 	"openclaw":    "openclaw agent (json)",
 	"opencode":    "opencode run (json)",

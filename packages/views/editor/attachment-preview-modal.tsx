@@ -62,7 +62,7 @@ import { toast } from "sonner";
 import {
   PreviewTooLargeError,
   PreviewUnsupportedError,
-} from "@multica/core/api";
+} from "@inkway/core/api";
 import {
   ChevronLeft,
   ChevronRight,
@@ -91,15 +91,15 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
-import type { Attachment } from "@multica/core/types";
-import { paths, useWorkspaceSlug } from "@multica/core/paths";
-import { cn } from "@multica/ui/lib/utils";
-import { copyImage } from "@multica/ui/lib/clipboard";
-import { resolvePublicFileUrl } from "@multica/core/workspace/avatar-url";
+import type { Attachment } from "@inkway/core/types";
+import { paths, useWorkspaceSlug } from "@inkway/core/paths";
+import { cn } from "@inkway/ui/lib/utils";
+import { copyImage } from "@inkway/ui/lib/clipboard";
+import { resolvePublicFileUrl } from "@inkway/core/workspace/avatar-url";
 import {
   UI_EASE_OUT,
   UI_MOTION_DURATION,
-} from "@multica/ui/lib/motion";
+} from "@inkway/ui/lib/motion";
 import { useT } from "../i18n";
 import { useNavigation } from "../navigation";
 import { openExternal } from "../platform";

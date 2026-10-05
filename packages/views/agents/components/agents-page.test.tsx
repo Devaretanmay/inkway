@@ -1,9 +1,9 @@
 import React from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { screen } from "@testing-library/react";
-import type { Agent } from "@multica/core/types";
-import type { AgentActivity } from "@multica/core/agents";
-import type { SupportedLocale } from "@multica/core/i18n";
+import type { Agent } from "@inkway/core/types";
+import type { AgentActivity } from "@inkway/core/agents";
+import type { SupportedLocale } from "@inkway/core/i18n";
 import { renderWithI18n } from "../../test/i18n";
 import { NavigationProvider, type NavigationAdapter } from "../../navigation";
 import { AgentsPage } from "./agents-page";
@@ -90,7 +90,7 @@ vi.mock("sonner", () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }));
 
-vi.mock("@multica/core/agents", () => ({
+vi.mock("@inkway/core/agents", () => ({
   isAgentRuntimeBound: (agent: { runtime_id: string; runtime_bound?: boolean }) =>
     agent.runtime_bound !== false && agent.runtime_id.length > 0,
   agentRunCounts30dOptions: () => ({ queryKey: ["agent-run-counts"] }),
@@ -105,27 +105,27 @@ vi.mock("@multica/core/agents", () => ({
   ALL_ACCESS_SCOPES: ["workspace", "specific-people", "owner-only"],
 }));
 
-vi.mock("@multica/core/agents/stores", () => ({
+vi.mock("@inkway/core/agents/stores", () => ({
   useAgentsViewStore: (selector: (state: unknown) => unknown) =>
     selector(mocks.viewState),
   AGENT_DEFAULT_HIDDEN_COLUMNS: ["model", "created"],
   AGENT_SCOPES: ["mine", "all", "archived"],
 }));
 
-vi.mock("@multica/core/api", () => ({
+vi.mock("@inkway/core/api", () => ({
   api: { archiveAgent: vi.fn(), restoreAgent: vi.fn() },
 }));
 
-vi.mock("@multica/core/auth", () => ({
+vi.mock("@inkway/core/auth", () => ({
   useAuthStore: (selector: (state: unknown) => unknown) =>
     selector({ user: { id: "user-1" } }),
 }));
 
-vi.mock("@multica/core/hooks", () => ({
+vi.mock("@inkway/core/hooks", () => ({
   useWorkspaceId: () => "workspace-1",
 }));
 
-vi.mock("@multica/core/paths", () => ({
+vi.mock("@inkway/core/paths", () => ({
   useWorkspacePaths: () => ({
     newAgent: () => "/test-workspace/agents/new",
     newAgentManual: () => "/test-workspace/agents/new/manual",
@@ -133,13 +133,13 @@ vi.mock("@multica/core/paths", () => ({
   }),
 }));
 
-vi.mock("@multica/core/workspace/queries", () => ({
+vi.mock("@inkway/core/workspace/queries", () => ({
   agentListOptions: () => ({ queryKey: ["agents"] }),
   memberListOptions: () => ({ queryKey: ["members"] }),
   workspaceKeys: { agents: (wsId: string) => ["agents", wsId] },
 }));
 
-vi.mock("@multica/core/runtimes", () => ({
+vi.mock("@inkway/core/runtimes", () => ({
   runtimeListOptions: () => ({ queryKey: ["runtimes"] }),
 }));
 
@@ -152,12 +152,12 @@ vi.mock("./agent-list-toolbar", () => ({
   countActiveFilterDimensions: () => 0,
 }));
 vi.mock("../presence", () => ({ availabilityConfig: {} }));
-vi.mock("@multica/ui/components/ui/skeleton", () => ({
+vi.mock("@inkway/ui/components/ui/skeleton", () => ({
   Skeleton: (props: Record<string, unknown>) => (
     <div data-testid="skeleton" {...props} />
   ),
 }));
-vi.mock("@multica/ui/components/ui/tooltip", () => ({
+vi.mock("@inkway/ui/components/ui/tooltip", () => ({
   Tooltip: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   TooltipTrigger: ({ render }: { render: React.ReactNode }) => <>{render}</>,
   TooltipContent: ({ children }: { children: React.ReactNode }) => (
@@ -339,12 +339,10 @@ describe("AgentsPage listReady gate", () => {
   });
 });
 
-describe("AgentsPage docs link", () => {
-  it("points Learn more at the viewer's docs locale", () => {
+describe("AgentsPage legacy help destination", () => {
+  it("does not expose a link to the old Inkway docs site", () => {
     renderPage("fr");
 
-    expect(
-      screen.getByRole("link", { name: "En savoir plus →" }),
-    ).toHaveAttribute("href", "https://multica.ai/docs/fr/agents");
+    expect(document.querySelector('a[href*="multica.ai"]')).not.toBeInTheDocument();
   });
 });

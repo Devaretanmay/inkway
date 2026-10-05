@@ -4,7 +4,7 @@ import { type ReactNode } from "react";
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { I18nProvider } from "@multica/core/i18n/react";
+import { I18nProvider } from "@inkway/core/i18n/react";
 import enCommon from "../../locales/en/common.json";
 import enSettings from "../../locales/en/settings.json";
 
@@ -46,13 +46,13 @@ vi.mock("@tanstack/react-query", () => ({
   queryOptions: <T,>(opts: T) => opts,
 }));
 
-vi.mock("@multica/core/hooks", () => ({ useWorkspaceId: () => "workspace-1" }));
+vi.mock("@inkway/core/hooks", () => ({ useWorkspaceId: () => "workspace-1" }));
 
-vi.mock("@multica/core/workspace/queries", () => ({
+vi.mock("@inkway/core/workspace/queries", () => ({
   memberListOptions: () => ({ queryKey: ["members"], queryFn: vi.fn() }),
 }));
 
-vi.mock("@multica/core/workspace/hooks", () => ({
+vi.mock("@inkway/core/workspace/hooks", () => ({
   useActorName: () => ({
     getAgentName: (agentId: string) => `Agent ${agentId}`,
     getMemberName: () => "Unknown",
@@ -69,7 +69,7 @@ vi.mock("../../common/actor-avatar", () => ({
   ),
 }));
 
-vi.mock("@multica/core/telegram", () => ({
+vi.mock("@inkway/core/telegram", () => ({
   telegramInstallationsOptions: () => ({
     queryKey: ["telegram", "installations"],
     queryFn: vi.fn(),
@@ -77,14 +77,14 @@ vi.mock("@multica/core/telegram", () => ({
   telegramKeys: { installations: (wsId: string) => ["telegram", "installations", wsId] },
 }));
 
-vi.mock("@multica/core/api", () => ({
+vi.mock("@inkway/core/api", () => ({
   api: {
     registerTelegramBot: mockRegister,
     deleteTelegramInstallation: mockDeleteInstallation,
   },
 }));
 
-vi.mock("@multica/core/auth", () => {
+vi.mock("@inkway/core/auth", () => {
   const useAuthStore = Object.assign(
     (sel?: (s: { user: { id: string } }) => unknown) =>
       sel ? sel({ user: { id: "user-1" } }) : { user: { id: "user-1" } },
@@ -138,13 +138,11 @@ describe("TelegramAgentBindButton", () => {
     expect(mockOpenExternal).not.toHaveBeenCalled();
   });
 
-  it("opens the localized Telegram setup guide", async () => {
+  it("does not link to the retired Inkway setup guide", async () => {
     renderUI(<TelegramAgentBindButton agentId="agent-1" agentName="Bot" />);
     await userEvent.click(screen.getByTestId("telegram-agent-connect"));
-    await userEvent.click(await screen.findByTestId("telegram-docs-link"));
-    expect(mockOpenExternal).toHaveBeenCalledWith(
-      "https://multica.ai/docs/telegram-bot-integration",
-    );
+    expect(screen.queryByTestId("telegram-docs-link")).not.toBeInTheDocument();
+    expect(mockOpenExternal).not.toHaveBeenCalled();
   });
 
   it("does not report success for a malformed install response", async () => {

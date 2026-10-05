@@ -35,11 +35,11 @@ import {
   TriangleAlert,
   Workflow,
 } from "lucide-react";
-import { Button } from "@multica/ui/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@multica/ui/components/ui/tabs";
-import { Spinner } from "@multica/ui/components/ui/spinner";
-import { copyText } from "@multica/ui/lib/clipboard";
-import { cn } from "@multica/ui/lib/utils";
+import { Button } from "@inkway/ui/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@inkway/ui/components/ui/tabs";
+import { Spinner } from "@inkway/ui/components/ui/spinner";
+import { copyText } from "@inkway/ui/lib/clipboard";
+import { cn } from "@inkway/ui/lib/utils";
 import { useT } from "../i18n";
 import { CodeBlockStatic } from "./code-block-static";
 

@@ -2,8 +2,8 @@ import type { ReactNode } from "react";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { cleanup, render } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { I18nProvider } from "@multica/core/i18n/react";
-import { RESOURCES } from "@multica/views/locales";
+import { I18nProvider } from "@inkway/core/i18n/react";
+import { RESOURCES } from "@inkway/views/locales";
 
 /**
  * Regression guard for MUL-6231 / #7021: deleting the last workspace blanked
@@ -48,7 +48,7 @@ vi.mock("@/platform/navigation", () => ({
   routeContentLinkPath: vi.fn(),
 }));
 
-vi.mock("@multica/core/paths", () => ({
+vi.mock("@inkway/core/paths", () => ({
   WorkspaceSlugProvider: ({ children }: { children: ReactNode }) => (
     <>{children}</>
   ),
@@ -56,42 +56,42 @@ vi.mock("@multica/core/paths", () => ({
   useCurrentWorkspace: () => null,
 }));
 
-vi.mock("@multica/core/platform", () => ({
+vi.mock("@inkway/core/platform", () => ({
   getCurrentSlug: () => state.currentSlug,
   subscribeToCurrentSlug: () => () => {},
 }));
 
-vi.mock("@multica/core/workspace", () => ({
+vi.mock("@inkway/core/workspace", () => ({
   workspaceListOptions: () => ({
     queryKey: ["workspace-list"],
     queryFn: async () => state.wsList,
   }),
 }));
 
-vi.mock("@multica/views/navigation", () => ({
+vi.mock("@inkway/views/navigation", () => ({
   useNavigation: () => ({ push: vi.fn() }),
 }));
 
-vi.mock("@multica/views/platform", () => ({
+vi.mock("@inkway/views/platform", () => ({
   useDesktopUnreadBadge: () => {},
 }));
 
 // Each workspace-scoped component gets a marker so the assertions can tell
 // which of them the shell decided to mount.
-vi.mock("@multica/views/layout", () => ({
+vi.mock("@inkway/views/layout", () => ({
   AppSidebar: () => <div data-testid="app-sidebar" />,
   GlobalShortcuts: () => <div data-testid="global-shortcuts" />,
   NavigationProgress: () => <div data-testid="navigation-progress" />,
 }));
 
-vi.mock("@multica/views/modals/registry", () => ({
+vi.mock("@inkway/views/modals/registry", () => ({
   ModalRegistry: () => <div data-testid="modal-registry" />,
 }));
 
 // Stands in for the real SearchCommand, which calls useWorkspaceId() at the
 // top of its body. Mounting it without a resolvable workspace is precisely
 // the crash this gate prevents, so the stub throws the same way.
-vi.mock("@multica/views/search", () => ({
+vi.mock("@inkway/views/search", () => ({
   SearchCommand: () => {
     const resolved = state.wsList.some((w) => w.slug === state.currentSlug);
     if (!resolved) {
@@ -104,7 +104,7 @@ vi.mock("@multica/views/search", () => ({
   SearchTrigger: () => null,
 }));
 
-vi.mock("@multica/views/chat", () => ({
+vi.mock("@inkway/views/chat", () => ({
   FloatingChat: () => <div data-testid="floating-chat" />,
 }));
 

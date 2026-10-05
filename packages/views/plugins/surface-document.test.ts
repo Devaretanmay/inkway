@@ -44,7 +44,7 @@ describe("plugin surface frame document", () => {
     });
 
     expect(document).toContain("securitypolicyviolation");
-    expect(document).toContain("multica:plugin-surface-navigation-blocked");
+    expect(document).toContain("inkway:plugin-surface-navigation-blocked");
     expect(document).toContain('if (state === "terminal") return');
     expect(document).not.toContain("setTimeout(");
   });

@@ -1,5 +1,5 @@
-import type { Issue, IssueStatus, IssuePriority, IssueAssigneeGroup, ProjectStatus, PropertyFilterValue, PropertyOperatorFilter } from "@multica/core/types";
-import type { ActorFilterValue } from "@multica/core/issues/stores/view-store";
+import type { Issue, IssueStatus, IssuePriority, IssueAssigneeGroup, ProjectStatus, PropertyFilterValue, PropertyOperatorFilter } from "@inkway/core/types";
+import type { ActorFilterValue } from "@inkway/core/issues/stores/view-store";
 import type { IssueActivityState } from "../surface/activity";
 
 export interface IssueFilters {

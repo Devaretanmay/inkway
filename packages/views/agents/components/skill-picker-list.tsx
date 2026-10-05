@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { Search } from "lucide-react";
 import { SkillIcon } from "../../skills/lib/skill-icon";
-import type { SkillSummary } from "@multica/core/types";
-import { Checkbox } from "@multica/ui/components/ui/checkbox";
-import { Input } from "@multica/ui/components/ui/input";
-import { cn } from "@multica/ui/lib/utils";
+import type { SkillSummary } from "@inkway/core/types";
+import { Checkbox } from "@inkway/ui/components/ui/checkbox";
+import { Input } from "@inkway/ui/components/ui/input";
+import { cn } from "@inkway/ui/lib/utils";
 import { useT } from "../../i18n";
 
 interface SkillPickerListProps {

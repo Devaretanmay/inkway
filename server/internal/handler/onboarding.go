@@ -9,11 +9,11 @@ import (
 
 	"github.com/jackc/pgx/v5/pgtype"
 
-	"github.com/multica-ai/multica/server/internal/analytics"
-	"github.com/multica-ai/multica/server/internal/logger"
-	obsmetrics "github.com/multica-ai/multica/server/internal/metrics"
-	"github.com/multica-ai/multica/server/internal/middleware"
-	db "github.com/multica-ai/multica/server/pkg/db/generated"
+	"github.com/Devaretanmay/inkway/server/internal/analytics"
+	"github.com/Devaretanmay/inkway/server/internal/logger"
+	obsmetrics "github.com/Devaretanmay/inkway/server/internal/metrics"
+	"github.com/Devaretanmay/inkway/server/internal/middleware"
+	db "github.com/Devaretanmay/inkway/server/pkg/db/generated"
 )
 
 // Upper bound on free-text fields. `cloudWaitlistReasonMaxLen` is a

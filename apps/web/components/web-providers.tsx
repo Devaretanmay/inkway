@@ -1,10 +1,10 @@
 "use client";
 
 import { useMemo } from "react";
-import { CoreProvider } from "@multica/core/platform";
-import { createBrowserCookieLocaleAdapter } from "@multica/core/i18n/browser";
-import type { LocaleResources, SupportedLocale } from "@multica/core/i18n";
-import { useWelcomeStore } from "@multica/core/onboarding";
+import { CoreProvider, migrateLegacyBrandStorage } from "@inkway/core/platform";
+import { createBrowserCookieLocaleAdapter } from "@inkway/core/i18n/browser";
+import type { LocaleResources, SupportedLocale } from "@inkway/core/i18n";
+import { useWelcomeStore } from "@inkway/core/onboarding";
 import packageJson from "../package.json";
 import { WebNavigationProvider } from "@/platform/navigation";
 import { WebScrollRestorationProvider } from "@/platform/scroll-restoration";
@@ -17,14 +17,14 @@ import { useUserLocaleSyncEnabled } from "@/platform/user-locale-sync";
 
 // Legacy token in localStorage → keep this session in token mode so users who
 // logged in before the cookie-auth migration stay authed. They migrate to
-// cookie mode on their next logout/login cycle (logout clears multica_token).
-// Sunset: once telemetry shows <1% of sessions still carry multica_token,
+// cookie mode on their next logout/login cycle (logout clears inkway_token).
+// Sunset: once telemetry shows <1% of sessions still carry inkway_token,
 // delete this branch and hard-code `cookieAuth` — the localStorage token is
 // XSS-exposed and is the exact thing the cookie migration exists to remove.
 function hasLegacyToken(): boolean {
   if (typeof window === "undefined") return false;
   try {
-    return Boolean(window.localStorage.getItem("multica_token"));
+    return Boolean(window.localStorage.getItem("inkway_token"));
   } catch {
     return false;
   }
@@ -58,6 +58,7 @@ export function WebProviders({
   apiBaseUrl?: string;
   wsUrl?: string;
 }) {
+  if (typeof window !== "undefined") migrateLegacyBrandStorage(window.localStorage);
   const cookieAuth = !hasLegacyToken();
   const syncUserLocale = useUserLocaleSyncEnabled();
   // Stable identity reference so downstream effects keyed on it don't see a

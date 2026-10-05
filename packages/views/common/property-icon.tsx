@@ -1,8 +1,8 @@
 "use client";
 
-import type { IssueProperty } from "@multica/core/types";
-import { Button } from "@multica/ui/components/ui/button";
-import { cn } from "@multica/ui/lib/utils";
+import type { IssueProperty } from "@inkway/core/types";
+import { Button } from "@inkway/ui/components/ui/button";
+import { cn } from "@inkway/ui/lib/utils";
 import {
   Bookmark,
   BriefcaseBusiness,

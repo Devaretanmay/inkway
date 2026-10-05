@@ -20,23 +20,24 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/multica-ai/multica/server/internal/analytics"
-	"github.com/multica-ai/multica/server/internal/auth"
-	"github.com/multica-ai/multica/server/internal/daemonws"
-	"github.com/multica-ai/multica/server/internal/integrations/slack"
-	"github.com/multica-ai/multica/server/internal/issuestatus"
-	obsmetrics "github.com/multica-ai/multica/server/internal/metrics"
-	"github.com/multica-ai/multica/server/internal/middleware"
-	"github.com/multica-ai/multica/server/internal/runtimeapps"
-	"github.com/multica-ai/multica/server/internal/service"
-	"github.com/multica-ai/multica/server/internal/util"
-	"github.com/multica-ai/multica/server/pkg/agent"
-	db "github.com/multica-ai/multica/server/pkg/db/generated"
-	"github.com/multica-ai/multica/server/pkg/dbid"
-	"github.com/multica-ai/multica/server/pkg/protocol"
-	"github.com/multica-ai/multica/server/pkg/redact"
-	"github.com/multica-ai/multica/server/pkg/skillbundle"
-	"github.com/multica-ai/multica/server/pkg/taskfailure"
+	"github.com/Devaretanmay/inkway/server/internal/analytics"
+	"github.com/Devaretanmay/inkway/server/internal/auth"
+	"github.com/Devaretanmay/inkway/server/internal/daemonws"
+	"github.com/Devaretanmay/inkway/server/internal/integrations/slack"
+	"github.com/Devaretanmay/inkway/server/internal/issuestatus"
+	obsmetrics "github.com/Devaretanmay/inkway/server/internal/metrics"
+	"github.com/Devaretanmay/inkway/server/internal/ink"
+	"github.com/Devaretanmay/inkway/server/internal/middleware"
+	"github.com/Devaretanmay/inkway/server/internal/runtimeapps"
+	"github.com/Devaretanmay/inkway/server/internal/service"
+	"github.com/Devaretanmay/inkway/server/internal/util"
+	"github.com/Devaretanmay/inkway/server/pkg/agent"
+	db "github.com/Devaretanmay/inkway/server/pkg/db/generated"
+	"github.com/Devaretanmay/inkway/server/pkg/dbid"
+	"github.com/Devaretanmay/inkway/server/pkg/protocol"
+	"github.com/Devaretanmay/inkway/server/pkg/redact"
+	"github.com/Devaretanmay/inkway/server/pkg/skillbundle"
+	"github.com/Devaretanmay/inkway/server/pkg/taskfailure"
 )
 
 // claimPollHintMinDelay bounds a future mismatch between the hint query and
@@ -202,7 +203,7 @@ type DaemonRegisterRequest struct {
 	// and tasks keep working without manual intervention.
 	LegacyDaemonIDs []string `json:"legacy_daemon_ids"`
 	DeviceName      string   `json:"device_name"`
-	CLIVersion      string   `json:"cli_version"` // multica CLI version
+	CLIVersion      string   `json:"cli_version"` // inkway CLI version
 	LaunchedBy      string   `json:"launched_by"` // "desktop" when spawned by the Electron app
 	Runtimes        []struct {
 		Name    string `json:"name"`
@@ -963,7 +964,7 @@ func (h *Handler) DaemonDeregister(w http.ResponseWriter, r *http.Request) {
 
 	// Batch the runtime lookups instead of one GetAgentRuntime per id (N+1),
 	// while keeping the MUL-6884 per-source attribution: getAgentRuntimes
-	// records one multica_agent_runtime_lookup_total result per requested id.
+	// records one inkway_agent_runtime_lookup_total result per requested id.
 	// A read error is NOT "the rows don't exist": fail closed with 500 (like
 	// ListRuntimesForClaim) so a transient blip can't report a successful
 	// deregister while every runtime silently stays online until the liveness
@@ -1021,8 +1022,74 @@ func (h *Handler) DaemonDeregister(w http.ResponseWriter, r *http.Request) {
 }
 
 type DaemonHeartbeatRequest struct {
-	RuntimeID           string `json:"runtime_id"`
-	SupportsBatchImport bool   `json:"supports_batch_import,omitempty"`
+	RuntimeID           string              `json:"runtime_id"`
+	SupportsBatchImport bool                `json:"supports_batch_import,omitempty"`
+	Ink           *ink.Snapshot `json:"ink,omitempty"`
+}
+
+func validateInkSnapshot(snapshot *ink.Snapshot) bool {
+	if snapshot == nil {
+		return true
+	}
+	switch snapshot.Status {
+	case "connected", "degraded", "unavailable":
+	default:
+		return false
+	}
+	if len(snapshot.Sites) > 16 {
+		return false
+	}
+	for i := range snapshot.Sites {
+		site := &snapshot.Sites[i]
+		if site.Name != "coding_agent.recovery_action" || len(site.Version) != 64 {
+			return false
+		}
+		if _, err := hex.DecodeString(site.Version); err != nil {
+			return false
+		}
+		switch site.Status {
+		case "OBSERVE", "CANDIDATE", "SHADOW", "ACTIVE", "DEMOTED", "RETIRED":
+		default:
+			return false
+		}
+		if site.Observations < 0 || site.VerifiedOutcomes < 0 || site.VerifiedOutcomes > site.Observations || site.FastServed < 0 || site.FalseServes < 0 || site.Coverage < 0 || site.Coverage > 1 {
+			return false
+		}
+		if site.ModelCallsAvoided != nil && (*site.ModelCallsAvoided < 0 || site.SavingsBasis != "declared_and_validated_fixed_call_count") {
+			return false
+		}
+		if site.ModelCallsAvoided == nil {
+			site.SavingsBasis = ""
+		}
+	}
+	return true
+}
+
+func (h *Handler) storeInkSnapshot(ctx context.Context, runtimeID pgtype.UUID, snapshot *ink.Snapshot) {
+	if snapshot == nil || h.DB == nil {
+		return
+	}
+	if !validateInkSnapshot(snapshot) {
+		slog.Warn("discarding invalid Ink snapshot", "runtime_id", uuidToString(runtimeID))
+		return
+	}
+	if _, err := h.DB.Exec(ctx, `INSERT INTO runtime_ink_health(runtime_id,status,updated_at) VALUES($1,$2,now())
+		ON CONFLICT(runtime_id) DO UPDATE SET status=EXCLUDED.status,updated_at=now()`, runtimeID, snapshot.Status); err != nil {
+		slog.Warn("store Ink runtime health failed", "runtime_id", uuidToString(runtimeID), "error", err)
+		return
+	}
+	for _, site := range snapshot.Sites {
+		if _, err := h.DB.Exec(ctx, `INSERT INTO runtime_ink_sites(
+			runtime_id,site_name,site_version,status,observations,verified_outcomes,fast_served,coverage,false_serves,last_maintenance,model_calls_avoided,savings_basis,updated_at
+		) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,now())
+		ON CONFLICT(runtime_id,site_name,site_version) DO UPDATE SET status=EXCLUDED.status,observations=EXCLUDED.observations,verified_outcomes=EXCLUDED.verified_outcomes,
+		fast_served=EXCLUDED.fast_served,coverage=EXCLUDED.coverage,false_serves=EXCLUDED.false_serves,last_maintenance=EXCLUDED.last_maintenance,
+		model_calls_avoided=EXCLUDED.model_calls_avoided,savings_basis=EXCLUDED.savings_basis,updated_at=now()`,
+			runtimeID, site.Name, site.Version, site.Status, site.Observations, site.VerifiedOutcomes, site.FastServed, site.Coverage, site.FalseServes,
+			site.LastMaintenance, site.ModelCallsAvoided, site.SavingsBasis); err != nil {
+			slog.Warn("store Ink site snapshot failed", "runtime_id", uuidToString(runtimeID), "site", site.Name, "error", err)
+		}
+	}
 }
 
 // heartbeatHasPendingTimeout bounds the cheap HasPending probe on the
@@ -1163,6 +1230,7 @@ func (h *Handler) DaemonHeartbeat(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	updateMs = time.Since(updateStart).Milliseconds()
+	h.storeInkSnapshot(r.Context(), runtimeUUID, req.Ink)
 
 	ack, m, err := h.processHeartbeat(r.Context(), runtimeID, req.SupportsBatchImport)
 	probeModelMs = m.ProbeModelMs
@@ -1777,7 +1845,7 @@ func (h *Handler) ClaimTasksByRuntime(w http.ResponseWriter, r *http.Request) {
 	//
 	// This read goes through RuntimeLookup like every other agent_runtime read
 	// by id (MUL-6884), so the claim path is attributed on
-	// multica_agent_runtime_lookup_total instead of being invisible on it. That
+	// inkway_agent_runtime_lookup_total instead of being invisible on it. That
 	// matters more here than on any other caller: both /tasks/claim and /claim
 	// route to this handler and the WebSocket claim RPC replays through it, so
 	// an unattributed read here would make the busiest reader in the system
@@ -2173,7 +2241,7 @@ func (h *Handler) rejectClaimSkillLoad(task *db.AgentTaskQueue, err error) *clai
 
 // rejectClaimOnWorkspaceMismatch enforces the claim's tenant boundary against
 // the workspace that OWNS the task's context (issue / chat session / autopilot
-// / quick-create), which is the only authority for MULTICA_WORKSPACE_ID in the
+// / quick-create), which is the only authority for INKWAY_WORKSPACE_ID in the
 // agent env. An empty value would make the CLI silently fall back to the
 // user-global config and talk to whatever workspace the user happened to last
 // configure; a value that doesn't match the runtime's workspace means upstream
@@ -2313,7 +2381,7 @@ func rerunSourceMatchesTaskScope(task, source db.AgentTaskQueue) bool {
 // child: a poisoned conversation says nothing about the files it left behind,
 // the same contract the manual-retry branch applies (MUL-4869, MUL-7034).
 //
-// The workdir is offered only to a daemon whose `multica repo checkout` keeps
+// The workdir is offered only to a daemon whose `inkway repo checkout` keeps
 // an existing checkout's work (DaemonCapabilityCheckoutKeepsWorkV1). The fresh
 // session has no memory of that work and will fetch its repositories again;
 // an older daemon's checkout resets the checkout and deletes the work being
@@ -2458,7 +2526,7 @@ func (h *Handler) buildClaimedTaskResponse(r *http.Request, task *db.AgentTaskQu
 		)
 	}
 	useSkillRefs := requestHasClientCapability(r, protocol.DaemonCapabilitySkillBundlesV1)
-	// A daemon older than the multica-platform merge assembles a brief that
+	// A daemon older than the inkway-platform merge assembles a brief that
 	// still names the built-ins this server stopped shipping. It cannot be
 	// fixed from here — the brief lives in the daemon binary — so the missing
 	// capability buys that daemon a redirect stub under the old name instead of
@@ -2951,7 +3019,7 @@ func (h *Handler) buildClaimedTaskResponse(r *http.Request, task *db.AgentTaskQu
 				)
 				resp.PriorSessionResumeUnavailable = true
 			}
-		} else if !task.ForceFreshSession {
+		} else if !task.ForceFreshSession && !task.RetryOfTaskID.Valid {
 			// Non-rerun follow-up on the same issue: resume the most recent
 			// (agent, issue) session so the agent keeps the issue's conversation
 			// context across turns. The "Focus on THIS comment" guard in
@@ -2992,6 +3060,20 @@ func (h *Handler) buildClaimedTaskResponse(r *http.Request, task *db.AgentTaskQu
 			// parent's workdir, never its session. A force_fresh task with no
 			// retry lineage still resumes nothing.
 			applyFreshSessionRetryWorkdir(*task, &resp, requestHasClientCapability(r, protocol.DaemonCapabilityCheckoutKeepsWorkV1))
+			// Only a daemon that opted into the local Ink boundary may
+			// receive the source failure needed to choose between the two
+			// existing retry modes. Default/older daemons keep the fresh-session
+			// retry behavior above byte-for-byte.
+			if requestHasClientCapability(r, protocol.DaemonCapabilityInkRecoveryV1) {
+				resp.RetryOfTaskID = uuidToString(task.RetryOfTaskID)
+				if source, sourceErr := h.Queries.GetAgentTask(r.Context(), task.RetryOfTaskID); sourceErr == nil &&
+					source.FailureReason.Valid && source.SessionID.Valid && source.SessionID.String != "" &&
+					source.RuntimeID == task.RuntimeID && !service.ResumeUnsafeFailure(source.FailureReason.String, source.Error.String) {
+					resp.PriorSessionID = source.SessionID.String
+					resp.RetryFailureReason = source.FailureReason.String
+					resp.PriorSessionResumeUnavailable = false
+				}
+			}
 		}
 
 		// Both deltas, now that the resume source is known (MUL-7344).
@@ -3080,7 +3162,7 @@ func (h *Handler) buildClaimedTaskResponse(r *http.Request, task *db.AgentTaskQu
 		// A task-level delivery snapshot, not the Chat's historical binding,
 		// decides whether this run is operating for an external audience.
 		// Web/Desktop/Mobile turns in an old channel-originated Chat have no
-		// snapshot and remain private to Multica after /new rotates the route.
+		// snapshot and remain private to Inkway after /new rotates the route.
 		delivery, deliveryErr := h.Queries.GetChannelTaskDelivery(r.Context(), task.ID)
 		if deliveryErr == nil {
 			resp.ChatChannelType = delivery.ChannelType
@@ -3138,7 +3220,7 @@ func (h *Handler) buildClaimedTaskResponse(r *http.Request, task *db.AgentTaskQu
 		// (MUL-2968: "看上海天气" then "还有青岛" must both be delivered) —
 		// so a rolling deploy never replays their history. Attachments are
 		// collected per included message so the agent can
-		// `multica attachment download <id>` (the inline markdown URL is
+		// `inkway attachment download <id>` (the inline markdown URL is
 		// signed + 30-min expiring on the CDN).
 		var unanswered []db.ChatMessage
 		var inputLoadErr error
@@ -3224,6 +3306,16 @@ func (h *Handler) buildClaimedTaskResponse(r *http.Request, task *db.AgentTaskQu
 			// from a user-requested fresh start (the Lark fresh-session command),
 			// which still inherits nothing.
 			applyFreshSessionRetryWorkdir(*task, &resp, requestHasClientCapability(r, protocol.DaemonCapabilityCheckoutKeepsWorkV1))
+			if requestHasClientCapability(r, protocol.DaemonCapabilityInkRecoveryV1) {
+				resp.RetryOfTaskID = uuidToString(task.RetryOfTaskID)
+				if source, sourceErr := h.Queries.GetAgentTask(r.Context(), task.RetryOfTaskID); sourceErr == nil &&
+					source.FailureReason.Valid && source.SessionID.Valid && source.SessionID.String != "" &&
+					source.RuntimeID == task.RuntimeID && !service.ResumeUnsafeFailure(source.FailureReason.String, source.Error.String) {
+					resp.PriorSessionID = source.SessionID.String
+					resp.RetryFailureReason = source.FailureReason.String
+					resp.PriorSessionResumeUnavailable = false
+				}
+			}
 		}
 
 		parts := make([]string, 0, len(unanswered))
@@ -3701,8 +3793,8 @@ func worktreeClaimBlockReason(resources []ProjectResourceData, runtime db.AgentR
 			continue
 		}
 		return fmt.Sprintf(
-			"This machine's Multica runtime does not support parallel (worktree) mode, which %q is set to use. "+
-				"Update the Multica app on that machine to the latest version, then re-run this task. "+
+			"This machine's Inkway runtime does not support parallel (worktree) mode, which %q is set to use. "+
+				"Update the Inkway app on that machine to the latest version, then re-run this task. "+
 				"Refusing to run rather than falling back to editing the directory directly, which is what this mode exists to prevent.",
 			ref.LocalPath)
 	}
@@ -3799,7 +3891,7 @@ func (h *Handler) ClaimTaskByRuntime(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	// Mint a task-scoped `mat_` token bound to (agent, task, workspace,
-	// owner). The daemon will inject this as MULTICA_TOKEN into the agent
+	// owner). The daemon will inject this as INKWAY_TOKEN into the agent
 	// process instead of its own credential, so any API call the agent
 	// makes — even one that strips X-Agent-ID / X-Task-ID headers — is
 	// recognized server-side as actor=agent, closing the lateral-movement
@@ -5544,7 +5636,7 @@ const HeaderActiveRunsTruncated = "X-Active-Runs-Truncated"
 
 // ActiveRunSummary is one in-flight run as the coordination read reports it:
 // which issue, which agent, what state, since when, and the task id to follow
-// up with `multica issue run-messages`.
+// up with `inkway issue run-messages`.
 //
 // Deliberately NOT AgentTaskResponse. That type is the execution log's row —
 // result, work_dir, attribution, coalesced comment ids — and it costs roughly
@@ -5564,7 +5656,7 @@ type ActiveRunSummary struct {
 
 // ListTasksByIssue returns tasks for an issue — the execution history behind
 // the issue-detail sidebar, and the coordination reads behind
-// `multica issue runs --active` / `--siblings`.
+// `inkway issue runs --active` / `--siblings`.
 //
 // Two optional query params narrow or widen it; with neither, the response is
 // byte-identical to what it has always been (full history, newest first), which

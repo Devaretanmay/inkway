@@ -13,14 +13,12 @@ const state = vi.hoisted(() => ({
   listFetched: true,
   wsList: [] as { id: string; slug: string }[],
   workspaceSeen: true,
-  modalRenders: 0,
-  modalAriaLabel: "source-backfill-modal-marker",
   currentSlug: null as string | null,
   pendingDeletes: new Set<string>(),
   childQuerySlugs: [] as (string | null)[],
 }));
 
-vi.mock("@multica/core/auth", () => {
+vi.mock("@inkway/core/auth", () => {
   const useAuthStore = (selector: (s: typeof state) => unknown) => {
     if (selector.toString().includes("isLoading"))
       return state.isAuthLoading;
@@ -37,7 +35,7 @@ vi.mock("@multica/core/auth", () => {
 // tab-swap case below: the incoming layout of a same-workspace swap writes the
 // slug that is already there, so its write is a no-op and cannot be what stops
 // the outgoing cleanup from clearing it.
-vi.mock("@multica/core/platform", () => ({
+vi.mock("@inkway/core/platform", () => ({
   setCurrentWorkspace: vi.fn((slug: string | null) => {
     if (state.currentSlug === slug) return;
     state.currentSlug = slug;
@@ -45,13 +43,13 @@ vi.mock("@multica/core/platform", () => ({
   getCurrentSlug: () => state.currentSlug,
 }));
 
-vi.mock("@multica/core/workspace/pending-delete", () => ({
+vi.mock("@inkway/core/workspace/pending-delete", () => ({
   isWorkspaceDeletePending: (id: string) => state.pendingDeletes.has(id),
 }));
 
-vi.mock("@multica/core/workspace", async () => {
-  const actual = await vi.importActual<typeof import("@multica/core/workspace")>(
-    "@multica/core/workspace",
+vi.mock("@inkway/core/workspace", async () => {
+  const actual = await vi.importActual<typeof import("@inkway/core/workspace")>(
+    "@inkway/core/workspace",
   );
   return {
     ...actual,
@@ -69,9 +67,9 @@ vi.mock("@multica/core/workspace", async () => {
   };
 });
 
-vi.mock("@multica/core/paths", async () => {
-  const actual = await vi.importActual<typeof import("@multica/core/paths")>(
-    "@multica/core/paths",
+vi.mock("@inkway/core/paths", async () => {
+  const actual = await vi.importActual<typeof import("@inkway/core/paths")>(
+    "@inkway/core/paths",
   );
   return {
     ...actual,
@@ -85,27 +83,16 @@ vi.mock("@multica/core/paths", async () => {
   };
 });
 
-vi.mock("@multica/views/workspace/use-workspace-seen", () => ({
+vi.mock("@inkway/views/workspace/use-workspace-seen", () => ({
   useWorkspaceSeen: () => state.workspaceSeen,
 }));
 
-vi.mock("@multica/views/workspace/welcome-after-onboarding", () => ({
+vi.mock("@inkway/views/workspace/welcome-after-onboarding", () => ({
   WelcomeAfterOnboarding: () => null,
 }));
 
-vi.mock("@multica/views/layout", () => ({
+vi.mock("@inkway/views/layout", () => ({
   WorkspacePresencePrefetch: () => null,
-}));
-
-// The point of this whole test: assert the desktop layout mounts the
-// SourceBackfillModal. We stub the real component with a marker that
-// renders only when the layout actually rendered it (and not e.g.
-// suppressed by overlayActive).
-vi.mock("@multica/views/onboarding", () => ({
-  SourceBackfillModal: () => {
-    state.modalRenders += 1;
-    return <div data-testid={state.modalAriaLabel} />;
-  },
 }));
 
 vi.mock("@/stores/tab-store", () => ({
@@ -154,26 +141,12 @@ beforeEach(() => {
   state.listFetched = true;
   state.wsList = [{ id: "ws-1", slug: "acme" }];
   state.workspaceSeen = true;
-  state.modalRenders = 0;
   state.currentSlug = null;
   state.pendingDeletes = new Set<string>();
   state.childQuerySlugs = [];
 });
 
 describe("WorkspaceRouteLayout", () => {
-  it("mounts SourceBackfillModal when no WindowOverlay is active", () => {
-    const { queryByTestId } = renderLayout();
-    expect(queryByTestId(state.modalAriaLabel)).not.toBeNull();
-    expect(state.modalRenders).toBeGreaterThan(0);
-  });
-
-  it("suppresses SourceBackfillModal while a WindowOverlay is active", () => {
-    state.overlay = { type: "new-workspace" };
-    const { queryByTestId } = renderLayout();
-    expect(queryByTestId(state.modalAriaLabel)).toBeNull();
-    expect(state.modalRenders).toBe(0);
-  });
-
   it("keeps workspace content mounted when a background refetch fails", async () => {
     const { queryByTestId, queryClient } = renderLayout();
     expect(queryByTestId("outlet")).not.toBeNull();

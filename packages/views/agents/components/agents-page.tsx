@@ -13,7 +13,7 @@ import type {
   Agent,
   AgentRuntime,
   MemberWithUser,
-} from "@multica/core/types";
+} from "@inkway/core/types";
 import {
   type AgentActivity,
   agentRunCounts30dOptions,
@@ -23,7 +23,7 @@ import {
   useWorkspacePresenceMap,
   VISIBILITY_TOOLTIP,
   type AgentPresenceDetail,
-} from "@multica/core/agents";
+} from "@inkway/core/agents";
 import {
   type AgentListFilters,
   useAgentsViewStore,
@@ -32,17 +32,17 @@ import {
   type AgentColumnKey,
   type AgentsScope,
   type AgentSortField,
-} from "@multica/core/agents/stores";
-import { useAuthStore } from "@multica/core/auth";
-import { useWorkspaceId } from "@multica/core/hooks";
-import { useWorkspacePaths } from "@multica/core/paths";
+} from "@inkway/core/agents/stores";
+import { useAuthStore } from "@inkway/core/auth";
+import { useWorkspaceId } from "@inkway/core/hooks";
+import { useWorkspacePaths } from "@inkway/core/paths";
 import {
   agentListOptions,
   memberListOptions,
-} from "@multica/core/workspace/queries";
-import { runtimeDisplayLabel, runtimeListOptions } from "@multica/core/runtimes";
-import { Button } from "@multica/ui/components/ui/button";
-import { Checkbox } from "@multica/ui/components/ui/checkbox";
+} from "@inkway/core/workspace/queries";
+import { runtimeDisplayLabel, runtimeListOptions } from "@inkway/core/runtimes";
+import { Button } from "@inkway/ui/components/ui/button";
+import { Checkbox } from "@inkway/ui/components/ui/checkbox";
 import {
   LIST_GRID_BOTTOM_CLEARANCE,
   ListGrid,
@@ -52,16 +52,15 @@ import {
   ListGridHeaderCell,
   ListGridRow,
   type ListGridSortDirection,
-} from "@multica/ui/components/ui/list-grid";
-import { Skeleton } from "@multica/ui/components/ui/skeleton";
+} from "@inkway/ui/components/ui/list-grid";
+import { Skeleton } from "@inkway/ui/components/ui/skeleton";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@multica/ui/components/ui/tooltip";
+} from "@inkway/ui/components/ui/tooltip";
 import { useNavigation, useRowLink } from "../../navigation";
 import { ActorAvatar } from "../../common/actor-avatar";
-import { docsLocalePrefix } from "../../common/docs-locale";
 import { ProviderLogo } from "../../runtimes/components/provider-logo";
 import {
   CollectionPageHeader,
@@ -228,11 +227,11 @@ export function rowMatchesFilters(
 
 /**
  * Bulk-access dialog confirm-button enablement is centralized in
- * `@multica/core/agents` as `isAccessChangeReady` (MUL-3963). The dialog
+ * `@inkway/core/agents` as `isAccessChangeReady` (MUL-3963). The dialog
  * consumes it; the picker also gates its internal Save button on the same
  * predicate (its own Save button is hidden via `hideFooter` in the bulk flow).
  */
-import { isAccessChangeReady } from "@multica/core/agents";
+import { isAccessChangeReady } from "@inkway/core/agents";
 import { AgentBatchToolbar } from "./agent-batch-toolbar";
 export { isAccessChangeReady };
 
@@ -256,17 +255,13 @@ function PageHeaderBar({
   totalCount: number;
   onCreate: () => void;
 }) {
-  const { t, i18n } = useT("agents");
+  const { t } = useT("agents");
   return (
     <CollectionPageHeader
       icon={Bot}
       title={t(($) => $.page.title)}
       count={totalCount}
       description={t(($) => $.page.tagline)}
-      learnMore={{
-        href: `https://multica.ai/docs${docsLocalePrefix(i18n.language)}/agents`,
-        label: t(($) => $.page.learn_more),
-      }}
       actions={
         <CollectionPageHeaderAction
           icon={Plus}

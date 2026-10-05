@@ -353,12 +353,12 @@
       "intro": "すべての実行で使用する System Prompt を設定します。Markdown に対応しています。",
       "system_prompt_label": "System Prompt",
       "placeholder": "このエージェントの役割、専門分野、作業スタイルを定義してください。\n\n# 例\nあなたは React と TypeScript を専門とするフロントエンドエンジニアです。\n\n## 作業スタイル\n- 小さく焦点を絞った PR を作成する — 論理的な変更ごとに1コミット\n- 継承よりコンポジションを優先する\n- 新しいコンポーネントには必ずユニットテストを追加する\n\n## 制約\n- 明示的な承認なしに shared/ の型を変更しない\n- features/ の既存のコンポーネントパターンに従う",
-      "system_layer_label": "Multica が管理",
-      "system_layer_hint": "Multica のリリースごとに更新されます。編集はできず、下に書いた内容が上書きされることもありません。",
+      "system_layer_label": "Inkway が管理",
+      "system_layer_hint": "Inkway のリリースごとに更新されます。編集はできず、下に書いた内容が上書きされることもありません。",
       "system_layer_show": "表示",
       "system_layer_hide": "隠す",
       "workspace_notes_label": "ワークスペースの補足",
-      "workspace_notes_intro": "チームのコンテキストや好みを下に追加してください。Multica がこのエージェント向けに管理している指示の上に適用されます。Markdown が使えます。",
+      "workspace_notes_intro": "チームのコンテキストや好みを下に追加してください。Inkway がこのエージェント向けに管理している指示の上に適用されます。Markdown が使えます。",
       "workspace_notes_placeholder": "このエージェントが常に知っておくべきことを書きます。\n\n# 例\nメインリポジトリは github.com/acme/platform です。\nチャットが日本語でも、タスクは英語で書いてください。\n金曜日はデプロイしません。"
     },
     "env": {
@@ -410,12 +410,12 @@
       "save_failed_toast": "カスタム引数を保存できませんでした"
     },
     "mcp_config": {
-      "managed_title": "Multica で管理",
-      "managed_empty": "Multica で管理されている MCP Server はありません。",
+      "managed_title": "Inkway で管理",
+      "managed_empty": "Inkway で管理されている MCP Server はありません。",
       "add_action": "MCP を追加",
       "agent_disabled_badge": "エージェントで無効",
       "runtime_disabled_badge": "ランタイムで無効",
-      "runtime_overridden_badge": "Multica で上書き",
+      "runtime_overridden_badge": "Inkway で上書き",
       "workspace_title": "ワークスペースライブラリから",
       "workspace_action_failed": "このエージェントの MCP サーバーを更新できませんでした",
       "workspace_removed_toast": "このエージェントから MCP サーバーを削除しました",
@@ -895,7 +895,9 @@
       "behavior": "動作と機能",
       "execution": "実行設定",
       "execution_hint": "未指定の項目はランタイムの既定値を使います。",
-      "access": "アクセス"
+      "access": "アクセス",
+      "provider_tool": "プロバイダー / ツール",
+      "provider_tool_hint": "ローカルツールまたはAPIプロバイダーを選択します。"
     },
     "thinking_label": "思考",
     "speed_label": "速度",
@@ -956,10 +958,28 @@
       "discard_cancel": "編集を続ける",
       "banner": "未完了の下書きが {{count}} 件あります",
       "pick_hint": "続きを選んでください。"
+    },
+    "provider_tool": {
+      "execution_legend": "実行方法",
+      "local_tool": "ローカルツール",
+      "api_provider": "APIプロバイダー",
+      "provider": "プロバイダー",
+      "native_provider_aria": "API provider",
+      "openai": "OpenAI",
+      "anthropic": "Anthropic",
+      "groq": "Groq",
+      "model": "モデル",
+      "native_model_aria": "API provider model",
+      "model_id": "モデルID",
+      "credentials_local": "認証情報はこのコンピューターに保存されます。"
     }
   },
   "actions": {
     "selected_other": "{{count}} 件選択中",
     "clear_selection": "選択を解除"
+  },
+  "advanced": {
+    "label": "Advanced",
+    "hint": "Thinking level, service tier, skills, conversation starters and access."
   }
 }

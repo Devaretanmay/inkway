@@ -13,19 +13,9 @@ type ExtraFrontmatter = {
 };
 
 export async function generateMetadata(): Promise<Metadata> {
-  const locale = await getUseCaseLocale();
-  const text = useCaseText[locale];
   return {
-    title: text.indexMetadataTitle,
-    description: text.indexMetadataDescription,
-    openGraph: {
-      title: text.indexMetadataTitle,
-      description: text.indexMetadataDescription,
-      url: "/usecases",
-    },
-    alternates: {
-      canonical: "/usecases",
-    },
+    title: "Inkway",
+    description: "AI agents with verified local decisions called Inks.",
   };
 }
 

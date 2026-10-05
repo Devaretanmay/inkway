@@ -10,12 +10,12 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 
-	"github.com/multica-ai/multica/server/internal/integrations/channel"
-	"github.com/multica-ai/multica/server/internal/integrations/channel/engine"
-	slackintegration "github.com/multica-ai/multica/server/internal/integrations/slack"
-	"github.com/multica-ai/multica/server/internal/service"
-	"github.com/multica-ai/multica/server/internal/util"
-	db "github.com/multica-ai/multica/server/pkg/db/generated"
+	"github.com/Devaretanmay/inkway/server/internal/integrations/channel"
+	"github.com/Devaretanmay/inkway/server/internal/integrations/channel/engine"
+	slackintegration "github.com/Devaretanmay/inkway/server/internal/integrations/slack"
+	"github.com/Devaretanmay/inkway/server/internal/service"
+	"github.com/Devaretanmay/inkway/server/internal/util"
+	db "github.com/Devaretanmay/inkway/server/pkg/db/generated"
 	slackapi "github.com/slack-go/slack"
 )
 
@@ -112,7 +112,7 @@ func TestChannelClearCommandE2EStartsFreshProviderSession(t *testing.T) {
 }
 
 // /new changes only the future inbound route. A task already queued from the
-// old generation must keep both its Multica Chat and exact external reply
+// old generation must keep both its Inkway Chat and exact external reply
 // target, while the new command gets a distinct Chat and delivery snapshot.
 func TestChannelChatCommandE2ERotatesRouteAndFreezesTaskDelivery(t *testing.T) {
 	if testHandler == nil {
@@ -348,7 +348,7 @@ func TestChannelChatCommandE2ERotatesRouteAndFreezesTaskDelivery(t *testing.T) {
 		}
 	}
 
-	// The empty channel-created Chat remains writable from Multica. Its first
+	// The empty channel-created Chat remains writable from Inkway. Its first
 	// direct turn initializes the same deterministic title, while the direct
 	// task deliberately gets no external delivery snapshot.
 	emptySessionUUID := util.MustParseUUID(emptySessionID)

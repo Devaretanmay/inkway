@@ -23,7 +23,7 @@ When you assign to a squad, the squad becomes the issue's assignee and the squad
 
 ## Execution after assignment
 
-Multica creates a [run](/tasks) for the agent. Once an online runtime claims the run, it invokes the AI coding tool on that machine; progress, comments, and results then appear in the issue.
+Inkway creates a [run](/tasks) for the agent. Once an online runtime claims the run, it invokes the AI coding tool on that machine; progress, comments, and results then appear in the issue.
 
 If the runtime is temporarily offline, the run waits in the queue; a run is bound to its runtime and never moves to another machine.
 
@@ -38,7 +38,7 @@ What it can actually do is still limited by the agent's configuration, the runti
 
 During the run, the agent manages the issue's status by judging what its work changes: starting on the issue's own ask moves it to `in_progress` right away, delivery moves it to `in_review`, work continuing beyond the turn keeps it `in_progress`, and consultation or discussion leaves the status untouched — these actions appear under the agent's identity in the timeline. Run lifecycle and issue status are separate: a run completing does not by itself change the issue status.
 
-When the assignee is a [squad](/squads), the same rule applies: Multica enqueues the leader, and dispatching members is not delivery — a dispatch turn leaves the parent issue `in_progress`, and the leader only moves it to `in_review` once the overall goal is met.
+When the assignee is a [squad](/squads), the same rule applies: Inkway enqueues the leader, and dispatching members is not delivery — a dispatch turn leaves the parent issue `in_progress`, and the leader only moves it to `in_review` once the overall goal is met.
 
 ## Assign without starting
 
@@ -71,13 +71,13 @@ Changing the assignee, unassigning, or changing the issue status doesn't stop a 
 ## Use the CLI
 
 ```bash
-multica issue assign MUL-42 --to "Agent name"
-multica issue assign MUL-42 --to-id <agent-uuid> --no-start
-multica issue status MUL-42 in_progress --no-start
-multica issue assign MUL-42 --unassign
+inkway issue assign MUL-42 --to "Agent name"
+inkway issue assign MUL-42 --to-id <agent-uuid> --no-start
+inkway issue status MUL-42 in_progress --no-start
+inkway issue assign MUL-42 --unassign
 ```
 
-In scripts, use `--to-id <uuid>` to avoid matching the wrong object with the same name. Look up UUIDs with `multica agent list --output json` or `multica workspace member list --output json`.
+In scripts, use `--to-id <uuid>` to avoid matching the wrong object with the same name. Look up UUIDs with `inkway agent list --output json` or `inkway workspace member list --output json`.
 
 Use `--no-start` when the assignment should record ownership without creating a new run — for example, when the same agent is already handling the issue from another run. The same flag is available on `issue update` and `issue status`. If an ownership-only flow changes both assignment and status, pass it to both commands; suppressing the assignment does not suppress a later status-triggered run.
 

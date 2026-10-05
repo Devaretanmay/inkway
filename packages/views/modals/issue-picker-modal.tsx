@@ -1,11 +1,11 @@
 "use client";
 
-import { issueStatusCategory } from "@multica/core/issues";
-import { useWorkspaceId } from "@multica/core/hooks";
-import { useIssueStatuses } from "@multica/core/issue-statuses/hooks";
+import { issueStatusCategory } from "@inkway/core/issues";
+import { useWorkspaceId } from "@inkway/core/hooks";
+import { useIssueStatuses } from "@inkway/core/issue-statuses/hooks";
 import { useState, useEffect, useCallback, useRef } from "react";
-import type { Issue } from "@multica/core/types";
-import { searchIssues } from "@multica/core/search-index";
+import type { Issue } from "@inkway/core/types";
+import { searchIssues } from "@inkway/core/search-index";
 import {
   Command,
   CommandDialog,
@@ -14,7 +14,7 @@ import {
   CommandEmpty,
   CommandGroup,
   CommandItem,
-} from "@multica/ui/components/ui/command";
+} from "@inkway/ui/components/ui/command";
 import { StatusIcon } from "../issues/components/status-icon";
 import { useT } from "../i18n";
 

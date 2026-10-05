@@ -2,14 +2,14 @@
 
 import { useCallback, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import type { Issue, Project } from "@multica/core/types";
-import { projectListOptions } from "@multica/core/projects/queries";
-import { childIssueProgressOptions } from "@multica/core/issues/queries";
-import { issueSurfaceGanttOptions } from "@multica/core/issues/surface/repository";
-import type { IssueSurfaceQueryPlan } from "@multica/core/issues/surface/query-plan";
-import type { IssueStatus, ProjectStatus, PropertyFilterValue } from "@multica/core/types";
-import { useIssueStatuses } from "@multica/core/issue-statuses/hooks";
-import { issueBehavesAsAny, statusColumnKeys, visibleStatusKeys } from "@multica/core/issues";
+import type { Issue, Project } from "@inkway/core/types";
+import { projectListOptions } from "@inkway/core/projects/queries";
+import { childIssueProgressOptions } from "@inkway/core/issues/queries";
+import { issueSurfaceGanttOptions } from "@inkway/core/issues/surface/repository";
+import type { IssueSurfaceQueryPlan } from "@inkway/core/issues/surface/query-plan";
+import type { IssueStatus, ProjectStatus, PropertyFilterValue } from "@inkway/core/types";
+import { useIssueStatuses } from "@inkway/core/issue-statuses/hooks";
+import { issueBehavesAsAny, statusColumnKeys, visibleStatusKeys } from "@inkway/core/issues";
 import {
   applyIssueFilters,
   type IssueFilterState,

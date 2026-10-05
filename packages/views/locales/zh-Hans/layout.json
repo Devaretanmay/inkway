@@ -1,6 +1,8 @@
 {
   "nav": {
     "inbox": "收件箱",
+    "providers": "Providers",
+    "fastpaths": "Inks",
     "chat": "聊天",
     "my_issues": "我的任务",
     "issues": "任务",
@@ -12,6 +14,36 @@
     "runtimes": "运行时",
     "skills": "Skills",
     "settings": "设置"
+  },
+  "fastpaths": {
+    "title": "Inks",
+    "empty_heading": "No Inks connected",
+    "empty_body": "No Inks yet. Once Inkway is connected, repeated agent decisions will move through Learning, Shadow and Active as they are independently verified against real outcomes.",
+    "stage_learning": "Learning",
+    "stage_shadow": "Shadow",
+    "stage_active": "Active",
+    "stage_note": "Explanatory only. Inkway is not connected, so there is no Ink data to show.",
+    "subtitle": "Verified local decisions for common agent tasks.",
+    "stage_learning_detail": "Collect decision and outcome evidence from real agent runs. Nothing is served locally yet.",
+    "stage_shadow_detail": "Compare local decisions against the cloud decisions they would have replaced.",
+    "stage_active_detail": "Serve a verified decision locally, and fall back the moment it stops matching reality.",
+    "loading": "正在加载 Ink 数据…",
+    "load_error": "无法加载 Ink 数据。",
+    "observations": "观测数",
+    "fast_served": "Ink 服务数",
+    "coverage": "覆盖率",
+    "false_serves": "错误服务数",
+    "last_maintenance": "上次维护",
+    "runtime": "运行时",
+    "connected": "已连接",
+    "degraded": "降级",
+    "unavailable": "不可用",
+    "candidate": "候选",
+    "demoted": "已降级",
+    "retired": "已停用",
+    "updated": "已更新",
+    "verified_outcomes": "已验证结果",
+    "model_calls_avoided": "避免的模型调用"
   },
   "tab": {
     "issue": "任务",
@@ -53,7 +85,7 @@
     "new_issue_shortcut": "C",
     "pinned_label": "固定",
     "work_group": "工作",
-    "ai_team_group": "AI 团队",
+    "ai_team_group": "AI 工作",
     "show_more_pins": "再显示 {{count}} 项...",
     "show_fewer_pins": "收起",
     "unread_overflow": "99+",
@@ -61,5 +93,6 @@
       "title": "加入 Discord",
       "dismiss": "关闭"
     }
-  }
+  },
+  "brand_name": "Inkway"
 }

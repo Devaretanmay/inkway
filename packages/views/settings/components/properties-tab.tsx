@@ -14,33 +14,33 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useAuthStore } from "@multica/core/auth";
-import { useWorkspaceId } from "@multica/core/hooks";
-import { memberListOptions } from "@multica/core/workspace/queries";
+import { useAuthStore } from "@inkway/core/auth";
+import { useWorkspaceId } from "@inkway/core/hooks";
+import { memberListOptions } from "@inkway/core/workspace/queries";
 import {
   propertyListOptions,
   useCreateProperty,
   useUpdateProperty,
-} from "@multica/core/properties";
+} from "@inkway/core/properties";
 import type {
   IssueProperty,
   IssuePropertyOption,
   IssuePropertyType,
-} from "@multica/core/types";
-import { ISSUE_PROPERTY_TYPES } from "@multica/core/types";
-import { Button } from "@multica/ui/components/ui/button";
-import { Badge } from "@multica/ui/components/ui/badge";
-import { Input } from "@multica/ui/components/ui/input";
-import { Textarea } from "@multica/ui/components/ui/textarea";
-import { Label as FieldLabel } from "@multica/ui/components/ui/label";
-import { Switch } from "@multica/ui/components/ui/switch";
+} from "@inkway/core/types";
+import { ISSUE_PROPERTY_TYPES } from "@inkway/core/types";
+import { Button } from "@inkway/ui/components/ui/button";
+import { Badge } from "@inkway/ui/components/ui/badge";
+import { Input } from "@inkway/ui/components/ui/input";
+import { Textarea } from "@inkway/ui/components/ui/textarea";
+import { Label as FieldLabel } from "@inkway/ui/components/ui/label";
+import { Switch } from "@inkway/ui/components/ui/switch";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@multica/ui/components/ui/select";
+} from "@inkway/ui/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -48,7 +48,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@multica/ui/components/ui/dialog";
+} from "@inkway/ui/components/ui/dialog";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -58,18 +58,18 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@multica/ui/components/ui/alert-dialog";
+} from "@inkway/ui/components/ui/alert-dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@multica/ui/components/ui/dropdown-menu";
+} from "@inkway/ui/components/ui/dropdown-menu";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@multica/ui/components/ui/popover";
+} from "@inkway/ui/components/ui/popover";
 import { ColorPicker, COLOR_PICKER_PRESETS } from "../../common/color-picker";
 import {
   PropertyIcon,

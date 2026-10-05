@@ -11,11 +11,11 @@ import {
   Search,
   Trash2,
 } from "lucide-react";
-import { Input } from "@multica/ui/components/ui/input";
-import { Label } from "@multica/ui/components/ui/label";
-import { Button } from "@multica/ui/components/ui/button";
-import { Badge } from "@multica/ui/components/ui/badge";
-import { Checkbox } from "@multica/ui/components/ui/checkbox";
+import { Input } from "@inkway/ui/components/ui/input";
+import { Label } from "@inkway/ui/components/ui/label";
+import { Button } from "@inkway/ui/components/ui/button";
+import { Badge } from "@inkway/ui/components/ui/badge";
+import { Checkbox } from "@inkway/ui/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -23,14 +23,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@multica/ui/components/ui/dialog";
+} from "@inkway/ui/components/ui/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@multica/ui/components/ui/select";
+} from "@inkway/ui/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -40,33 +40,33 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@multica/ui/components/ui/alert-dialog";
+} from "@inkway/ui/components/ui/alert-dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@multica/ui/components/ui/dropdown-menu";
+} from "@inkway/ui/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import {
   useInfiniteQuery,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { useWorkspaceId } from "@multica/core/hooks";
-import { useCurrentMember } from "@multica/core/permissions";
-import { useCurrentWorkspace } from "@multica/core/paths";
-import { workspaceKeys } from "@multica/core/workspace/queries";
+import { useWorkspaceId } from "@inkway/core/hooks";
+import { useCurrentMember } from "@inkway/core/permissions";
+import { useCurrentWorkspace } from "@inkway/core/paths";
+import { workspaceKeys } from "@inkway/core/workspace/queries";
 import {
   githubInstallationRepositoriesOptions,
   githubInstallationsOptions,
-} from "@multica/core/github";
-import { api } from "@multica/core/api";
+} from "@inkway/core/github";
+import { api } from "@inkway/core/api";
 import type {
   GitHubRepository,
   Workspace,
   WorkspaceRepo,
-} from "@multica/core/types";
+} from "@inkway/core/types";
 import { useNavigation } from "../../navigation";
 import { useT } from "../../i18n";
 import { SettingsCard, SettingsSection } from "./settings-layout";

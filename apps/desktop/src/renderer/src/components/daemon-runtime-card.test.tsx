@@ -20,16 +20,16 @@ const translations = {
 vi.mock("@tanstack/react-query", () => ({
   useQuery: () => ({ data: [] }),
 }));
-vi.mock("@multica/core/hooks", () => ({
+vi.mock("@inkway/core/hooks", () => ({
   useWorkspaceId: () => "ws-1",
 }));
-vi.mock("@multica/core/runtimes", () => ({
+vi.mock("@inkway/core/runtimes", () => ({
   runtimeListOptions: () => ({ queryKey: ["runtimes"] }),
 }));
-vi.mock("@multica/core/agents", () => ({
+vi.mock("@inkway/core/agents", () => ({
   agentTaskSnapshotOptions: () => ({ queryKey: ["snapshot"] }),
 }));
-vi.mock("@multica/views/i18n", () => ({
+vi.mock("@inkway/views/i18n", () => ({
   useT: () => ({
     t: (selector: (resources: typeof translations) => string) =>
       selector(translations),

@@ -4,28 +4,28 @@ import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, Globe, Info, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
-import { ApiError } from "@multica/core/api";
-import type { Agent, AgentRuntime, MemberWithUser } from "@multica/core/types";
-import { runtimeDisplayLabel } from "@multica/core/runtimes";
+import { ApiError } from "@inkway/core/api";
+import type { Agent, AgentRuntime, MemberWithUser } from "@inkway/core/types";
+import { runtimeDisplayLabel } from "@inkway/core/runtimes";
 import {
   useDeleteRuntime,
   useUnbindAgentsAndDeleteRuntime,
-} from "@multica/core/runtimes/mutations";
+} from "@inkway/core/runtimes/mutations";
 import {
   agentListOptions,
   memberListOptions,
-} from "@multica/core/workspace/queries";
+} from "@inkway/core/workspace/queries";
 import {
   type AgentPresenceDetail,
   useWorkspacePresenceMap,
-} from "@multica/core/agents";
-import { useAuthStore } from "@multica/core/auth";
+} from "@inkway/core/agents";
+import { useAuthStore } from "@inkway/core/auth";
 import {
   AlertDialog,
   AlertDialogContent,
-} from "@multica/ui/components/ui/alert-dialog";
-import { Button } from "@multica/ui/components/ui/button";
-import { Checkbox } from "@multica/ui/components/ui/checkbox";
+} from "@inkway/ui/components/ui/alert-dialog";
+import { Button } from "@inkway/ui/components/ui/button";
+import { Checkbox } from "@inkway/ui/components/ui/checkbox";
 import { ActorAvatar } from "../../common/actor-avatar";
 import { availabilityConfig, workloadConfig } from "../../agents/presence";
 import { useT } from "../../i18n";

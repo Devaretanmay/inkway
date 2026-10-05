@@ -1,8 +1,8 @@
 "use client";
 
 import { createContext, useCallback, useContext, useMemo } from "react";
-import { useIssueOpeningStore, type IssueOpenMode } from "@multica/core/issues/stores/issue-opening-store";
-import { useWorkspacePaths } from "@multica/core/paths";
+import { useIssueOpeningStore, type IssueOpenMode } from "@inkway/core/issues/stores/issue-opening-store";
+import { useWorkspacePaths } from "@inkway/core/paths";
 import { useNavigation } from "../../navigation";
 
 /**

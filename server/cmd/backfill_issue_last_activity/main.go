@@ -23,8 +23,8 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/multica-ai/multica/server/internal/issueactivitybackfill"
-	"github.com/multica-ai/multica/server/internal/logger"
+	"github.com/Devaretanmay/inkway/server/internal/issueactivitybackfill"
+	"github.com/Devaretanmay/inkway/server/internal/logger"
 )
 
 const (
@@ -84,7 +84,7 @@ func run() error {
 	defer stop()
 	dbURL := os.Getenv("DATABASE_URL")
 	if dbURL == "" {
-		dbURL = "postgres://multica:multica@localhost:5432/multica?sslmode=disable"
+		dbURL = "postgres://inkway:inkway@localhost:5432/inkway?sslmode=disable"
 	}
 	pool, err := pgxpool.New(ctx, dbURL)
 	if err != nil {

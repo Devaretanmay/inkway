@@ -1,4 +1,4 @@
-import type { AgentTask } from "@multica/core/types";
+import type { AgentTask } from "@inkway/core/types";
 import {
   estimateCostBreakdown,
   summarizeTaskUsage,

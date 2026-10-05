@@ -1,15 +1,15 @@
 import { act, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ApiError } from "@multica/core/api";
-import { configStore } from "@multica/core/config";
-import { BILLING_WORKSPACE_SUBSCRIPTIONS_FLAG } from "@multica/core/feature-flags";
+import { ApiError } from "@inkway/core/api";
+import { configStore } from "@inkway/core/config";
+import { BILLING_WORKSPACE_SUBSCRIPTIONS_FLAG } from "@inkway/core/feature-flags";
 import type {
   AutopilotQuotaUsage,
   IssueLimitUsage,
   WorkspaceSubscriptionEntitlements,
   WorkspaceSubscriptionSummary,
-} from "@multica/core/types";
+} from "@inkway/core/types";
 import { renderWithI18n } from "../../test/i18n";
 
 const mocks = vi.hoisted(() => ({
@@ -114,7 +114,7 @@ vi.mock("@tanstack/react-query", () => ({
   useQuery: (options: unknown) => mocks.useQuery(options),
 }));
 
-vi.mock("@multica/core/billing", () => ({
+vi.mock("@inkway/core/billing", () => ({
   workspaceSubscriptionPricesOptions: (wsId: string) => ({
     queryKey: ["workspace-subscriptions", wsId, "prices"],
   }),
@@ -142,13 +142,13 @@ vi.mock("@multica/core/billing", () => ({
   }),
 }));
 
-vi.mock("@multica/core/autopilots", () => ({
+vi.mock("@inkway/core/autopilots", () => ({
   autopilotQuotaUsageOptions: (wsId: string) => ({
     queryKey: ["autopilots", wsId, "usage"],
   }),
 }));
 
-vi.mock("@multica/core/paths", () => ({
+vi.mock("@inkway/core/paths", () => ({
   useCurrentWorkspace: () => ({
     id: mocks.workspaceId,
     slug: "acme",

@@ -107,7 +107,7 @@ const mockQuickCreateStore = {
 };
 
 const mockCreateSettingsStore = {
-  quickCreateFields: ["project"] as Array<"project" | "priority" | "due_date">,
+  quickCreateFields: [] as Array<"project" | "priority" | "due_date">,
   setQuickCreateFieldVisible: mockSetQuickCreateFieldVisible,
 };
 
@@ -181,7 +181,7 @@ const { ApiError } = vi.hoisted(() => {
   return { ApiError: ApiErrorImpl };
 });
 
-vi.mock("@multica/core/api", () => ({
+vi.mock("@inkway/core/api", () => ({
   api: {
     createCommentSubIssue: mockCreateCommentSubIssue,
     quickCreateIssue: mockQuickCreateIssue,
@@ -190,7 +190,7 @@ vi.mock("@multica/core/api", () => ({
   ApiError,
 }));
 
-vi.mock("@multica/core/hooks", () => ({
+vi.mock("@inkway/core/hooks", () => ({
   useWorkspaceId: () => "ws-test",
 }));
 
@@ -198,7 +198,7 @@ vi.mock("./use-issue-limit-upgrade-prompt", () => ({
   useIssueLimitUpgradePrompt: () => mockShowIssueLimitUpgradePrompt,
 }));
 
-vi.mock("@multica/core/paths", () => ({
+vi.mock("@inkway/core/paths", () => ({
   useCurrentWorkspace: () => ({ name: "Test Workspace" }),
   useWorkspacePaths: () => ({
     settings: () => "/ws-test/settings",
@@ -211,7 +211,7 @@ vi.mock("../navigation/context", () => ({
   useNavigation: () => ({ push: mockNavigationPush }),
 }));
 
-vi.mock("@multica/core/workspace/queries", () => ({
+vi.mock("@inkway/core/workspace/queries", () => ({
   agentListOptions: () => ({ queryKey: ["agents"] }),
   memberListOptions: () => ({ queryKey: ["members"] }),
   squadListOptions: (wsId: string) => ({
@@ -219,16 +219,16 @@ vi.mock("@multica/core/workspace/queries", () => ({
   }),
 }));
 
-vi.mock("@multica/core/projects/queries", () => ({
+vi.mock("@inkway/core/projects/queries", () => ({
   projectListOptions: () => ({ queryKey: ["projects"] }),
 }));
 
-vi.mock("@multica/core/issues/stores/quick-create-store", () => ({
+vi.mock("@inkway/core/issues/stores/quick-create-store", () => ({
   useQuickCreateStore: (selector?: (state: typeof mockQuickCreateStore) => unknown) =>
     (selector ? selector(mockQuickCreateStore) : mockQuickCreateStore),
 }));
 
-vi.mock("@multica/core/issues/stores/draft-store", () => ({
+vi.mock("@inkway/core/issues/stores/draft-store", () => ({
   useIssueDraftStore: Object.assign(
     (selector?: (state: typeof mockIssueDraftStore) => unknown) =>
       (selector ? selector(mockIssueDraftStore) : mockIssueDraftStore),
@@ -236,18 +236,18 @@ vi.mock("@multica/core/issues/stores/draft-store", () => ({
   ),
 }));
 
-vi.mock("@multica/core/issues/stores/issue-create-settings-store", () => ({
+vi.mock("@inkway/core/issues/stores/issue-create-settings-store", () => ({
   useIssueCreateSettingsStore: (
     selector?: (state: typeof mockCreateSettingsStore) => unknown,
   ) => (selector ? selector(mockCreateSettingsStore) : mockCreateSettingsStore),
 }));
 
-vi.mock("@multica/core/issues/stores/create-mode-store", () => ({
+vi.mock("@inkway/core/issues/stores/create-mode-store", () => ({
   useCreateModeStore: (selector?: (state: { setLastMode: typeof mockSetLastMode }) => unknown) =>
     (selector ? selector({ setLastMode: mockSetLastMode }) : { setLastMode: mockSetLastMode }),
 }));
 
-vi.mock("@multica/core/auth", () => ({
+vi.mock("@inkway/core/auth", () => ({
   useAuthStore: (selector?: (state: { user: { id: string } }) => unknown) =>
     (selector ? selector({ user: { id: "user-1" } }) : { user: { id: "user-1" } }),
 }));
@@ -256,8 +256,8 @@ vi.mock("@multica/core/auth", () => ({
 // panel reacts when the selected runtime is absent vs. present-but-old, and a
 // constant-"ok" stub would mask exactly that. Only runtimeListOptions is
 // overridden so the query key routes to our mocked useQuery above.
-vi.mock("@multica/core/runtimes", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@multica/core/runtimes")>()),
+vi.mock("@inkway/core/runtimes", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@inkway/core/runtimes")>()),
   runtimeListOptions: () => ({ queryKey: ["runtimes"] }),
 }));
 
@@ -297,7 +297,7 @@ vi.mock("../projects/components/project-picker", () => ({
   ),
 }));
 
-vi.mock("@multica/ui/components/ui/dropdown-menu", () => ({
+vi.mock("@inkway/ui/components/ui/dropdown-menu", () => ({
   DropdownMenu: ({ children }: { children: ReactNode }) => <>{children}</>,
   DropdownMenuTrigger: ({ render }: { render: ReactNode }) => <>{render}</>,
   DropdownMenuContent: ({ children }: { children: ReactNode }) => <>{children}</>,
@@ -320,7 +320,7 @@ vi.mock("@multica/ui/components/ui/dropdown-menu", () => ({
   DropdownMenuSeparator: () => null,
 }));
 
-vi.mock("@multica/ui/lib/utils", () => ({
+vi.mock("@inkway/ui/lib/utils", () => ({
   cn: (...values: Array<string | false | null | undefined>) => values.filter(Boolean).join(" "),
 }));
 
@@ -405,7 +405,7 @@ vi.mock("../editor", async () => {
   };
 });
 
-vi.mock("@multica/ui/components/ui/dialog", () => ({
+vi.mock("@inkway/ui/components/ui/dialog", () => ({
   DialogTitle: ({ children, className }: { children: ReactNode; className?: string }) => (
     <div className={className}>{children}</div>
   ),
@@ -455,7 +455,7 @@ vi.mock("../issues/components/pickers/property-picker", () => ({
   PickerEmpty: () => <div data-testid="picker-empty" />,
 }));
 
-vi.mock("@multica/ui/components/ui/button", () => ({
+vi.mock("@inkway/ui/components/ui/button", () => ({
   Button: ({ children, disabled, onClick }: { children: ReactNode; disabled?: boolean; onClick?: () => void }) => (
     <button type="button" disabled={disabled} onClick={onClick}>
       {children}
@@ -463,7 +463,7 @@ vi.mock("@multica/ui/components/ui/button", () => ({
   ),
 }));
 
-vi.mock("@multica/ui/components/ui/switch", () => ({
+vi.mock("@inkway/ui/components/ui/switch", () => ({
   Switch: ({ checked, onCheckedChange }: { checked: boolean; onCheckedChange: (v: boolean) => void }) => (
     <input
       type="checkbox"
@@ -473,7 +473,7 @@ vi.mock("@multica/ui/components/ui/switch", () => ({
   ),
 }));
 
-vi.mock("@multica/ui/components/common/file-upload-button", () => ({
+vi.mock("@inkway/ui/components/common/file-upload-button", () => ({
   // `disabled` is forwarded so the "can still queue another file mid-upload"
   // guarantee is actually assertable here (MUL-4808).
   FileUploadButton: ({ disabled, size }: { disabled?: boolean; size?: string }) => (
@@ -487,7 +487,7 @@ vi.mock("sonner", () => ({
   },
 }));
 
-import { I18nProvider } from "@multica/core/i18n/react";
+import { I18nProvider } from "@inkway/core/i18n/react";
 import enCommon from "../locales/en/common.json";
 import enModals from "../locales/en/modals.json";
 import enEditor from "../locales/en/editor.json";
@@ -513,7 +513,7 @@ describe("AgentCreatePanel", () => {
     mockQuickCreateStore.lastActorType = null;
     mockQuickCreateStore.lastActorId = null;
     mockQuickCreateStore.lastProjectId = null;
-    mockCreateSettingsStore.quickCreateFields = ["project"];
+    mockCreateSettingsStore.quickCreateFields = [];
     mockQuickCreateStore.keepOpen = false;
     mockIssueDraftStore.draft = emptyIssueDraft();
     // The prompt now lives in the unified draft's agent slot.
@@ -909,9 +909,9 @@ describe("AgentCreatePanel", () => {
 
       renderPanel({ onClose: vi.fn(), isExpanded: false, setIsExpanded: vi.fn() });
 
-      // Seeding from it is exactly the removed behavior — the pill must be
-      // empty, and with no value there is nothing to clear.
-      expect(screen.getByTestId("project-picker")).toHaveTextContent("Project none");
+      // Project stays out of the default toolbar even when an older build left
+      // a last-used value behind.
+      expect(screen.queryByTestId("project-picker")).not.toBeInTheDocument();
       expect(screen.queryByRole("button", { name: "Clear project" })).not.toBeInTheDocument();
     });
 
@@ -919,6 +919,7 @@ describe("AgentCreatePanel", () => {
       // Guard against over-removal: dropping the memory must not drop the
       // field from the outgoing request.
       const user = userEvent.setup();
+      mockCreateSettingsStore.quickCreateFields = ["project"];
       mockProjectsQuery.data = [{ id: "proj-1", title: "Web", icon: null }];
       mockProjectsQuery.isSuccess = true;
 
@@ -961,7 +962,7 @@ describe("AgentCreatePanel", () => {
     await waitFor(() => {
       expect(mockSetShared).toHaveBeenCalledWith({ projectId: undefined });
     });
-    expect(screen.getByTestId("project-picker")).toHaveTextContent("Project none");
+    expect(screen.queryByTestId("project-picker")).not.toBeInTheDocument();
   });
 
   // Dropping a project used to cost two clicks — open the popover, hit
@@ -969,6 +970,10 @@ describe("AgentCreatePanel", () => {
   // (MUL-5862). The × is part of the pill, so it only exists once the field
   // has a value to drop.
   describe("project pill quick-clear", () => {
+    beforeEach(() => {
+      mockCreateSettingsStore.quickCreateFields = ["project"];
+    });
+
     it("has no × while no project is selected", () => {
       renderPanel({ onClose: vi.fn(), isExpanded: false, setIsExpanded: vi.fn() });
 

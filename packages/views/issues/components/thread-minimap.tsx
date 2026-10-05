@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CheckCircle2 } from "lucide-react";
-import type { TimelineEntry } from "@multica/core/types";
-import { isDeletedComment } from "@multica/core/issues/comment-deletion";
-import { useActorName } from "@multica/core/workspace/hooks";
-import { cn } from "@multica/ui/lib/utils";
-import { ActorAvatar } from "@multica/ui/components/common/actor-avatar";
-import { resolvePublicFileUrl } from "@multica/core/workspace/avatar-url";
+import type { TimelineEntry } from "@inkway/core/types";
+import { isDeletedComment } from "@inkway/core/issues/comment-deletion";
+import { useActorName } from "@inkway/core/workspace/hooks";
+import { cn } from "@inkway/ui/lib/utils";
+import { ActorAvatar } from "@inkway/ui/components/common/actor-avatar";
+import { resolvePublicFileUrl } from "@inkway/core/workspace/avatar-url";
 import { useT, useTimeAgo } from "../../i18n";
 
 // ---------------------------------------------------------------------------

@@ -1,8 +1,8 @@
 "use client";
 
 import { ChevronRight, FileText, MessageSquare } from "lucide-react";
-import { useWorkspacePaths } from "@multica/core/paths";
-import { cn } from "@multica/ui/lib/utils";
+import { useWorkspacePaths } from "@inkway/core/paths";
+import { cn } from "@inkway/ui/lib/utils";
 import { AppLink, useBackOrReplace, useNavigation } from "../../navigation";
 import { useT } from "../../i18n";
 import { AgentCreateShell } from "./create-shell";

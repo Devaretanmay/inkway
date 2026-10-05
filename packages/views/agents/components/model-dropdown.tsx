@@ -6,14 +6,14 @@ import { ChevronDown, Cpu, Loader2, Plus, Check, Info } from "lucide-react";
 import {
   refreshRuntimeModels,
   runtimeModelsOptions,
-} from "@multica/core/runtimes";
-import type { RuntimeModel } from "@multica/core/types";
+} from "@inkway/core/runtimes";
+import type { RuntimeModel } from "@inkway/core/types";
 import {
   Popover,
   PopoverTrigger,
   PopoverContent,
-} from "@multica/ui/components/ui/popover";
-import { Label } from "@multica/ui/components/ui/label";
+} from "@inkway/ui/components/ui/popover";
+import { Label } from "@inkway/ui/components/ui/label";
 import { useT } from "../../i18n";
 import { UnavailableModelsNote } from "./unavailable-models-note";
 import { ModelSearchHeader } from "./model-search-header";

@@ -1,17 +1,17 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ActorAvatar as ActorAvatarBase } from "@multica/ui/components/common/actor-avatar";
-import { AVATAR_SIZE_PX, type AvatarSize } from "@multica/ui/lib/avatar-size";
+import { ActorAvatar as ActorAvatarBase } from "@inkway/ui/components/common/actor-avatar";
+import { AVATAR_SIZE_PX, type AvatarSize } from "@inkway/ui/lib/avatar-size";
 import {
   HoverCard,
   HoverCardTrigger,
   HoverCardContent,
-} from "@multica/ui/components/ui/hover-card";
-import { useActorName } from "@multica/core/workspace/hooks";
-import { resolvePublicFileUrl } from "@multica/core/workspace/avatar-url";
-import { useAgentPresenceDetail } from "@multica/core/agents";
-import { useCurrentWorkspace, useWorkspacePaths } from "@multica/core/paths";
+} from "@inkway/ui/components/ui/hover-card";
+import { useActorName } from "@inkway/core/workspace/hooks";
+import { resolvePublicFileUrl } from "@inkway/core/workspace/avatar-url";
+import { useAgentPresenceDetail } from "@inkway/core/agents";
+import { useCurrentWorkspace, useWorkspacePaths } from "@inkway/core/paths";
 import { AgentProfileCard } from "../agents/components/agent-profile-card";
 import { AgentLivePeekCard } from "../agents/components/agent-live-peek-card";
 import { MemberProfileCard } from "../members/member-profile-card";

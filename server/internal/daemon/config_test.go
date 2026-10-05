@@ -14,8 +14,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/multica-ai/multica/server/internal/cli"
-	"github.com/multica-ai/multica/server/internal/daemon/execenv"
+	"github.com/Devaretanmay/inkway/server/internal/cli"
+	"github.com/Devaretanmay/inkway/server/internal/daemon/execenv"
 )
 
 func TestResolveAgentExecutablePath_PreservesDispatchShimName(t *testing.T) {
@@ -93,9 +93,9 @@ func TestResolveAgentExecutablePath_CanonicalizesOrdinaryVersionTarget(t *testin
 }
 
 func TestPatternsFromEnv_DefaultsWhenUnset(t *testing.T) {
-	t.Setenv("MULTICA_GC_ARTIFACT_PATTERNS", "")
+	t.Setenv("INKWAY_GC_ARTIFACT_PATTERNS", "")
 	defaults := []string{"node_modules", ".next", ".turbo"}
-	got := patternsFromEnv("MULTICA_GC_ARTIFACT_PATTERNS", defaults)
+	got := patternsFromEnv("INKWAY_GC_ARTIFACT_PATTERNS", defaults)
 	if !reflect.DeepEqual(got, defaults) {
 		t.Fatalf("expected defaults %v, got %v", defaults, got)
 	}
@@ -113,7 +113,7 @@ func TestLoadConfig_CompletedTaskTTLDefaultsDisabledOnSelfHostAndReadsEnv(t *tes
 	stageFakeAgent(t)
 	t.Setenv("HOME", t.TempDir())
 	t.Setenv("SHELL", filepath.Join(t.TempDir(), "missing-shell"))
-	t.Setenv("MULTICA_GC_COMPLETED_TASK_TTL", "")
+	t.Setenv("INKWAY_GC_COMPLETED_TASK_TTL", "")
 
 	overrides := Overrides{
 		ServerURL:      "http://localhost:0",
@@ -127,7 +127,7 @@ func TestLoadConfig_CompletedTaskTTLDefaultsDisabledOnSelfHostAndReadsEnv(t *tes
 		t.Fatalf("GCCompletedTaskTTL = %s, want disabled", cfg.GCCompletedTaskTTL)
 	}
 
-	t.Setenv("MULTICA_GC_COMPLETED_TASK_TTL", "36h")
+	t.Setenv("INKWAY_GC_COMPLETED_TASK_TTL", "36h")
 	cfg, err = LoadConfig(overrides)
 	if err != nil {
 		t.Fatalf("LoadConfig with completed-task TTL: %v", err)
@@ -136,8 +136,8 @@ func TestLoadConfig_CompletedTaskTTLDefaultsDisabledOnSelfHostAndReadsEnv(t *tes
 		t.Fatalf("GCCompletedTaskTTL = %s, want 36h", cfg.GCCompletedTaskTTL)
 	}
 
-	t.Setenv("MULTICA_GC_COMPLETED_TASK_TTL", "not-a-duration")
-	if _, err := LoadConfig(overrides); err == nil || !strings.Contains(err.Error(), "MULTICA_GC_COMPLETED_TASK_TTL") {
+	t.Setenv("INKWAY_GC_COMPLETED_TASK_TTL", "not-a-duration")
+	if _, err := LoadConfig(overrides); err == nil || !strings.Contains(err.Error(), "INKWAY_GC_COMPLETED_TASK_TTL") {
 		t.Fatalf("LoadConfig invalid completed-task TTL error = %v, want named validation error", err)
 	}
 }
@@ -146,7 +146,7 @@ func TestLoadConfig_WSClaimPollIntervalPrecedence(t *testing.T) {
 	stageFakeAgent(t)
 	t.Setenv("HOME", t.TempDir())
 	t.Setenv("SHELL", filepath.Join(t.TempDir(), "missing-shell"))
-	t.Setenv("MULTICA_DAEMON_WS_CLAIM_POLL_INTERVAL", "")
+	t.Setenv("INKWAY_DAEMON_WS_CLAIM_POLL_INTERVAL", "")
 	base := Overrides{ServerURL: "http://localhost:0", WorkspacesRoot: t.TempDir()}
 
 	cfg, err := LoadConfig(base)
@@ -157,7 +157,7 @@ func TestLoadConfig_WSClaimPollIntervalPrecedence(t *testing.T) {
 		t.Fatalf("default WSClaimPollInterval = %s, want %s", cfg.WSClaimPollInterval, DefaultWSClaimPollInterval)
 	}
 
-	t.Setenv("MULTICA_DAEMON_WS_CLAIM_POLL_INTERVAL", "75s")
+	t.Setenv("INKWAY_DAEMON_WS_CLAIM_POLL_INTERVAL", "75s")
 	cfg, err = LoadConfig(base)
 	if err != nil {
 		t.Fatalf("LoadConfig env: %v", err)
@@ -176,7 +176,7 @@ func TestLoadConfig_WSClaimPollIntervalPrecedence(t *testing.T) {
 	}
 
 	base.WSClaimPollInterval = 0
-	t.Setenv("MULTICA_DAEMON_WS_CLAIM_POLL_INTERVAL", "0s")
+	t.Setenv("INKWAY_DAEMON_WS_CLAIM_POLL_INTERVAL", "0s")
 	if _, err := LoadConfig(base); err == nil || !strings.Contains(err.Error(), "must be positive") {
 		t.Fatalf("LoadConfig zero WS claim poll error = %v, want positive-duration validation", err)
 	}
@@ -186,7 +186,7 @@ func TestLoadConfig_CompletedTaskTTLDefaultsBoundedOnOfficialCloud(t *testing.T)
 	stageFakeAgent(t)
 	t.Setenv("HOME", t.TempDir())
 	t.Setenv("SHELL", filepath.Join(t.TempDir(), "missing-shell"))
-	t.Setenv("MULTICA_GC_COMPLETED_TASK_TTL", "")
+	t.Setenv("INKWAY_GC_COMPLETED_TASK_TTL", "")
 
 	overrides := Overrides{
 		ServerURL:      "https://" + officialCloudHost,
@@ -202,7 +202,7 @@ func TestLoadConfig_CompletedTaskTTLDefaultsBoundedOnOfficialCloud(t *testing.T)
 
 	// An explicit 0 has to win on cloud too — otherwise the only way back to the
 	// previous retention behavior would be downgrading the daemon.
-	t.Setenv("MULTICA_GC_COMPLETED_TASK_TTL", "0")
+	t.Setenv("INKWAY_GC_COMPLETED_TASK_TTL", "0")
 	cfg, err = LoadConfig(overrides)
 	if err != nil {
 		t.Fatalf("LoadConfig with cloud opt-out: %v", err)
@@ -211,7 +211,7 @@ func TestLoadConfig_CompletedTaskTTLDefaultsBoundedOnOfficialCloud(t *testing.T)
 		t.Fatalf("GCCompletedTaskTTL = %s, want an explicit 0 to disable the cloud default", cfg.GCCompletedTaskTTL)
 	}
 
-	t.Setenv("MULTICA_GC_COMPLETED_TASK_TTL", "36h")
+	t.Setenv("INKWAY_GC_COMPLETED_TASK_TTL", "36h")
 	cfg, err = LoadConfig(overrides)
 	if err != nil {
 		t.Fatalf("LoadConfig with cloud override: %v", err)
@@ -233,7 +233,7 @@ func TestDefaultGCCompletedTaskTTLOnlyBoundsOfficialCloudHost(t *testing.T) {
 		// Staging and previews inherit the self-host value for the same reason
 		// officialCloudHost excludes them from the auto-update default.
 		{"staging", "https://api-staging.multica.ai", DefaultGCCompletedTaskTTLSelfHost},
-		{"self-host", "https://multica.example.com", DefaultGCCompletedTaskTTLSelfHost},
+		{"self-host", "https://inkway.example.com", DefaultGCCompletedTaskTTLSelfHost},
 		{"localhost", "http://localhost:8080", DefaultGCCompletedTaskTTLSelfHost},
 		{"unparseable", "://nope", DefaultGCCompletedTaskTTLSelfHost},
 	}
@@ -248,20 +248,20 @@ func TestDefaultGCCompletedTaskTTLOnlyBoundsOfficialCloudHost(t *testing.T) {
 }
 
 func TestRepoMaintenanceKillSwitchDefaultsOnAndCanDisable(t *testing.T) {
-	t.Setenv("MULTICA_GC_REPO_MAINTENANCE_ENABLED", "")
-	if !boolFromEnv("MULTICA_GC_REPO_MAINTENANCE_ENABLED", true) {
+	t.Setenv("INKWAY_GC_REPO_MAINTENANCE_ENABLED", "")
+	if !boolFromEnv("INKWAY_GC_REPO_MAINTENANCE_ENABLED", true) {
 		t.Fatal("repo maintenance kill switch should default to enabled")
 	}
 
-	t.Setenv("MULTICA_GC_REPO_MAINTENANCE_ENABLED", "false")
-	if boolFromEnv("MULTICA_GC_REPO_MAINTENANCE_ENABLED", true) {
+	t.Setenv("INKWAY_GC_REPO_MAINTENANCE_ENABLED", "false")
+	if boolFromEnv("INKWAY_GC_REPO_MAINTENANCE_ENABLED", true) {
 		t.Fatal("repo maintenance kill switch should accept false")
 	}
 }
 
 func TestPatternsFromEnv_DropsSeparatorBearingEntries(t *testing.T) {
-	t.Setenv("MULTICA_GC_ARTIFACT_PATTERNS", "node_modules, .next ,foo/bar, ../etc, ,target")
-	got := patternsFromEnv("MULTICA_GC_ARTIFACT_PATTERNS", nil)
+	t.Setenv("INKWAY_GC_ARTIFACT_PATTERNS", "node_modules, .next ,foo/bar, ../etc, ,target")
+	got := patternsFromEnv("INKWAY_GC_ARTIFACT_PATTERNS", nil)
 	want := []string{"node_modules", ".next", "target"}
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("expected %v, got %v", want, got)
@@ -434,7 +434,7 @@ func TestIsOfficialCloudServer(t *testing.T) {
 		{"localhost is self-host", "http://localhost:8080", false},
 		{"loopback ip is self-host", "http://127.0.0.1:8080", false},
 		{"lan ip is self-host", "http://192.168.0.28:8080", false},
-		{"third-party host is self-host", "https://multica.example.com", false},
+		{"third-party host is self-host", "https://inkway.example.com", false},
 		// Staging / preview / future subdomains deliberately follow the
 		// safer self-host default until explicitly opted in.
 		{"multica.ai apex is not the api host", "https://multica.ai", false},
@@ -467,10 +467,10 @@ func stageFakeAgent(t *testing.T) string {
 		t.Fatalf("write fake claude: %v", err)
 	}
 	t.Setenv("PATH", binDir)
-	t.Setenv("MULTICA_DAEMON_ID", "11111111-1111-1111-1111-111111111111")
+	t.Setenv("INKWAY_DAEMON_ID", "11111111-1111-1111-1111-111111111111")
 	// Clear any inherited env-var override so the test sees the URL-based
 	// default, not whatever the developer happens to have exported.
-	t.Setenv("MULTICA_DAEMON_AUTO_UPDATE", "")
+	t.Setenv("INKWAY_DAEMON_AUTO_UPDATE", "")
 	return binDir
 }
 
@@ -486,8 +486,8 @@ func TestLoadConfig_DiscoversQwenCode(t *testing.T) {
 	// Avoid consulting an inherited interactive shell for all deliberately
 	// absent providers; this test is about ordinary PATH discovery.
 	t.Setenv("SHELL", "/usr/bin/fish")
-	t.Setenv("MULTICA_QWEN_MODEL", "qwen3.8-max-preview")
-	t.Setenv("MULTICA_QWEN_ARGS", "--verbose --foo=bar")
+	t.Setenv("INKWAY_QWEN_MODEL", "qwen3.8-max-preview")
+	t.Setenv("INKWAY_QWEN_ARGS", "--verbose --foo=bar")
 
 	cfg, err := LoadConfig(Overrides{
 		ServerURL:      "http://localhost:0",
@@ -512,14 +512,14 @@ func TestLoadConfig_DiscoversQwenCode(t *testing.T) {
 	}
 }
 
-func TestLoadConfig_SkipsMulticaHooksShadowingAgentBinaries(t *testing.T) {
+func TestLoadConfig_SkipsInkwayHooksShadowingAgentBinaries(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("POSIX shell not available on Windows")
 	}
 
 	home := t.TempDir()
 	t.Setenv("HOME", home)
-	hooksDir := filepath.Join(home, ".multica", "hooks")
+	hooksDir := filepath.Join(home, ".inkway", "hooks")
 	if err := os.MkdirAll(hooksDir, 0o755); err != nil {
 		t.Fatalf("create hooks dir: %v", err)
 	}
@@ -539,7 +539,7 @@ func TestLoadConfig_SkipsMulticaHooksShadowingAgentBinaries(t *testing.T) {
 
 	t.Setenv("PATH", hooksDir+string(os.PathListSeparator)+realBinDir)
 	t.Setenv("SHELL", filepath.Join(t.TempDir(), "fish"))
-	t.Setenv("MULTICA_DAEMON_ID", "11111111-1111-1111-1111-111111111111")
+	t.Setenv("INKWAY_DAEMON_ID", "11111111-1111-1111-1111-111111111111")
 
 	cfg, err := LoadConfig(Overrides{
 		ServerURL:      "http://localhost:0",
@@ -568,7 +568,7 @@ func TestLoadConfig_SkipsMulticaHooksShadowingAgentBinaries(t *testing.T) {
 	}
 }
 
-func TestLoadConfig_SkipsMulticaHooksFromLoginShellFallback(t *testing.T) {
+func TestLoadConfig_SkipsInkwayHooksFromLoginShellFallback(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("POSIX shell not available on Windows")
 	}
@@ -579,7 +579,7 @@ func TestLoadConfig_SkipsMulticaHooksFromLoginShellFallback(t *testing.T) {
 
 	home := t.TempDir()
 	t.Setenv("HOME", home)
-	hooksDir := filepath.Join(home, ".multica", "hooks")
+	hooksDir := filepath.Join(home, ".inkway", "hooks")
 	if err := os.MkdirAll(hooksDir, 0o755); err != nil {
 		t.Fatalf("create hooks dir: %v", err)
 	}
@@ -604,7 +604,7 @@ func TestLoadConfig_SkipsMulticaHooksFromLoginShellFallback(t *testing.T) {
 	}
 	t.Setenv("SHELL", sh)
 	t.Setenv("ENV", rc)
-	t.Setenv("MULTICA_DAEMON_ID", "11111111-1111-1111-1111-111111111111")
+	t.Setenv("INKWAY_DAEMON_ID", "11111111-1111-1111-1111-111111111111")
 	pinNonCodexAgentsToMissingPaths(t)
 	oldBundlePaths := codexDesktopAppBundlePaths
 	codexDesktopAppBundlePaths = func() []string { return nil }
@@ -650,7 +650,7 @@ func TestLoadConfig_AutoUpdateDefault_SelfHostOff(t *testing.T) {
 
 func TestLoadConfig_CodexHandshakeTimeout(t *testing.T) {
 	stageFakeAgent(t)
-	t.Setenv("MULTICA_CODEX_HANDSHAKE_TIMEOUT", "")
+	t.Setenv("INKWAY_CODEX_HANDSHAKE_TIMEOUT", "")
 
 	cfg, err := LoadConfig(Overrides{
 		ServerURL:      "http://localhost:8080",
@@ -666,7 +666,7 @@ func TestLoadConfig_CodexHandshakeTimeout(t *testing.T) {
 		t.Fatalf("CodexThreadHandshakeTimeout = %s, want default %s", cfg.CodexThreadHandshakeTimeout, DefaultCodexThreadHandshakeTimeout)
 	}
 
-	t.Setenv("MULTICA_CODEX_HANDSHAKE_TIMEOUT", "47s")
+	t.Setenv("INKWAY_CODEX_HANDSHAKE_TIMEOUT", "47s")
 
 	cfg, err = LoadConfig(Overrides{
 		ServerURL:      "http://localhost:8080",
@@ -682,7 +682,7 @@ func TestLoadConfig_CodexHandshakeTimeout(t *testing.T) {
 		t.Fatalf("CodexThreadHandshakeTimeout = %s, want legacy 47s env override", cfg.CodexThreadHandshakeTimeout)
 	}
 
-	t.Setenv("MULTICA_CODEX_HANDSHAKE_TIMEOUT", "1d")
+	t.Setenv("INKWAY_CODEX_HANDSHAKE_TIMEOUT", "1d")
 	cfg, err = LoadConfig(Overrides{
 		ServerURL:      "http://localhost:8080",
 		WorkspacesRoot: t.TempDir(),
@@ -697,7 +697,7 @@ func TestLoadConfig_CodexHandshakeTimeout(t *testing.T) {
 		t.Fatalf("CodexThreadHandshakeTimeout = %s, want legacy 24h env override", cfg.CodexThreadHandshakeTimeout)
 	}
 
-	t.Setenv("MULTICA_CODEX_HANDSHAKE_TIMEOUT", "0")
+	t.Setenv("INKWAY_CODEX_HANDSHAKE_TIMEOUT", "0")
 	cfg, err = LoadConfig(Overrides{
 		ServerURL:      "http://localhost:8080",
 		WorkspacesRoot: t.TempDir(),
@@ -730,7 +730,7 @@ func TestLoadConfig_CodexHandshakeTimeout(t *testing.T) {
 
 func TestLoadConfig_CodexTurnInterruptTimeout(t *testing.T) {
 	stageFakeAgent(t)
-	t.Setenv("MULTICA_CODEX_TURN_INTERRUPT_TIMEOUT", "750ms")
+	t.Setenv("INKWAY_CODEX_TURN_INTERRUPT_TIMEOUT", "750ms")
 
 	cfg, err := LoadConfig(Overrides{
 		ServerURL:      "http://localhost:8080",
@@ -743,7 +743,7 @@ func TestLoadConfig_CodexTurnInterruptTimeout(t *testing.T) {
 		t.Fatalf("CodexTurnInterruptTimeout = %s, want 750ms", cfg.CodexTurnInterruptTimeout)
 	}
 
-	t.Setenv("MULTICA_CODEX_TURN_INTERRUPT_TIMEOUT", "0")
+	t.Setenv("INKWAY_CODEX_TURN_INTERRUPT_TIMEOUT", "0")
 	cfg, err = LoadConfig(Overrides{
 		ServerURL:      "http://localhost:8080",
 		WorkspacesRoot: t.TempDir(),
@@ -757,13 +757,13 @@ func TestLoadConfig_CodexTurnInterruptTimeout(t *testing.T) {
 }
 
 // TestLoadConfig_CodexFirstTurnNoProgressTimeout pins the env-only
-// MULTICA_CODEX_FIRST_TURN_TIMEOUT resolution (GH #3262 / #5959): unset and an
+// INKWAY_CODEX_FIRST_TURN_TIMEOUT resolution (GH #3262 / #5959): unset and an
 // explicit "0" both mean "keep the backend default" (0 = unset), while a positive
 // value is honored verbatim. There is deliberately no Overrides/CLI parity — this
 // knob is environment-only.
 func TestLoadConfig_CodexFirstTurnNoProgressTimeout(t *testing.T) {
 	stageFakeAgent(t)
-	t.Setenv("MULTICA_CODEX_FIRST_TURN_TIMEOUT", "")
+	t.Setenv("INKWAY_CODEX_FIRST_TURN_TIMEOUT", "")
 
 	cfg, err := LoadConfig(Overrides{
 		ServerURL:      "http://localhost:8080",
@@ -776,7 +776,7 @@ func TestLoadConfig_CodexFirstTurnNoProgressTimeout(t *testing.T) {
 		t.Fatalf("CodexFirstTurnNoProgressTimeout = %s, want 0 when unset", cfg.CodexFirstTurnNoProgressTimeout)
 	}
 
-	t.Setenv("MULTICA_CODEX_FIRST_TURN_TIMEOUT", "30m")
+	t.Setenv("INKWAY_CODEX_FIRST_TURN_TIMEOUT", "30m")
 	cfg, err = LoadConfig(Overrides{
 		ServerURL:      "http://localhost:8080",
 		WorkspacesRoot: t.TempDir(),
@@ -788,7 +788,7 @@ func TestLoadConfig_CodexFirstTurnNoProgressTimeout(t *testing.T) {
 		t.Fatalf("CodexFirstTurnNoProgressTimeout = %s, want 30m from env", cfg.CodexFirstTurnNoProgressTimeout)
 	}
 
-	t.Setenv("MULTICA_CODEX_FIRST_TURN_TIMEOUT", "0")
+	t.Setenv("INKWAY_CODEX_FIRST_TURN_TIMEOUT", "0")
 	cfg, err = LoadConfig(Overrides{
 		ServerURL:      "http://localhost:8080",
 		WorkspacesRoot: t.TempDir(),
@@ -802,7 +802,7 @@ func TestLoadConfig_CodexFirstTurnNoProgressTimeout(t *testing.T) {
 }
 
 // TestLoadConfig_CodexFirstTurnTimeoutEqualToSemanticWarns pins the equality
-// edge (multica-eve review on #6753): because the semantic-inactivity timer is
+// edge (inkway-eve review on #6753): because the semantic-inactivity timer is
 // armed before the first-turn timer, equal durations still let the semantic
 // deadline win and drop the #3291 startup retry. LoadConfig must warn when the
 // first-turn timeout is >= the semantic timeout, and stay quiet only when the
@@ -810,7 +810,7 @@ func TestLoadConfig_CodexFirstTurnNoProgressTimeout(t *testing.T) {
 func TestLoadConfig_CodexFirstTurnTimeoutEqualToSemanticWarns(t *testing.T) {
 	stageFakeAgent(t)
 
-	const warnNeedle = "MULTICA_CODEX_FIRST_TURN_TIMEOUT is greater than or equal to the semantic-inactivity timeout"
+	const warnNeedle = "INKWAY_CODEX_FIRST_TURN_TIMEOUT is greater than or equal to the semantic-inactivity timeout"
 
 	loadWithLoggedWarnings := func(t *testing.T, semantic, firstTurn string) string {
 		t.Helper()
@@ -819,8 +819,8 @@ func TestLoadConfig_CodexFirstTurnTimeoutEqualToSemanticWarns(t *testing.T) {
 		slog.SetDefault(slog.New(slog.NewTextHandler(&buf, &slog.HandlerOptions{Level: slog.LevelWarn})))
 		t.Cleanup(func() { slog.SetDefault(prev) })
 
-		t.Setenv("MULTICA_CODEX_SEMANTIC_INACTIVITY_TIMEOUT", semantic)
-		t.Setenv("MULTICA_CODEX_FIRST_TURN_TIMEOUT", firstTurn)
+		t.Setenv("INKWAY_CODEX_SEMANTIC_INACTIVITY_TIMEOUT", semantic)
+		t.Setenv("INKWAY_CODEX_FIRST_TURN_TIMEOUT", firstTurn)
 		if _, err := LoadConfig(Overrides{
 			ServerURL:      "http://localhost:8080",
 			WorkspacesRoot: t.TempDir(),
@@ -855,8 +855,8 @@ func TestLoadConfig_CodexFirstTurnTimeoutEqualToSemanticWarns(t *testing.T) {
 // lower, invisible ceiling.
 func TestLoadConfig_ToolWatchdogDefaultsToIdleWatchdog(t *testing.T) {
 	stageFakeAgent(t)
-	t.Setenv("MULTICA_AGENT_IDLE_WATCHDOG", "")
-	t.Setenv("MULTICA_AGENT_TOOL_WATCHDOG", "")
+	t.Setenv("INKWAY_AGENT_IDLE_WATCHDOG", "")
+	t.Setenv("INKWAY_AGENT_TOOL_WATCHDOG", "")
 
 	load := func(t *testing.T) Config {
 		t.Helper()
@@ -879,7 +879,7 @@ func TestLoadConfig_ToolWatchdogDefaultsToIdleWatchdog(t *testing.T) {
 	}
 
 	// Raising only the idle budget must carry the tool budget with it.
-	t.Setenv("MULTICA_AGENT_IDLE_WATCHDOG", "6h")
+	t.Setenv("INKWAY_AGENT_IDLE_WATCHDOG", "6h")
 	cfg = load(t)
 	if cfg.AgentIdleWatchdog != 6*time.Hour || cfg.AgentToolWatchdog != 6*time.Hour {
 		t.Fatalf("idle=%s tool=%s, want both 6h", cfg.AgentIdleWatchdog, cfg.AgentToolWatchdog)
@@ -887,7 +887,7 @@ func TestLoadConfig_ToolWatchdogDefaultsToIdleWatchdog(t *testing.T) {
 
 	// An explicit tool override still wins, so "tools may run longer than the
 	// model may think" stays expressible.
-	t.Setenv("MULTICA_AGENT_TOOL_WATCHDOG", "12h")
+	t.Setenv("INKWAY_AGENT_TOOL_WATCHDOG", "12h")
 	cfg = load(t)
 	if cfg.AgentIdleWatchdog != 6*time.Hour {
 		t.Fatalf("AgentIdleWatchdog = %s, want 6h", cfg.AgentIdleWatchdog)
@@ -898,15 +898,15 @@ func TestLoadConfig_ToolWatchdogDefaultsToIdleWatchdog(t *testing.T) {
 
 	// Zero keeps its distinct meaning: never force-stop while a tool is in
 	// flight. It must NOT be re-derived from the idle budget.
-	t.Setenv("MULTICA_AGENT_TOOL_WATCHDOG", "0")
+	t.Setenv("INKWAY_AGENT_TOOL_WATCHDOG", "0")
 	cfg = load(t)
 	if cfg.AgentToolWatchdog != 0 {
 		t.Fatalf("AgentToolWatchdog = %s, want 0 from env", cfg.AgentToolWatchdog)
 	}
 
 	// Disabling the suite disables both.
-	t.Setenv("MULTICA_AGENT_IDLE_WATCHDOG", "0")
-	t.Setenv("MULTICA_AGENT_TOOL_WATCHDOG", "")
+	t.Setenv("INKWAY_AGENT_IDLE_WATCHDOG", "0")
+	t.Setenv("INKWAY_AGENT_TOOL_WATCHDOG", "")
 	cfg = load(t)
 	if cfg.AgentIdleWatchdog != 0 || cfg.AgentToolWatchdog != 0 {
 		t.Fatalf("idle=%s tool=%s, want both 0", cfg.AgentIdleWatchdog, cfg.AgentToolWatchdog)
@@ -921,9 +921,9 @@ func TestLoadConfig_ToolWatchdogDefaultsToIdleWatchdog(t *testing.T) {
 func TestLoadConfig_CodexSemanticInactivityDerivesFromWatchdog(t *testing.T) {
 	stageFakeAgent(t)
 	for _, key := range []string{
-		"MULTICA_AGENT_IDLE_WATCHDOG",
-		"MULTICA_AGENT_TOOL_WATCHDOG",
-		"MULTICA_CODEX_SEMANTIC_INACTIVITY_TIMEOUT",
+		"INKWAY_AGENT_IDLE_WATCHDOG",
+		"INKWAY_AGENT_TOOL_WATCHDOG",
+		"INKWAY_CODEX_SEMANTIC_INACTIVITY_TIMEOUT",
 	} {
 		t.Setenv(key, "")
 	}
@@ -946,7 +946,7 @@ func TestLoadConfig_CodexSemanticInactivityDerivesFromWatchdog(t *testing.T) {
 	}
 
 	// Raising the idle budget carries Codex with it.
-	t.Setenv("MULTICA_AGENT_IDLE_WATCHDOG", "6h")
+	t.Setenv("INKWAY_AGENT_IDLE_WATCHDOG", "6h")
 	if got := load(t).CodexSemanticInactivityTimeout; got != 6*time.Hour {
 		t.Fatalf("CodexSemanticInactivityTimeout = %s, want 6h", got)
 	}
@@ -954,7 +954,7 @@ func TestLoadConfig_CodexSemanticInactivityDerivesFromWatchdog(t *testing.T) {
 	// A wider tool budget wins: this timer cannot see that a tool is in flight,
 	// so it has to be sized like the larger of the two or it re-creates the very
 	// bug being fixed, one tier up.
-	t.Setenv("MULTICA_AGENT_TOOL_WATCHDOG", "9h")
+	t.Setenv("INKWAY_AGENT_TOOL_WATCHDOG", "9h")
 	if got := load(t).CodexSemanticInactivityTimeout; got != 9*time.Hour {
 		t.Fatalf("CodexSemanticInactivityTimeout = %s, want the wider tool budget 9h", got)
 	}
@@ -962,22 +962,22 @@ func TestLoadConfig_CodexSemanticInactivityDerivesFromWatchdog(t *testing.T) {
 	// A tool budget of 0 means "never force-stop during a tool", which this
 	// timer cannot express; it falls back to the idle budget rather than
 	// silently running unbounded.
-	t.Setenv("MULTICA_AGENT_TOOL_WATCHDOG", "0")
+	t.Setenv("INKWAY_AGENT_TOOL_WATCHDOG", "0")
 	if got := load(t).CodexSemanticInactivityTimeout; got != 6*time.Hour {
 		t.Fatalf("CodexSemanticInactivityTimeout = %s, want the idle budget 6h when the tool budget is unbounded", got)
 	}
 
 	// The explicit env still wins over the derivation.
-	t.Setenv("MULTICA_CODEX_SEMANTIC_INACTIVITY_TIMEOUT", "20m")
+	t.Setenv("INKWAY_CODEX_SEMANTIC_INACTIVITY_TIMEOUT", "20m")
 	if got := load(t).CodexSemanticInactivityTimeout; got != 20*time.Minute {
 		t.Fatalf("CodexSemanticInactivityTimeout = %s, want 20m from env", got)
 	}
 
 	// Disabling the watchdog suite has never disabled this timer; Codex keeps
 	// its own built-in default rather than becoming unbounded.
-	t.Setenv("MULTICA_CODEX_SEMANTIC_INACTIVITY_TIMEOUT", "")
-	t.Setenv("MULTICA_AGENT_IDLE_WATCHDOG", "0")
-	t.Setenv("MULTICA_AGENT_TOOL_WATCHDOG", "")
+	t.Setenv("INKWAY_CODEX_SEMANTIC_INACTIVITY_TIMEOUT", "")
+	t.Setenv("INKWAY_AGENT_IDLE_WATCHDOG", "0")
+	t.Setenv("INKWAY_AGENT_TOOL_WATCHDOG", "")
 	if got := load(t).CodexSemanticInactivityTimeout; got != DefaultCodexSemanticInactivityTimeout {
 		t.Fatalf("CodexSemanticInactivityTimeout = %s, want the codex built-in %s when watchdogs are off", got, DefaultCodexSemanticInactivityTimeout)
 	}
@@ -985,7 +985,7 @@ func TestLoadConfig_CodexSemanticInactivityDerivesFromWatchdog(t *testing.T) {
 
 func TestLoadConfig_OpenCodeIdleWatchdog(t *testing.T) {
 	stageFakeAgent(t)
-	t.Setenv("MULTICA_OPENCODE_IDLE_WATCHDOG", "")
+	t.Setenv("INKWAY_OPENCODE_IDLE_WATCHDOG", "")
 
 	cfg, err := LoadConfig(Overrides{
 		ServerURL:      "http://localhost:8080",
@@ -998,7 +998,7 @@ func TestLoadConfig_OpenCodeIdleWatchdog(t *testing.T) {
 		t.Fatalf("OpenCodeIdleWatchdog = %s, want default %s", cfg.OpenCodeIdleWatchdog, DefaultOpenCodeIdleWatchdog)
 	}
 
-	t.Setenv("MULTICA_OPENCODE_IDLE_WATCHDOG", "7m")
+	t.Setenv("INKWAY_OPENCODE_IDLE_WATCHDOG", "7m")
 	cfg, err = LoadConfig(Overrides{
 		ServerURL:      "http://localhost:8080",
 		WorkspacesRoot: t.TempDir(),
@@ -1012,7 +1012,7 @@ func TestLoadConfig_OpenCodeIdleWatchdog(t *testing.T) {
 
 	// Zero disables the OpenCode-specific override while leaving the generic
 	// AgentIdleWatchdog as the fallback for OpenCode runs.
-	t.Setenv("MULTICA_OPENCODE_IDLE_WATCHDOG", "0")
+	t.Setenv("INKWAY_OPENCODE_IDLE_WATCHDOG", "0")
 	cfg, err = LoadConfig(Overrides{
 		ServerURL:      "http://localhost:8080",
 		WorkspacesRoot: t.TempDir(),
@@ -1026,7 +1026,7 @@ func TestLoadConfig_OpenCodeIdleWatchdog(t *testing.T) {
 }
 
 // TestLoadConfig_AutoUpdateDefault_CloudOn confirms the symmetric case: a
-// daemon pointed at Multica's hosted cloud keeps the historical opt-in
+// daemon pointed at Inkway's hosted cloud keeps the historical opt-in
 // auto-update default. We pass the WSS form of the URL to also exercise that
 // NormalizeServerBaseURL maps it through to the http host the detector
 // inspects.
@@ -1040,7 +1040,7 @@ func TestLoadConfig_AutoUpdateDefault_CloudOn(t *testing.T) {
 		t.Fatalf("LoadConfig: %v", err)
 	}
 	if !cfg.AutoUpdateEnabled {
-		t.Fatalf("AutoUpdateEnabled = false for Multica Cloud server, want true")
+		t.Fatalf("AutoUpdateEnabled = false for Inkway Cloud server, want true")
 	}
 }
 
@@ -1048,7 +1048,7 @@ func TestLoadConfig_AutoUpdateDefault_CloudOn(t *testing.T) {
 // re-enable auto-update via env var, overriding the new conservative default.
 func TestLoadConfig_AutoUpdateEnv_ForcesOnForSelfHost(t *testing.T) {
 	stageFakeAgent(t)
-	t.Setenv("MULTICA_DAEMON_AUTO_UPDATE", "true")
+	t.Setenv("INKWAY_DAEMON_AUTO_UPDATE", "true")
 	cfg, err := LoadConfig(Overrides{
 		ServerURL:      "http://localhost:8080",
 		WorkspacesRoot: t.TempDir(),
@@ -1057,7 +1057,7 @@ func TestLoadConfig_AutoUpdateEnv_ForcesOnForSelfHost(t *testing.T) {
 		t.Fatalf("LoadConfig: %v", err)
 	}
 	if !cfg.AutoUpdateEnabled {
-		t.Fatalf("AutoUpdateEnabled = false after explicit MULTICA_DAEMON_AUTO_UPDATE=true, want true")
+		t.Fatalf("AutoUpdateEnabled = false after explicit INKWAY_DAEMON_AUTO_UPDATE=true, want true")
 	}
 }
 
@@ -1065,7 +1065,7 @@ func TestLoadConfig_AutoUpdateEnv_ForcesOnForSelfHost(t *testing.T) {
 // user can still opt out via env var.
 func TestLoadConfig_AutoUpdateEnv_ForcesOffForCloud(t *testing.T) {
 	stageFakeAgent(t)
-	t.Setenv("MULTICA_DAEMON_AUTO_UPDATE", "false")
+	t.Setenv("INKWAY_DAEMON_AUTO_UPDATE", "false")
 	cfg, err := LoadConfig(Overrides{
 		ServerURL:      "https://api.multica.ai",
 		WorkspacesRoot: t.TempDir(),
@@ -1074,7 +1074,7 @@ func TestLoadConfig_AutoUpdateEnv_ForcesOffForCloud(t *testing.T) {
 		t.Fatalf("LoadConfig: %v", err)
 	}
 	if cfg.AutoUpdateEnabled {
-		t.Fatalf("AutoUpdateEnabled = true after explicit MULTICA_DAEMON_AUTO_UPDATE=false, want false")
+		t.Fatalf("AutoUpdateEnabled = true after explicit INKWAY_DAEMON_AUTO_UPDATE=false, want false")
 	}
 }
 
@@ -1083,7 +1083,7 @@ func TestLoadConfig_AutoUpdateEnv_ForcesOffForCloud(t *testing.T) {
 // forces auto-update off even when the cloud default and env var would enable.
 func TestLoadConfig_AutoUpdate_NoFlagWinsOverCloudDefault(t *testing.T) {
 	stageFakeAgent(t)
-	t.Setenv("MULTICA_DAEMON_AUTO_UPDATE", "true")
+	t.Setenv("INKWAY_DAEMON_AUTO_UPDATE", "true")
 	cfg, err := LoadConfig(Overrides{
 		ServerURL:         "https://api.multica.ai",
 		WorkspacesRoot:    t.TempDir(),
@@ -1105,8 +1105,8 @@ func TestLoadConfig_AutoUpdate_NoFlagWinsOverCloudDefault(t *testing.T) {
 // installed by hand.
 func TestLoadConfig_AutoReload_DefaultsOnEvenForSelfHost(t *testing.T) {
 	stageFakeAgent(t)
-	t.Setenv("MULTICA_DAEMON_AUTO_UPDATE", "")
-	t.Setenv("MULTICA_DAEMON_AUTO_RELOAD", "")
+	t.Setenv("INKWAY_DAEMON_AUTO_UPDATE", "")
+	t.Setenv("INKWAY_DAEMON_AUTO_RELOAD", "")
 	cfg, err := LoadConfig(Overrides{
 		ServerURL:      "http://localhost:8080",
 		WorkspacesRoot: t.TempDir(),
@@ -1127,8 +1127,8 @@ func TestLoadConfig_AutoReload_DefaultsOnEvenForSelfHost(t *testing.T) {
 // from following a hand-installed binary.
 func TestLoadConfig_AutoReload_NotGatedOnAutoUpdateEnv(t *testing.T) {
 	stageFakeAgent(t)
-	t.Setenv("MULTICA_DAEMON_AUTO_UPDATE", "false")
-	t.Setenv("MULTICA_DAEMON_AUTO_RELOAD", "")
+	t.Setenv("INKWAY_DAEMON_AUTO_UPDATE", "false")
+	t.Setenv("INKWAY_DAEMON_AUTO_RELOAD", "")
 	cfg, err := LoadConfig(Overrides{
 		ServerURL:      "https://api.multica.ai",
 		WorkspacesRoot: t.TempDir(),
@@ -1137,7 +1137,7 @@ func TestLoadConfig_AutoReload_NotGatedOnAutoUpdateEnv(t *testing.T) {
 		t.Fatalf("LoadConfig: %v", err)
 	}
 	if !cfg.AutoReloadEnabled {
-		t.Fatalf("MULTICA_DAEMON_AUTO_UPDATE=false disabled auto-reload; the two switches are independent")
+		t.Fatalf("INKWAY_DAEMON_AUTO_UPDATE=false disabled auto-reload; the two switches are independent")
 	}
 }
 
@@ -1160,7 +1160,7 @@ func TestLoadConfig_AutoReload_OffSwitches(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			stageFakeAgent(t)
-			t.Setenv("MULTICA_DAEMON_AUTO_RELOAD", tc.env)
+			t.Setenv("INKWAY_DAEMON_AUTO_RELOAD", tc.env)
 			overrides := tc.overrides
 			overrides.ServerURL = "https://api.multica.ai"
 			overrides.WorkspacesRoot = t.TempDir()
@@ -1298,7 +1298,7 @@ func TestResolveAgentsViaLoginShell_HardTimeoutOnBackgroundedStdout(t *testing.T
 
 // TestLoadConfig_SkipsLoginShellWhenLookPathSucceeds proves the laziness
 // requirement: if every agent CLI the operator cares about is already
-// resolvable via the daemon's PATH (or pinned to an explicit MULTICA_*_PATH),
+// resolvable via the daemon's PATH (or pinned to an explicit INKWAY_*_PATH),
 // the shell-fallback path must not run. We assert this by pointing SHELL at
 // a sentinel script that touches a marker file when invoked.
 func TestLoadConfig_SkipsLoginShellWhenLookPathSucceeds(t *testing.T) {
@@ -1331,7 +1331,7 @@ func TestLoadConfig_SkipsLoginShellWhenLookPathSucceeds(t *testing.T) {
 	// the fallback — except `claude` already resolves, and the user hasn't
 	// configured anything else, so the probe loop should be satisfied
 	// after the first probe alone.
-	t.Setenv("MULTICA_DAEMON_ID", "11111111-1111-1111-1111-111111111111")
+	t.Setenv("INKWAY_DAEMON_ID", "11111111-1111-1111-1111-111111111111")
 
 	if _, err := LoadConfig(Overrides{
 		ServerURL:      "http://localhost:0",
@@ -1370,8 +1370,8 @@ func TestLoadConfig_UsesCodexDesktopAppBundleFallback(t *testing.T) {
 
 	t.Setenv("PATH", t.TempDir())
 	t.Setenv("SHELL", filepath.Join(t.TempDir(), "fish"))
-	t.Setenv("MULTICA_DAEMON_ID", "11111111-1111-1111-1111-111111111111")
-	t.Setenv("MULTICA_CODEX_MODEL", "gpt-5")
+	t.Setenv("INKWAY_DAEMON_ID", "11111111-1111-1111-1111-111111111111")
+	t.Setenv("INKWAY_CODEX_MODEL", "gpt-5")
 	pinNonCodexAgentsToMissingPaths(t)
 
 	cfg, err := LoadConfig(Overrides{
@@ -1394,7 +1394,7 @@ func TestLoadConfig_UsesCodexDesktopAppBundleFallback(t *testing.T) {
 }
 
 // Regression for #5205: after OpenAI moved the Desktop app to ChatGPT.app,
-// Multica must resolve the bundled CLI under ChatGPT.app (and prefer it over
+// Inkway must resolve the bundled CLI under ChatGPT.app (and prefer it over
 // the legacy Codex.app path when both exist).
 func TestLoadConfig_UsesChatGPTAppBundleCodexPath(t *testing.T) {
 	pathDir := t.TempDir()
@@ -1416,7 +1416,7 @@ func TestLoadConfig_UsesChatGPTAppBundleCodexPath(t *testing.T) {
 
 	t.Setenv("PATH", t.TempDir())
 	t.Setenv("SHELL", filepath.Join(t.TempDir(), "fish"))
-	t.Setenv("MULTICA_DAEMON_ID", "11111111-1111-1111-1111-111111111111")
+	t.Setenv("INKWAY_DAEMON_ID", "11111111-1111-1111-1111-111111111111")
 	pinNonCodexAgentsToMissingPaths(t)
 
 	cfg, err := LoadConfig(Overrides{
@@ -1483,14 +1483,14 @@ func TestLoadConfig_CodexDesktopFallbackDoesNotOverrideExplicitPath(t *testing.T
 
 	t.Setenv("PATH", t.TempDir())
 	t.Setenv("SHELL", filepath.Join(t.TempDir(), "fish"))
-	t.Setenv("MULTICA_DAEMON_ID", "11111111-1111-1111-1111-111111111111")
-	t.Setenv("MULTICA_CODEX_PATH", filepath.Join(t.TempDir(), "missing-codex"))
+	t.Setenv("INKWAY_DAEMON_ID", "11111111-1111-1111-1111-111111111111")
+	t.Setenv("INKWAY_CODEX_PATH", filepath.Join(t.TempDir(), "missing-codex"))
 	pinNonCodexAgentsToMissingPaths(t)
 	fakeClaude := filepath.Join(t.TempDir(), "claude")
 	if err := os.WriteFile(fakeClaude, []byte("#!/bin/sh\nexit 0\n"), 0o755); err != nil {
 		t.Fatalf("write fake claude: %v", err)
 	}
-	t.Setenv("MULTICA_CLAUDE_PATH", fakeClaude)
+	t.Setenv("INKWAY_CLAUDE_PATH", fakeClaude)
 
 	cfg, err := LoadConfig(Overrides{
 		ServerURL:      "http://localhost:0",
@@ -1500,7 +1500,7 @@ func TestLoadConfig_CodexDesktopFallbackDoesNotOverrideExplicitPath(t *testing.T
 		t.Fatalf("LoadConfig: %v", err)
 	}
 	if got, ok := cfg.Agents["codex"]; ok {
-		t.Fatalf("explicit missing MULTICA_CODEX_PATH should not fall back to Desktop bundle, got %#v", got)
+		t.Fatalf("explicit missing INKWAY_CODEX_PATH should not fall back to Desktop bundle, got %#v", got)
 	}
 }
 
@@ -1508,18 +1508,18 @@ func pinNonCodexAgentsToMissingPaths(t *testing.T) {
 	t.Helper()
 	missingDir := t.TempDir()
 	for _, name := range []string{
-		"MULTICA_CLAUDE_PATH",
-		"MULTICA_OPENCODE_PATH",
-		"MULTICA_OPENCLAW_PATH",
-		"MULTICA_HERMES_PATH",
-		"MULTICA_PI_PATH",
-		"MULTICA_CURSOR_PATH",
-		"MULTICA_COPILOT_PATH",
-		"MULTICA_KIMI_PATH",
-		"MULTICA_REASONIX_PATH",
-		"MULTICA_DSH_PATH",
-		"MULTICA_KIRO_PATH",
-		"MULTICA_GROK_PATH",
+		"INKWAY_CLAUDE_PATH",
+		"INKWAY_OPENCODE_PATH",
+		"INKWAY_OPENCLAW_PATH",
+		"INKWAY_HERMES_PATH",
+		"INKWAY_PI_PATH",
+		"INKWAY_CURSOR_PATH",
+		"INKWAY_COPILOT_PATH",
+		"INKWAY_KIMI_PATH",
+		"INKWAY_REASONIX_PATH",
+		"INKWAY_DSH_PATH",
+		"INKWAY_KIRO_PATH",
+		"INKWAY_GROK_PATH",
 	} {
 		t.Setenv(name, filepath.Join(missingDir, strings.ToLower(name)))
 	}
@@ -1546,13 +1546,13 @@ func writeCLIConfigForProfile(t *testing.T, profile string, cfg cli.CLIConfig) {
 // existing probe / spawn flow remains undisturbed.
 func TestApplyOpenclawOverride_DoesNothingWhenNil(t *testing.T) {
 	// Pre-set both env vars to known values; verify they survive untouched.
-	t.Setenv("MULTICA_OPENCLAW_PATH", "/before/openclaw")
+	t.Setenv("INKWAY_OPENCLAW_PATH", "/before/openclaw")
 	t.Setenv("OPENCLAW_STATE_DIR", "/before/state")
 
 	applyOpenclawOverride(nil)
 
-	if got := os.Getenv("MULTICA_OPENCLAW_PATH"); got != "/before/openclaw" {
-		t.Errorf("MULTICA_OPENCLAW_PATH mutated: got %q, want /before/openclaw", got)
+	if got := os.Getenv("INKWAY_OPENCLAW_PATH"); got != "/before/openclaw" {
+		t.Errorf("INKWAY_OPENCLAW_PATH mutated: got %q, want /before/openclaw", got)
 	}
 	if got := os.Getenv("OPENCLAW_STATE_DIR"); got != "/before/state" {
 		t.Errorf("OPENCLAW_STATE_DIR mutated: got %q, want /before/state", got)
@@ -1563,12 +1563,12 @@ func TestApplyOpenclawOverride_DoesNothingWhenNil(t *testing.T) {
 // neither env var is set, the override has both fields, both env vars get
 // set to the override values.
 func TestApplyOpenclawOverride_SetsBothWhenEnvUnset(t *testing.T) {
-	t.Setenv("MULTICA_OPENCLAW_PATH", "")
+	t.Setenv("INKWAY_OPENCLAW_PATH", "")
 	t.Setenv("OPENCLAW_STATE_DIR", "")
-	os.Unsetenv("MULTICA_OPENCLAW_PATH")
+	os.Unsetenv("INKWAY_OPENCLAW_PATH")
 	os.Unsetenv("OPENCLAW_STATE_DIR")
 	t.Cleanup(func() {
-		os.Unsetenv("MULTICA_OPENCLAW_PATH")
+		os.Unsetenv("INKWAY_OPENCLAW_PATH")
 		os.Unsetenv("OPENCLAW_STATE_DIR")
 	})
 
@@ -1577,8 +1577,8 @@ func TestApplyOpenclawOverride_SetsBothWhenEnvUnset(t *testing.T) {
 		StateDir:   "/from/config/state",
 	})
 
-	if got := os.Getenv("MULTICA_OPENCLAW_PATH"); got != "/from/config/openclaw" {
-		t.Errorf("MULTICA_OPENCLAW_PATH: got %q, want /from/config/openclaw", got)
+	if got := os.Getenv("INKWAY_OPENCLAW_PATH"); got != "/from/config/openclaw" {
+		t.Errorf("INKWAY_OPENCLAW_PATH: got %q, want /from/config/openclaw", got)
 	}
 	if got := os.Getenv("OPENCLAW_STATE_DIR"); got != "/from/config/state" {
 		t.Errorf("OPENCLAW_STATE_DIR: got %q, want /from/config/state", got)
@@ -1589,11 +1589,11 @@ func TestApplyOpenclawOverride_SetsBothWhenEnvUnset(t *testing.T) {
 // agreed with @YOMXXX in #3875 review: an env var set upstream by the user
 // (shell export, launchctl, systemd unit) MUST take precedence over the
 // config-file value. This is the back-compat contract — anyone with
-// MULTICA_OPENCLAW_PATH already in their environment must not see the
+// INKWAY_OPENCLAW_PATH already in their environment must not see the
 // daemon silently change its meaning when they later add a config file.
 func TestApplyOpenclawOverride_EnvWinsOverConfig(t *testing.T) {
 	// User has already exported these in their shell.
-	t.Setenv("MULTICA_OPENCLAW_PATH", "/from/env/openclaw")
+	t.Setenv("INKWAY_OPENCLAW_PATH", "/from/env/openclaw")
 	t.Setenv("OPENCLAW_STATE_DIR", "/from/env/state")
 
 	applyOpenclawOverride(&cli.OpenClawOverride{
@@ -1601,8 +1601,8 @@ func TestApplyOpenclawOverride_EnvWinsOverConfig(t *testing.T) {
 		StateDir:   "/from/config/state",
 	})
 
-	if got := os.Getenv("MULTICA_OPENCLAW_PATH"); got != "/from/env/openclaw" {
-		t.Errorf("MULTICA_OPENCLAW_PATH: env should win, got %q want /from/env/openclaw", got)
+	if got := os.Getenv("INKWAY_OPENCLAW_PATH"); got != "/from/env/openclaw" {
+		t.Errorf("INKWAY_OPENCLAW_PATH: env should win, got %q want /from/env/openclaw", got)
 	}
 	if got := os.Getenv("OPENCLAW_STATE_DIR"); got != "/from/env/state" {
 		t.Errorf("OPENCLAW_STATE_DIR: env should win, got %q want /from/env/state", got)
@@ -1612,23 +1612,23 @@ func TestApplyOpenclawOverride_EnvWinsOverConfig(t *testing.T) {
 // TestApplyOpenclawOverride_PartialFields_OnlySetsConfigured verifies that
 // an override with only one field set leaves the other env var alone (does
 // not Setenv to ""). This matters: a user who only configures state_dir
-// must not have their MULTICA_OPENCLAW_PATH discovery path forcibly
+// must not have their INKWAY_OPENCLAW_PATH discovery path forcibly
 // short-circuited to an empty string.
 func TestApplyOpenclawOverride_PartialFields_OnlySetsConfigured(t *testing.T) {
-	os.Unsetenv("MULTICA_OPENCLAW_PATH")
+	os.Unsetenv("INKWAY_OPENCLAW_PATH")
 	os.Unsetenv("OPENCLAW_STATE_DIR")
 	t.Cleanup(func() {
-		os.Unsetenv("MULTICA_OPENCLAW_PATH")
+		os.Unsetenv("INKWAY_OPENCLAW_PATH")
 		os.Unsetenv("OPENCLAW_STATE_DIR")
 	})
 
 	applyOpenclawOverride(&cli.OpenClawOverride{
 		StateDir: "/from/config/state",
-		// BinaryPath intentionally empty — must NOT call Setenv("MULTICA_OPENCLAW_PATH", "")
+		// BinaryPath intentionally empty — must NOT call Setenv("INKWAY_OPENCLAW_PATH", "")
 	})
 
-	if _, set := os.LookupEnv("MULTICA_OPENCLAW_PATH"); set {
-		t.Errorf("MULTICA_OPENCLAW_PATH should remain unset when BinaryPath is empty; got %q", os.Getenv("MULTICA_OPENCLAW_PATH"))
+	if _, set := os.LookupEnv("INKWAY_OPENCLAW_PATH"); set {
+		t.Errorf("INKWAY_OPENCLAW_PATH should remain unset when BinaryPath is empty; got %q", os.Getenv("INKWAY_OPENCLAW_PATH"))
 	}
 	if got := os.Getenv("OPENCLAW_STATE_DIR"); got != "/from/config/state" {
 		t.Errorf("OPENCLAW_STATE_DIR: got %q, want /from/config/state", got)
@@ -1670,10 +1670,10 @@ func TestLoadConfig_AppliesBackendOverridesFromConfigFile(t *testing.T) {
 	}
 
 	// Make sure no env-var override is leaking in from the test runner.
-	os.Unsetenv("MULTICA_OPENCLAW_PATH")
+	os.Unsetenv("INKWAY_OPENCLAW_PATH")
 	os.Unsetenv("OPENCLAW_STATE_DIR")
 	t.Cleanup(func() {
-		os.Unsetenv("MULTICA_OPENCLAW_PATH")
+		os.Unsetenv("INKWAY_OPENCLAW_PATH")
 		os.Unsetenv("OPENCLAW_STATE_DIR")
 	})
 
@@ -1723,10 +1723,10 @@ func TestLoadConfig_BackendOverrides_BackwardCompat_NoConfigFile(t *testing.T) {
 
 	// Point HOME at an empty dir — no config.json present.
 	t.Setenv("HOME", t.TempDir())
-	os.Unsetenv("MULTICA_OPENCLAW_PATH")
+	os.Unsetenv("INKWAY_OPENCLAW_PATH")
 	os.Unsetenv("OPENCLAW_STATE_DIR")
 	t.Cleanup(func() {
-		os.Unsetenv("MULTICA_OPENCLAW_PATH")
+		os.Unsetenv("INKWAY_OPENCLAW_PATH")
 		os.Unsetenv("OPENCLAW_STATE_DIR")
 	})
 
@@ -1754,7 +1754,7 @@ func TestLoadConfig_BackendOverrides_MalformedConfigFileNonFatal(t *testing.T) {
 	t.Setenv("HOME", homeDir)
 
 	// Write malformed JSON.
-	cfgDir := filepath.Join(homeDir, ".multica")
+	cfgDir := filepath.Join(homeDir, ".inkway")
 	if err := os.MkdirAll(cfgDir, 0o755); err != nil {
 		t.Fatal(err)
 	}

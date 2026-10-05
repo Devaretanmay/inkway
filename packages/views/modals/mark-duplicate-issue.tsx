@@ -3,20 +3,20 @@
 import { useMemo } from "react";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { errorCode } from "@multica/core/api";
-import { searchIssues } from "@multica/core/search-index";
-import { useWorkspaceId } from "@multica/core/hooks";
+import { errorCode } from "@inkway/core/api";
+import { searchIssues } from "@inkway/core/search-index";
+import { useWorkspaceId } from "@inkway/core/hooks";
 import {
   issueDetailOptions,
   issueDuplicatesOptions,
   issueKeys,
-} from "@multica/core/issues/queries";
-import { useUpdateIssue } from "@multica/core/issues/mutations";
+} from "@inkway/core/issues/queries";
+import { useUpdateIssue } from "@inkway/core/issues/mutations";
 import {
   selectRecentIssues,
   useRecentIssuesStore,
-} from "@multica/core/issues/stores/recent-issues-store";
-import type { Issue } from "@multica/core/types";
+} from "@inkway/core/issues/stores/recent-issues-store";
+import type { Issue } from "@inkway/core/types";
 import { isDuplicateIssue } from "../issues/components/issue-duplicates";
 import { IssuePickerModal, type IssuePickerSuggestionGroup } from "./issue-picker-modal";
 import { useT } from "../i18n";

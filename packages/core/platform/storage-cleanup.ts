@@ -20,15 +20,15 @@ import "../drafts/register-all-drafts";
  * or call `registerDraftCleanup` directly.
  */
 const WORKSPACE_SCOPED_KEYS = [
-  "multica_issue_surface_views",
-  "multica_issues_view",
-  "multica_issues_scope",
-  "multica_my_issues_view",
-  "multica:chat:selectedAgentId",
-  "multica:chat:selectedProjectId",
-  "multica:chat:activeSessionId",
-  "multica:chat:expanded",
-  "multica_navigation",
+  "inkway_issue_surface_views",
+  "inkway_issues_view",
+  "inkway_issues_scope",
+  "inkway_my_issues_view",
+  "inkway:chat:selectedAgentId",
+  "inkway:chat:selectedProjectId",
+  "inkway:chat:activeSessionId",
+  "inkway:chat:expanded",
+  "inkway_navigation",
 ];
 
 /** Remove all workspace-scoped storage entries for the given workspace slug. */
@@ -51,7 +51,7 @@ export function clearWorkspaceStorage(
  * `clearWorkspaceStorage` needs a slug, and the slugs come from the workspace
  * list — which a session rejected at the identity probe never loaded. A cold
  * start with a stale token therefore had no way to clean up after the previous
- * session, leaving `multica_comment_drafts:<slug>` and friends for whoever
+ * session, leaving `inkway_comment_drafts:<slug>` and friends for whoever
  * signed in next. Enumerating the keys removes that dependency entirely, and
  * also catches workspaces the last session had left before it ended.
  *

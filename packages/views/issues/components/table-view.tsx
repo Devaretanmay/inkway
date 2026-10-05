@@ -52,9 +52,9 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
-import { DataTable } from "@multica/ui/components/ui/data-table";
-import { Button } from "@multica/ui/components/ui/button";
-import { Input } from "@multica/ui/components/ui/input";
+import { DataTable } from "@inkway/ui/components/ui/data-table";
+import { Button } from "@inkway/ui/components/ui/button";
+import { Input } from "@inkway/ui/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -64,39 +64,39 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@multica/ui/components/ui/dropdown-menu";
+} from "@inkway/ui/components/ui/dropdown-menu";
 import {
   TableCell,
   TableRow,
-} from "@multica/ui/components/ui/table";
-import { Skeleton } from "@multica/ui/components/ui/skeleton";
-import { cn } from "@multica/ui/lib/utils";
-import { ApiError } from "@multica/core/api";
-import { useWorkspaceId } from "@multica/core/hooks";
-import { useIssueStatuses } from "@multica/core/issue-statuses/hooks";
-import { useModalStore } from "@multica/core/modals";
+} from "@inkway/ui/components/ui/table";
+import { Skeleton } from "@inkway/ui/components/ui/skeleton";
+import { cn } from "@inkway/ui/lib/utils";
+import { ApiError } from "@inkway/core/api";
+import { useWorkspaceId } from "@inkway/core/hooks";
+import { useIssueStatuses } from "@inkway/core/issue-statuses/hooks";
+import { useModalStore } from "@inkway/core/modals";
 import {
   issueKeys,
   issueTableGroupsOptions,
   issueTableRowPageOptions,
-} from "@multica/core/issues/queries";
+} from "@inkway/core/issues/queries";
 import {
   TABLE_SYSTEM_COLUMNS,
   propertyIdFromViewKey,
   type SortField,
   type TableColumnKey,
   type TableSystemColumnKey,
-} from "@multica/core/issues/stores/view-store";
-import { useViewStore } from "@multica/core/issues/stores/view-store-context";
-import { propertyListOptions } from "@multica/core/properties";
-import { projectListOptions } from "@multica/core/projects/queries";
-import { useWorkspacePaths } from "@multica/core/paths";
-import { buildActorNameResolver, useActorName } from "@multica/core/workspace/hooks";
+} from "@inkway/core/issues/stores/view-store";
+import { useViewStore } from "@inkway/core/issues/stores/view-store-context";
+import { propertyListOptions } from "@inkway/core/properties";
+import { projectListOptions } from "@inkway/core/projects/queries";
+import { useWorkspacePaths } from "@inkway/core/paths";
+import { buildActorNameResolver, useActorName } from "@inkway/core/workspace/hooks";
 import {
   agentListOptions,
   memberListOptions,
   squadListOptions,
-} from "@multica/core/workspace/queries";
+} from "@inkway/core/workspace/queries";
 import type {
   Issue,
   IssueProperty,
@@ -107,12 +107,12 @@ import type {
   IssueTableRowsResponse,
   Project,
   UpdateIssueRequest,
-} from "@multica/core/types";
+} from "@inkway/core/types";
 import {
   actorRefsFromValue,
   formatActorRef,
   isActorPropertyType,
-} from "@multica/core/types";
+} from "@inkway/core/types";
 import {
   useInfiniteQuery,
   useQueries,

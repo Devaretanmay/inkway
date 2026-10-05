@@ -17,11 +17,11 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/jackc/pgx/v5/pgxpool"
 
-	"github.com/multica-ai/multica/server/internal/analytics"
-	"github.com/multica-ai/multica/server/internal/auth"
-	"github.com/multica-ai/multica/server/internal/events"
-	"github.com/multica-ai/multica/server/internal/realtime"
-	db "github.com/multica-ai/multica/server/pkg/db/generated"
+	"github.com/Devaretanmay/inkway/server/internal/analytics"
+	"github.com/Devaretanmay/inkway/server/internal/auth"
+	"github.com/Devaretanmay/inkway/server/internal/events"
+	"github.com/Devaretanmay/inkway/server/internal/realtime"
+	db "github.com/Devaretanmay/inkway/server/pkg/db/generated"
 )
 
 var (
@@ -45,7 +45,7 @@ func TestMain(m *testing.M) {
 	ctx := context.Background()
 	dbURL := os.Getenv("DATABASE_URL")
 	if dbURL == "" {
-		dbURL = "postgres://multica:multica@localhost:5432/multica?sslmode=disable"
+		dbURL = "postgres://inkway:inkway@localhost:5432/inkway?sslmode=disable"
 	}
 
 	pool, err := pgxpool.New(ctx, dbURL)

@@ -11,10 +11,10 @@ import {
   UserRound,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent } from "@multica/ui/components/ui/card";
-import { cn } from "@multica/ui/lib/utils";
-import { useCurrentWorkspace } from "@multica/core/paths";
-import { memberListOptions } from "@multica/core/workspace/queries";
+import { Card, CardContent } from "@inkway/ui/components/ui/card";
+import { cn } from "@inkway/ui/lib/utils";
+import { useCurrentWorkspace } from "@inkway/core/paths";
+import { memberListOptions } from "@inkway/core/workspace/queries";
 import { WorkspaceAvatar } from "../../workspace/workspace-avatar";
 import { useT } from "../../i18n";
 

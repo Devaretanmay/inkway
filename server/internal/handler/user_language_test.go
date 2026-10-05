@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/multica-ai/multica/server/internal/testutil"
+	"github.com/Devaretanmay/inkway/server/internal/testutil"
 )
 
 func TestUpdateMeFrenchLanguageRoundTrip(t *testing.T) {

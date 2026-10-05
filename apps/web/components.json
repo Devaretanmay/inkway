@@ -13,11 +13,11 @@
   "iconLibrary": "lucide",
   "rtl": false,
   "aliases": {
-    "components": "@multica/ui/components",
-    "utils": "@multica/ui/lib/utils",
-    "ui": "@multica/ui/components/ui",
-    "lib": "@multica/ui/lib",
-    "hooks": "@multica/ui/hooks"
+    "components": "@inkway/ui/components",
+    "utils": "@inkway/ui/lib/utils",
+    "ui": "@inkway/ui/components/ui",
+    "lib": "@inkway/ui/lib",
+    "hooks": "@inkway/ui/hooks"
   },
   "menuColor": "default",
   "menuAccent": "subtle",

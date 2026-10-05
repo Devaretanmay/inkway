@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/multica-ai/multica/server/internal/testutil"
+	"github.com/Devaretanmay/inkway/server/internal/testutil"
 )
 
 // The project-status filter is a dimension of its own, next to the

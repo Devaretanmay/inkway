@@ -24,12 +24,12 @@ import type {
   Reaction,
   TimelineEntry,
   UpdateIssueRequest,
-} from "@multica/core/types";
-import type { AppConfigResponse } from "@multica/core/api/schemas";
+} from "@inkway/core/types";
+import type { AppConfigResponse } from "@inkway/core/api/schemas";
 import {
   applyCommentDeletion,
   removeCommentSubtree,
-} from "@multica/core/issues/comment-deletion";
+} from "@inkway/core/issues/comment-deletion";
 import { api } from "@/data/api";
 import { isBuiltInIssueStatus, statusCategoryOfKey } from "@/lib/issue-status";
 import { appConfigOptions } from "@/data/queries/billing";

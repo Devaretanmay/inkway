@@ -6,8 +6,8 @@ import { ChevronDown, Cpu, Loader2, Plus } from "lucide-react";
 import {
   refreshRuntimeModels,
   runtimeModelsOptions,
-} from "@multica/core/runtimes";
-import { Label } from "@multica/ui/components/ui/label";
+} from "@inkway/core/runtimes";
+import { Label } from "@inkway/ui/components/ui/label";
 import {
   PickerItem,
   PropertyPicker,

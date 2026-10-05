@@ -1,16 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { I18nProvider } from "@multica/core/i18n/react";
-import type { GitHubPullRequest, PRAutoComplete } from "@multica/core/types";
+import { I18nProvider } from "@inkway/core/i18n/react";
+import type { GitHubPullRequest, PRAutoComplete } from "@inkway/core/types";
 import enCommon from "../../locales/en/common.json";
 import enIssues from "../../locales/en/issues.json";
 
 const TEST_RESOURCES = { en: { common: enCommon, issues: enIssues } };
 
-vi.mock("@multica/core/github/queries", async () => {
-  const actual = await vi.importActual<typeof import("@multica/core/github/queries")>(
-    "@multica/core/github/queries",
+vi.mock("@inkway/core/github/queries", async () => {
+  const actual = await vi.importActual<typeof import("@inkway/core/github/queries")>(
+    "@inkway/core/github/queries",
   );
   return {
     ...actual,
@@ -27,15 +27,15 @@ const apiMock = vi.hoisted(() => ({
   linkIssuePullRequest: vi.fn(),
   setIssuePRAutoComplete: vi.fn(),
 }));
-vi.mock("@multica/core/api", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@multica/core/api")>()),
+vi.mock("@inkway/core/api", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@inkway/core/api")>()),
   api: apiMock,
 }));
 const toastMock = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn() }));
 vi.mock("sonner", () => ({ toast: toastMock }));
-vi.mock("@multica/core/hooks", () => ({ useWorkspaceId: () => "ws-1" }));
-vi.mock("@multica/core/paths", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@multica/core/paths")>()),
+vi.mock("@inkway/core/hooks", () => ({ useWorkspaceId: () => "ws-1" }));
+vi.mock("@inkway/core/paths", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@inkway/core/paths")>()),
   useWorkspacePaths: () => ({ settings: () => "/acme/settings" }),
   useCurrentWorkspace: () => ({ id: "ws-1", slug: "acme", settings: {} }),
 }));
@@ -420,7 +420,7 @@ describe("PullRequestList auto-complete", () => {
     mockPRs = [makePR({ id: "a", number: 12, state: "merged" }), makePR({ id: "b", number: 19 })];
     mockAutoComplete = decision("waiting", ["b"], { target_status: "in_review" });
     renderList();
-    expect(await screen.findByTestId("pr-auto-complete-line")).toHaveTextContent("Moves to In Review when #19 merges");
+    expect(await screen.findByTestId("pr-auto-complete-line")).toHaveTextContent("Moves to Review when #19 merges");
   });
 
   it("falls back to Done on a backend that does not name the target", async () => {

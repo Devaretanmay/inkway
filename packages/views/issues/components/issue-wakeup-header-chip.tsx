@@ -3,10 +3,10 @@
 import { memo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Bell, TriangleAlert } from "lucide-react";
-import { issueSystemWakeupsOptions, issueWakeupsOptions } from "@multica/core/issues";
-import type { IssueWakeup, SystemWakeup } from "@multica/core/types";
-import { useWorkspaceId } from "@multica/core/hooks";
-import { cn } from "@multica/ui/lib/utils";
+import { issueSystemWakeupsOptions, issueWakeupsOptions } from "@inkway/core/issues";
+import type { IssueWakeup, SystemWakeup } from "@inkway/core/types";
+import { useWorkspaceId } from "@inkway/core/hooks";
+import { cn } from "@inkway/ui/lib/utils";
 import { useT } from "../../i18n";
 import { useWakeupText } from "./wakeup-presentation";
 

@@ -3,16 +3,16 @@
 import { Fragment, memo, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { CheckCircle2, ChevronRight, CornerUpLeft, ListChevronsDownUp, Copy, Link2, Loader2, MessageSquarePlus, MoreHorizontal, Pencil, RotateCcw, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { Card } from "@multica/ui/components/ui/card";
-import { Button, buttonVariants } from "@multica/ui/components/ui/button";
+import { Card } from "@inkway/ui/components/ui/card";
+import { Button, buttonVariants } from "@inkway/ui/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-} from "@multica/ui/components/ui/dropdown-menu";
-import { Tooltip, TooltipTrigger, TooltipContent } from "@multica/ui/components/ui/tooltip";
+} from "@inkway/ui/components/ui/dropdown-menu";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@inkway/ui/components/ui/tooltip";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,34 +22,34 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@multica/ui/components/ui/alert-dialog";
+} from "@inkway/ui/components/ui/alert-dialog";
 import { ActorAvatar } from "../../common/actor-avatar";
-import { ReactionBar } from "@multica/ui/components/common/reaction-bar";
-import { QuickEmojiPicker } from "@multica/ui/components/common/quick-emoji-picker";
-import { cn } from "@multica/ui/lib/utils";
-import { copyText } from "@multica/ui/lib/clipboard";
-import { useActorName } from "@multica/core/workspace/hooks";
+import { ReactionBar } from "@inkway/ui/components/common/reaction-bar";
+import { QuickEmojiPicker } from "@inkway/ui/components/common/quick-emoji-picker";
+import { cn } from "@inkway/ui/lib/utils";
+import { copyText } from "@inkway/ui/lib/clipboard";
+import { useActorName } from "@inkway/core/workspace/hooks";
 import { useLocale, useTimeAgo } from "../../i18n";
 import { ContentEditor, type ContentEditorRef, ReadonlyContent, useFileDropZone, FileDropOverlay, Attachment as AttachmentRenderer, AttachmentDownloadProvider, useUploadGate, useComposerSubmit } from "../../editor";
 import { useCommentUploads } from "./use-comment-uploads";
-import { FileUploadButton } from "@multica/ui/components/common/file-upload-button";
-import { api, dispatchReasonCode, errorCode } from "@multica/core/api";
+import { FileUploadButton } from "@inkway/ui/components/common/file-upload-button";
+import { api, dispatchReasonCode, errorCode } from "@inkway/core/api";
 import { ReplyInput } from "./reply-input";
 import { CommentTriggerChips } from "./comment-trigger-chips";
 import { useCommentTriggerPreview } from "../hooks/use-comment-trigger-preview";
 import { useRecipientActions } from "../hooks/use-recipient-actions";
 import { SteerBadge, SteerReceipts } from "./steer-receipts";
-import type { AgentTask, TimelineEntry, Attachment } from "@multica/core/types";
-import { contentReferencesAttachment } from "@multica/core/types";
-import { isDeletedComment } from "@multica/core/issues/comment-deletion";
-import { commentSupplementReceipts, isSupplementInFlight } from "@multica/core/issues/run-steering";
-import { useConfigStore } from "@multica/core/config";
+import type { AgentTask, TimelineEntry, Attachment } from "@inkway/core/types";
+import { contentReferencesAttachment } from "@inkway/core/types";
+import { isDeletedComment } from "@inkway/core/issues/comment-deletion";
+import { commentSupplementReceipts, isSupplementInFlight } from "@inkway/core/issues/run-steering";
+import { useConfigStore } from "@inkway/core/config";
 import {
   orderStandaloneAttachments,
   selectStandaloneAttachments,
   standaloneAttachmentGroup,
-} from "@multica/core/attachments/image-sequence";
-import { useCommentCollapseStore, useCommentDraftStore } from "@multica/core/issues/stores";
+} from "@inkway/core/attachments/image-sequence";
+import { useCommentCollapseStore, useCommentDraftStore } from "@inkway/core/issues/stores";
 import { useT } from "../../i18n";
 import { CommentsFoldBar } from "./resolved-thread-bar";
 import { deriveThreadResolution } from "./thread-utils";

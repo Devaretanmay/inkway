@@ -1,8 +1,8 @@
 "use client";
 
 import { use } from "react";
-import { IssueDetailRoute } from "@multica/views/issues/components";
-import { ErrorBoundary } from "@multica/ui/components/common/error-boundary";
+import { IssueDetailRoute } from "@inkway/views/issues/components";
+import { ErrorBoundary } from "@inkway/ui/components/common/error-boundary";
 
 export default function IssueDetailPage({
   params,

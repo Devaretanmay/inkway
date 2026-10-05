@@ -3,21 +3,21 @@
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { sanitizeNextUrl, useAuthStore } from "@multica/core/auth";
-import { workspaceKeys } from "@multica/core/workspace/queries";
-import { paths, resolvePostAuthDestination } from "@multica/core/paths";
-import { api } from "@multica/core/api";
-import { createLogger } from "@multica/core/logger";
-import { validateCliCallback, redirectToCliCallback } from "@multica/views/auth";
+import { sanitizeNextUrl, useAuthStore } from "@inkway/core/auth";
+import { workspaceKeys } from "@inkway/core/workspace/queries";
+import { paths, resolvePostAuthDestination } from "@inkway/core/paths";
+import { api } from "@inkway/core/api";
+import { createLogger } from "@inkway/core/logger";
+import { validateCliCallback, redirectToCliCallback } from "@inkway/views/auth";
 import {
   Card,
   CardHeader,
   CardTitle,
   CardDescription,
   CardContent,
-} from "@multica/ui/components/ui/card";
-import { Button } from "@multica/ui/components/ui/button";
-import { useT } from "@multica/views/i18n";
+} from "@inkway/ui/components/ui/card";
+import { Button } from "@inkway/ui/components/ui/button";
+import { useT } from "@inkway/views/i18n";
 import { Loader2 } from "lucide-react";
 import { callbackErrorFrom, type CallbackError } from "./callback-error";
 
@@ -59,7 +59,7 @@ function CallbackContent() {
     const nextUrl = sanitizeNextUrl(nextPart ? nextPart.slice(5) : null);
 
     // CLI callback params — carried across the Google OAuth round-trip so
-    // headless/WSL2 `multica login` can receive the JWT after browser-based
+    // headless/WSL2 `inkway login` can receive the JWT after browser-based
     // Google auth completes.
     const cliCallbackPart = stateParts.find((p) => p.startsWith("cli_callback:"));
     const cliStatePart = stateParts.find((p) => p.startsWith("cli_state:"));
@@ -97,7 +97,7 @@ function CallbackContent() {
         .googleLogin(code, redirectUri)
         .then(({ token }) => {
           setDesktopToken(token);
-          window.location.href = `multica://auth/callback?token=${encodeURIComponent(token)}`;
+          window.location.href = `inkway://auth/callback?token=${encodeURIComponent(token)}`;
         })
         .catch((err) => {
           authLogger.error("Desktop Google OAuth callback failed", err);
@@ -144,10 +144,7 @@ function CallbackContent() {
 
           // 3. Default: hand off to the resolver (onboarding for first-timers,
           //    first workspace for returning users, /workspaces/new for
-          //    onboarded users with zero workspaces). Source-attribution
-          //    backfill for onboarded users with no recorded source is
-          //    handled by `<SourceBackfillModal />` inside the dashboard
-          //    shell — not a route detour, so we route straight to dest.
+          //    onboarded users with zero workspaces).
           router.push(resolvePostAuthDestination(wsList, onboarded));
         })
         .catch((err) => {
@@ -197,7 +194,7 @@ function CallbackContent() {
             <Button
               variant="outline"
               onClick={() => {
-                window.location.href = `multica://auth/callback?token=${encodeURIComponent(desktopToken)}`;
+                window.location.href = `inkway://auth/callback?token=${encodeURIComponent(desktopToken)}`;
               }}
             >
               {t(($) => $.web.desktop_handoff.open_button)}

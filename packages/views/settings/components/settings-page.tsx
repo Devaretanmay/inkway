@@ -14,6 +14,7 @@ import {
   ListPlus,
   Lock,
   MessagesSquare,
+  Monitor,
   Plug,
   Search,
   Server,
@@ -25,17 +26,17 @@ import {
   X,
   Zap,
 } from "lucide-react";
-import { useAuthStore } from "@multica/core/auth";
-import { useCurrentWorkspace } from "@multica/core/paths";
-import { useFeatureEnabled } from "@multica/core/config";
-import { useCurrentMember } from "@multica/core/permissions";
+import { useAuthStore } from "@inkway/core/auth";
+import { useCurrentWorkspace } from "@inkway/core/paths";
+import { useFeatureEnabled } from "@inkway/core/config";
+import { useCurrentMember } from "@inkway/core/permissions";
 import {
   BILLING_WORKSPACE_SUBSCRIPTIONS_FLAG,
   PLUGINS_V1_FLAG,
-} from "@multica/core/feature-flags";
-import { resolvePublicFileUrl } from "@multica/core/workspace/avatar-url";
-import { ActorAvatar } from "@multica/ui/components/common/actor-avatar";
-import { cn } from "@multica/ui/lib/utils";
+} from "@inkway/core/feature-flags";
+import { resolvePublicFileUrl } from "@inkway/core/workspace/avatar-url";
+import { ActorAvatar } from "@inkway/ui/components/common/actor-avatar";
+import { cn } from "@inkway/ui/lib/utils";
 import { resolveSettingsLocation, settingsHref } from "./settings-navigation";
 import { AppLink, useNavigation } from "../../navigation";
 import { WorkspaceAvatar } from "../../workspace/workspace-avatar";
@@ -55,6 +56,7 @@ import { QuickActionsTab } from "./quick-actions-tab";
 import { KeyboardShortcutsTab } from "./keyboard-shortcuts-tab";
 import { PluginsTab } from "./plugins-tab";
 import { McpTab } from "./mcp-tab";
+import { RuntimesPointerTab } from "./runtimes-pointer-tab";
 import { BillingTab } from "./billing-tab";
 import { SETTINGS_ANCHOR_ATTR } from "./settings-layout";
 import { searchSettings } from "./settings-search";
@@ -69,6 +71,7 @@ export interface ExtraSettingsTab {
   label: string;
   icon: React.ComponentType<{ className?: string }>;
   content: React.ReactNode;
+  navHidden?: boolean;
 }
 
 interface SettingsPageProps {
@@ -80,6 +83,18 @@ type SettingsEntry = ExtraSettingsTab & {
   wide?: boolean;
   /** Owners and admins manage it; members see a read-only page. */
   adminOnly?: boolean;
+  /**
+   * Out of Ink's primary Settings navigation, but still a real page.
+   *
+   * Chat channels, connected apps, workspace members, quick actions and
+   * billing are Inkway collaboration surfaces. They leave the visible nav
+   * because a new user configuring an agent runtime should not be reading
+   * about Lark webhooks. They are hidden rather than deleted: the component,
+   * the route and `resolveSettingsLocation` all stay, so a bookmark, an
+   * in-app link or a settings search hit still lands on the right page instead
+   * of silently falling back to the first tab.
+   */
+  navHidden?: boolean;
 };
 
 interface SettingsSubgroup {
@@ -120,13 +135,13 @@ export function SettingsPage({ extraDeviceTabs = [] }: SettingsPageProps = {}) {
     label: string,
     icon: ExtraSettingsTab["icon"],
     content: React.ReactNode,
-    options: { wide?: boolean; adminOnly?: boolean } = {},
+    options: { wide?: boolean; adminOnly?: boolean; navHidden?: boolean } = {},
   ): SettingsEntry => ({ value, label, icon, content, ...options });
 
   const groups: SettingsScopeGroup[] = [
     {
       key: "personal",
-      label: t(($) => $.page.groups.personal),
+      label: t(($) => $.page.groups.account),
       mark: (
         <ActorAvatar
           name={user?.name ?? ""}
@@ -140,10 +155,10 @@ export function SettingsPage({ extraDeviceTabs = [] }: SettingsPageProps = {}) {
         {
           key: "personal",
           entries: [
-            entry("profile", t(($) => $.page.tabs.profile), User, <AccountTab />),
+            entry("profile", t(($) => $.page.tabs.account), User, <AccountTab />),
             entry(
               "preferences",
-              t(($) => $.page.tabs.preferences),
+              t(($) => $.page.tabs.general),
               SlidersHorizontal,
               <PreferencesTab />,
             ),
@@ -152,24 +167,30 @@ export function SettingsPage({ extraDeviceTabs = [] }: SettingsPageProps = {}) {
               t(($) => $.page.tabs.notifications),
               Bell,
               <NotificationsTab />,
+              { navHidden: true },
             ),
             entry(
               "shortcuts",
               t(($) => $.page.tabs.shortcuts),
               Keyboard,
               <KeyboardShortcutsTab />,
+              { navHidden: true },
             ),
             ...(appsAvailable
-              ? [entry("apps", t(($) => $.page.tabs.apps), Plug, <ConnectedAppsTab />)]
+              ? [
+                  entry("apps", t(($) => $.page.tabs.apps), Plug, <ConnectedAppsTab />, {
+                    navHidden: true,
+                  }),
+                ]
               : []),
-            entry("tokens", t(($) => $.page.tabs.tokens), KeyRound, <TokensTab />),
+            entry("tokens", t(($) => $.page.tabs.tokens), KeyRound, <TokensTab />, { navHidden: true }),
           ],
         },
       ],
     },
     {
       key: "workspace",
-      label: workspaceName,
+      label: t(($) => $.page.groups.connections),
       mark: (
         <WorkspaceAvatar
           name={workspaceName}
@@ -178,16 +199,17 @@ export function SettingsPage({ extraDeviceTabs = [] }: SettingsPageProps = {}) {
           className="size-4 rounded-xs"
         />
       ),
-      tag: t(($) => $.page.groups.workspace),
       subgroups: [
         {
           key: "workspace",
           entries: [
             entry("workspace", t(($) => $.page.tabs.general), Settings, <WorkspaceTab />, {
               adminOnly: true,
+              navHidden: true,
             }),
             entry("members", t(($) => $.page.tabs.members), Users, <MembersTab />, {
               adminOnly: true,
+              navHidden: true,
             }),
             ...(billingEnabled
               ? [
@@ -196,6 +218,7 @@ export function SettingsPage({ extraDeviceTabs = [] }: SettingsPageProps = {}) {
                     t(($) => $.page.tabs.billing),
                     CreditCard,
                     <BillingTab />,
+                    { navHidden: true },
                   ),
                 ]
               : []),
@@ -210,28 +233,30 @@ export function SettingsPage({ extraDeviceTabs = [] }: SettingsPageProps = {}) {
               t(($) => $.page.tabs.issue_statuses),
               CircleDot,
               <IssueStatusesTab />,
-              { wide: true, adminOnly: true },
+              { wide: true, adminOnly: true, navHidden: true },
             ),
             entry("wakeups", t(($) => $.page.tabs.wakeups), AlarmClock, <WakeupsTab />, {
               wide: true,
               adminOnly: true,
+              navHidden: true,
             }),
             entry("labels", t(($) => $.page.tabs.labels), Tags, <LabelsTab />, {
               wide: true,
+              navHidden: true,
             }),
             entry(
               "properties",
               t(($) => $.page.tabs.properties),
               ListPlus,
               <PropertiesTab />,
-              { wide: true, adminOnly: true },
+              { wide: true, adminOnly: true, navHidden: true },
             ),
             entry(
               "quick-actions",
               t(($) => $.page.tabs.quick_actions),
               Zap,
               <QuickActionsTab />,
-              { wide: true },
+              { wide: true, navHidden: true },
             ),
           ],
         },
@@ -239,7 +264,14 @@ export function SettingsPage({ extraDeviceTabs = [] }: SettingsPageProps = {}) {
           key: "connections",
           label: t(($) => $.page.groups.connections),
           entries: [
-            entry("code", t(($) => $.page.tabs.code), FolderGit2, <CodeTab />, {
+            entry(
+              "runtimes",
+              t(($) => $.page.tabs.local_tools),
+              Monitor,
+              <RuntimesPointerTab />,
+              { adminOnly: true, navHidden: false },
+            ),
+            entry("code", t(($) => $.page.tabs.repositories), FolderGit2, <CodeTab />, {
               adminOnly: true,
             }),
             entry(
@@ -247,14 +279,17 @@ export function SettingsPage({ extraDeviceTabs = [] }: SettingsPageProps = {}) {
               t(($) => $.page.tabs.channels),
               MessagesSquare,
               <ChannelsTab />,
+              { navHidden: true },
             ),
             entry("mcp", t(($) => $.page.tabs.mcp), Server, <McpTab />, {
               adminOnly: true,
+              navHidden: true,
             }),
             ...(pluginsEnabled
               ? [
                   entry("plugins", t(($) => $.page.tabs.plugins), Blocks, <PluginsTab />, {
                     adminOnly: true,
+                    navHidden: true,
                   }),
                 ]
               : []),
@@ -266,7 +301,7 @@ export function SettingsPage({ extraDeviceTabs = [] }: SettingsPageProps = {}) {
       ? [
           {
             key: "device" as const,
-            label: t(($) => $.page.groups.device),
+            label: t(($) => $.page.groups.providers),
             mark: <Laptop aria-hidden="true" className="size-4 text-muted-foreground" />,
             subgroups: [{ key: "device", entries: extraDeviceTabs as SettingsEntry[] }],
           },
@@ -276,6 +311,17 @@ export function SettingsPage({ extraDeviceTabs = [] }: SettingsPageProps = {}) {
   const allEntries = groups.flatMap((group) =>
     group.subgroups.flatMap((subgroup) => subgroup.entries),
   );
+  const visibleGroups = groups
+    .map((group) => ({
+      ...group,
+      subgroups: group.subgroups
+        .map((subgroup) => ({
+          ...subgroup,
+          entries: subgroup.entries.filter((item) => !item.navHidden),
+        }))
+        .filter((subgroup) => subgroup.entries.length > 0),
+    }))
+    .filter((group) => group.subgroups.length > 0);
   const location = resolveSettingsLocation(navigation.searchParams);
   const candidate =
     location.tab === "billing" && !billingEnabled ? "workspace" : location.tab;
@@ -295,7 +341,10 @@ export function SettingsPage({ extraDeviceTabs = [] }: SettingsPageProps = {}) {
   const [query, setQuery] = useState("");
   const [activeResult, setActiveResult] = useState(0);
   const searchPages = useMemo(
-    () => allEntries.map((item) => ({ value: item.value, label: item.label })),
+    () =>
+      allEntries
+        .filter((item) => !item.navHidden)
+        .map((item) => ({ value: item.value, label: item.label })),
     // Labels are derived from i18n and flags; the value list is the identity.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [allEntries.map((item) => `${item.value}:${item.label}`).join("|")],
@@ -444,17 +493,19 @@ export function SettingsPage({ extraDeviceTabs = [] }: SettingsPageProps = {}) {
             value={active.value}
             onChange={(event) => navigation.push(href(event.target.value))}
           >
-            {groups.flatMap((group) =>
+            {visibleGroups.flatMap((group) =>
               group.subgroups.map((subgroup) => (
                 <optgroup
                   key={`${group.key}:${subgroup.key}`}
                   label={subgroup.label ? `${group.label} · ${subgroup.label}` : group.label}
                 >
-                  {subgroup.entries.map((item) => (
-                    <option key={item.value} value={item.value}>
-                      {item.label}
-                    </option>
-                  ))}
+                  {subgroup.entries
+                    .filter((item) => !item.navHidden)
+                    .map((item) => (
+                      <option key={item.value} value={item.value}>
+                        {item.label}
+                      </option>
+                    ))}
                 </optgroup>
               )),
             )}
@@ -514,7 +565,7 @@ export function SettingsPage({ extraDeviceTabs = [] }: SettingsPageProps = {}) {
             searchResults
           ) : (
             <div className="divide-y divide-surface-border">
-              {groups.map((group) => (
+              {visibleGroups.map((group) => (
                 <section
                   key={group.key}
                   aria-labelledby={`settings-group-${group.key}`}
@@ -550,7 +601,11 @@ export function SettingsPage({ extraDeviceTabs = [] }: SettingsPageProps = {}) {
                           {subgroup.label}
                         </h3>
                       ) : null}
-                      <ul className="space-y-px">{subgroup.entries.map(navItem)}</ul>
+                      <ul className="space-y-px">
+                        {subgroup.entries
+                          .filter((item) => !item.navHidden)
+                          .map(navItem)}
+                      </ul>
                     </div>
                   ))}
                 </section>

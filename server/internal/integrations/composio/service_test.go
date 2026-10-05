@@ -11,9 +11,9 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/multica-ai/multica/server/internal/util"
-	sdk "github.com/multica-ai/multica/server/pkg/composio"
-	db "github.com/multica-ai/multica/server/pkg/db/generated"
+	"github.com/Devaretanmay/inkway/server/internal/util"
+	sdk "github.com/Devaretanmay/inkway/server/pkg/composio"
+	db "github.com/Devaretanmay/inkway/server/pkg/db/generated"
 )
 
 // ---- fakes ---------------------------------------------------------------
@@ -251,7 +251,7 @@ func TestBeginConnect_MappingAndState(t *testing.T) {
 	if sdkFake.lastCreateLink.AuthConfigID != "ac_notion" {
 		t.Errorf("auth config = %q", sdkFake.lastCreateLink.AuthConfigID)
 	}
-	// composio_user_id == multica user id
+	// composio_user_id == inkway user id
 	if sdkFake.lastCreateLink.UserID != util.UUIDToString(userID) {
 		t.Errorf("composio user id = %q, want %q", sdkFake.lastCreateLink.UserID, util.UUIDToString(userID))
 	}

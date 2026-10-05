@@ -28,6 +28,7 @@ describe("column visibility vs status filter", () => {
     store.getState().hideStatus("backlog");
 
     expect(store.getState().hiddenStatuses).toEqual([
+      "blocked",
       "cancelled",
       "backlog",
     ]);
@@ -40,6 +41,7 @@ describe("column visibility vs status filter", () => {
     store.getState().showStatus("backlog");
 
     expect(store.getState().hiddenStatuses).toEqual([
+      "blocked",
       "cancelled",
       "done",
     ]);
@@ -51,6 +53,7 @@ describe("column visibility vs status filter", () => {
     store.getState().hideStatus("backlog");
 
     expect(store.getState().hiddenStatuses).toEqual([
+      "blocked",
       "cancelled",
       "backlog",
     ]);
@@ -69,7 +72,7 @@ describe("column visibility vs status filter", () => {
     store.getState().showStatus("cancelled");
     store.getState().clearFilters();
 
-    expect(store.getState().hiddenStatuses).toEqual(["backlog"]);
+    expect(store.getState().hiddenStatuses).toEqual(["blocked", "backlog"]);
   });
 });
 

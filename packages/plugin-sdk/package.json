@@ -1,7 +1,7 @@
 {
-  "name": "@multica/plugin-sdk",
+  "name": "@inkway/plugin-sdk",
   "version": "0.1.0",
-  "description": "Client SDK for Multica plugin surfaces.",
+  "description": "Client SDK for Inkway plugin surfaces.",
   "type": "module",
   "license": "Apache-2.0",
   "scripts": {
@@ -18,8 +18,8 @@
     "README.md"
   ],
   "devDependencies": {
-    "@multica/eslint-config": "workspace:*",
-    "@multica/tsconfig": "workspace:*",
+    "@inkway/eslint-config": "workspace:*",
+    "@inkway/tsconfig": "workspace:*",
     "typescript": "catalog:"
   }
 }

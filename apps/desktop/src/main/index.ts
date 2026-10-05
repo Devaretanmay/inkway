@@ -28,6 +28,7 @@ import {
 } from "./renderer-recovery";
 import { createBestEffortDevLog } from "./dev-log";
 import { appendMissingPathDirs } from "./path-fallback";
+import { legacyDataCandidates, migrateLegacyDirectory } from "./user-data-migration";
 import {
   writeFreezeBreadcrumb,
   readFreezeBreadcrumb,
@@ -102,7 +103,7 @@ const BUNDLED_ICON_PATH = join(__dirname, "../../resources/icon.png").replace(
 // macOS/Linux GUI launches inherit a minimal PATH from launchd that omits
 // the user's shell config (~/.zshrc, Homebrew, nvm, ~/.local/bin, etc.).
 // Run the user's login shell once to recover the real PATH so the bundled
-// multica CLI can find agent binaries like claude/codex/opencode. Must run
+// inkway CLI can find agent binaries like claude/codex/opencode. Must run
 // before any child_process.spawn / execFile call in the main process —
 // ES module imports are hoisted, so this block executes before createWindow
 // or any daemon-manager spawn.
@@ -121,7 +122,8 @@ if (process.platform !== "win32") {
   ]);
 }
 
-const PROTOCOL = "multica";
+const PROTOCOL = "inkway";
+const PROTOCOL_SCHEMES = [PROTOCOL, "multica", "issuway"] as const;
 const devLog = is.dev ? createBestEffortDevLog() : undefined;
 
 // Where the main process parks a freeze/crash breadcrumb until the next
@@ -188,16 +190,16 @@ function dispatchToMainRenderer(
 function handleDeepLink(url: string): void {
   try {
     const parsed = new URL(url);
-    if (parsed.protocol !== `${PROTOCOL}:`) return;
+    if (!PROTOCOL_SCHEMES.some((scheme) => parsed.protocol === `${scheme}:`)) return;
 
-    // multica://auth/callback?token=<jwt>
+    // inkway://auth/callback?token=<jwt>
     if (parsed.hostname === "auth" && parsed.pathname === "/callback") {
       const token = parsed.searchParams.get("token");
       if (token) dispatchToMainRenderer("auth:token", token);
       return;
     }
 
-    // multica://invite/<invitationId>
+    // inkway://invite/<invitationId>
     // Dispatched from the web invite page when the user chooses "Open in
     // desktop app". The renderer opens the invite overlay — no tab, no
     // route persistence, so deep-linking the same invite twice stays safe.
@@ -245,7 +247,7 @@ function loadRenderer(window: BrowserWindow): void {
 }
 
 function installLocaleRefresh(window: BrowserWindow): void {
-  // Electron has no dedicated OS-language event. Check whenever any Multica
+  // Electron has no dedicated OS-language event. Check whenever any Inkway
   // window regains focus, then broadcast so all open windows remain aligned.
   window.on("focus", () => {
     const current = getSystemLocale();
@@ -555,33 +557,46 @@ function createIssueWindow(context: IssueWindowContext): void {
 // without fighting for the shared single-instance lock. The suffix is
 // appended to the app name + userData path, so each worktree gets its own
 // lock file. Default (no env var) keeps behavior unchanged — the common
-// single-worktree case still lands at "Multica Canary".
+// single-worktree case still lands at "Inkway Canary".
 const DEV_APP_NAME = process.env.DESKTOP_APP_SUFFIX
-  ? `Multica Canary ${process.env.DESKTOP_APP_SUFFIX}`
-  : "Multica Canary";
+  ? `Inkway Canary ${process.env.DESKTOP_APP_SUFFIX}`
+  : "Inkway Canary";
+const DEV_USER_DATA_NAME = process.env.DESKTOP_APP_SUFFIX
+  ? `Inkway Canary ${process.env.DESKTOP_APP_SUFFIX}`
+  : "Inkway Canary";
 
 if (is.dev) {
   app.setName(DEV_APP_NAME);
-  app.setPath("userData", join(app.getPath("appData"), DEV_APP_NAME));
+  const appData = app.getPath("appData");
+  migrateLegacyDirectory(
+    appData,
+    DEV_USER_DATA_NAME,
+    legacyDataCandidates(process.env.DESKTOP_APP_SUFFIX),
+  );
+  app.setPath("userData", join(appData, DEV_USER_DATA_NAME));
 } else {
   // Pin the production app name in code. Electron's Linux WM_CLASS is set
   // from app.getName() when the first BrowserWindow is realized; the
   // packaged ASAR's package.json `productName` already steers app.getName()
-  // to "Multica", but anchoring it here makes WM_CLASS ↔ StartupWMClass
+  // to "Inkway", but anchoring it here makes WM_CLASS ↔ StartupWMClass
   // (declared in electron-builder.yml) survive a regression in
   // productName / the build pipeline. Must run before requestSingleInstanceLock().
-  app.setName("Multica");
+  app.setName("Inkway");
+  const appData = app.getPath("appData");
+  const userDataPath = join(appData, "Inkway");
+  migrateLegacyDirectory(appData, "Inkway", legacyDataCandidates());
+  migrateLegacyDirectory(app.getPath("home"), ".inkway", [".multica"]);
+  app.setPath("userData", userDataPath);
 }
 
 // --- Protocol registration -----------------------------------------------
 
-if (process.defaultApp) {
-  // In dev, register with the path to the electron binary + app path
-  app.setAsDefaultProtocolClient(PROTOCOL, process.execPath, [
-    app.getAppPath(),
-  ]);
-} else {
-  app.setAsDefaultProtocolClient(PROTOCOL);
+for (const scheme of PROTOCOL_SCHEMES) {
+  if (process.defaultApp) {
+    app.setAsDefaultProtocolClient(scheme, process.execPath, [app.getAppPath()]);
+  } else {
+    app.setAsDefaultProtocolClient(scheme);
+  }
 }
 
 // --- Single instance lock ------------------------------------------------
@@ -605,7 +620,9 @@ if (!gotTheLock) {
     if (window) focusMainWindow(window);
 
     // On Windows the deep link URL is the last argv entry
-    const deepLinkUrl = argv.find((arg) => arg.startsWith(`${PROTOCOL}://`));
+    const deepLinkUrl = argv.find((arg) =>
+      PROTOCOL_SCHEMES.some((scheme) => arg.startsWith(`${scheme}://`)),
+    );
     if (deepLinkUrl) handleDeepLink(deepLinkUrl);
   });
 
@@ -613,7 +630,7 @@ if (!gotTheLock) {
   // queued because desktopInitialized remains false until runtime config and
   // IPC handlers are ready.
   const coldStartDeepLink = process.argv.find((arg) =>
-    arg.startsWith(`${PROTOCOL}://`),
+    PROTOCOL_SCHEMES.some((scheme) => arg.startsWith(`${scheme}://`)),
   );
   if (coldStartDeepLink) handleDeepLink(coldStartDeepLink);
 
@@ -637,7 +654,7 @@ if (!gotTheLock) {
     });
 
     electronApp.setAppUserModelId(
-      is.dev ? "ai.multica.desktop.dev" : "ai.multica.desktop",
+      is.dev ? "io.github.devaretanmay.inkway.dev" : "io.github.devaretanmay.inkway",
     );
 
     // macOS: replace the default Electron dock icon with the bundled logo

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect, useLayoutEffect, useMemo, forwardRef } from "react";
-import { useWorkspaceId } from "@multica/core/hooks";
+import { useWorkspaceId } from "@inkway/core/hooks";
 import { useTraceIssueLabels } from "./use-trace-issue-labels";
 import { Virtuoso, type VirtuosoHandle, type Components } from "react-virtuoso";
 import {
@@ -28,11 +28,11 @@ import {
   Coins,
   GitBranch,
 } from "lucide-react";
-import { cn } from "@multica/ui/lib/utils";
-import { copyText } from "@multica/ui/lib/clipboard";
-import { Button } from "@multica/ui/components/ui/button";
-import { Dialog, DialogContent, DialogTitle } from "@multica/ui/components/ui/dialog";
-import { Popover, PopoverContent, PopoverTrigger } from "@multica/ui/components/ui/popover";
+import { cn } from "@inkway/ui/lib/utils";
+import { copyText } from "@inkway/ui/lib/clipboard";
+import { Button } from "@inkway/ui/components/ui/button";
+import { Dialog, DialogContent, DialogTitle } from "@inkway/ui/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@inkway/ui/components/ui/popover";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -40,22 +40,22 @@ import {
   DropdownMenuSeparator,
   DropdownMenuCheckboxItem,
   DropdownMenuItem,
-} from "@multica/ui/components/ui/dropdown-menu";
+} from "@inkway/ui/components/ui/dropdown-menu";
 import { ActorAvatar } from "../actor-avatar";
 import { AttributionBadge } from "../../issues/components/attribution-badge";
 import { plainTriggerSummary } from "../../issues/components/task-run-labels";
 import { cancellationActorLabel, cancelReasonLabel, failureReasonLabel } from "../../agents/components/tabs/task-failure";
 import { RichContent } from "../../rich-content";
-import { api } from "@multica/core/api";
+import { api } from "@inkway/core/api";
 import {
   useTranscriptViewStore,
   type TranscriptFilterKey,
   type TranscriptSortDirection,
-} from "@multica/core/agents/stores";
-import type { AgentTask, Agent, AgentRuntime } from "@multica/core/types/agent";
-import { resolveWorkdirCopyTarget } from "@multica/core/issues";
-import { runtimeDisplayName, providerDisplayName } from "@multica/core/runtimes";
-import { useCustomPricingStore } from "@multica/core/runtimes/custom-pricing-store";
+} from "@inkway/core/agents/stores";
+import type { AgentTask, Agent, AgentRuntime } from "@inkway/core/types/agent";
+import { resolveWorkdirCopyTarget } from "@inkway/core/issues";
+import { runtimeDisplayName, providerDisplayName } from "@inkway/core/runtimes";
+import { useCustomPricingStore } from "@inkway/core/runtimes/custom-pricing-store";
 import { redactSecrets } from "./redact";
 import {
   createLiveEndFollow,

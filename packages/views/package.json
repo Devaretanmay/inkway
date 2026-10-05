@@ -1,5 +1,5 @@
 {
-  "name": "@multica/views",
+  "name": "@inkway/views",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -33,6 +33,7 @@
     "./agents/manual-create-agent-page": "./agents/create/manual-create-agent-page.tsx",
     "./members": "./members/index.ts",
     "./inbox": "./inbox/index.ts",
+    "./inks": "./inks/index.ts",
     "./runtimes": "./runtimes/index.ts",
     "./billing": "./billing/index.ts",
     "./dashboard": "./dashboard/index.ts",
@@ -72,8 +73,8 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@floating-ui/dom": "^1.7.6",
-    "@multica/core": "workspace:*",
-    "@multica/ui": "workspace:*",
+    "@inkway/core": "workspace:*",
+    "@inkway/ui": "workspace:*",
     "@tanstack/react-virtual": "catalog:",
     "@tiptap/core": "3.31.3",
     "@tiptap/extension-code-block-lowlight": "3.31.3",
@@ -132,9 +133,9 @@
     "zustand": "catalog:"
   },
   "devDependencies": {
-    "@multica/eslint-config": "workspace:*",
-    "@multica/plugin-sdk": "workspace:*",
-    "@multica/tsconfig": "workspace:*",
+    "@inkway/eslint-config": "workspace:*",
+    "@inkway/plugin-sdk": "workspace:*",
+    "@inkway/tsconfig": "workspace:*",
     "@testing-library/jest-dom": "catalog:",
     "@testing-library/react": "catalog:",
     "@testing-library/user-event": "catalog:",

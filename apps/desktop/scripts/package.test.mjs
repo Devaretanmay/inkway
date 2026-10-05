@@ -107,7 +107,7 @@ describe("deriveVersion (real git describe)", () => {
   const repos = [];
 
   function initRepo() {
-    const dir = mkdtempSync(join(tmpdir(), "multica-desktop-ver-"));
+    const dir = mkdtempSync(join(tmpdir(), "inkway-desktop-ver-"));
     repos.push(dir);
     const run = (...args) =>
       execFileSync("git", args, { cwd: dir, encoding: "utf-8" });
@@ -430,7 +430,7 @@ describe("envWithLocalBins", () => {
 });
 
 describe("electron-builder.yml packaging config", () => {
-  // Regression guard for github.com/multica-ai/multica/issues/5595. The
+  // Regression guard for github.com/Devaretanmay/inkway/issues/5595. The
   // multi-arch release build writes each target's output to
   // dist/<platform>-<arch> in the same apps/desktop dir; electron-builder
   // only auto-excludes the *current* target's output dir, so without an

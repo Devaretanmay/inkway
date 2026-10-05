@@ -20,7 +20,6 @@ describe("issue create settings store", () => {
     setQuickCreateFieldVisible("priority", true);
 
     expect(useIssueCreateSettingsStore.getState().quickCreateFields).toEqual([
-      "project",
       "priority",
       "due_date",
     ]);
@@ -45,7 +44,7 @@ describe("issue create settings store", () => {
       "project",
       "due_date",
     ]);
-    expect(useIssueCreateSettingsStore.getState().quickCreateFields).toEqual(["project"]);
+    expect(useIssueCreateSettingsStore.getState().quickCreateFields).toEqual([]);
   });
 
   it("is a no-op to re-enable an already visible field", () => {

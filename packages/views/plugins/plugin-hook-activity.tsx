@@ -2,9 +2,9 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle } from "lucide-react";
-import { pluginInvocationsOptions } from "@multica/core/plugins";
-import type { PluginHook, PluginInvocation } from "@multica/core/types";
-import { cn } from "@multica/ui/lib/utils";
+import { pluginInvocationsOptions } from "@inkway/core/plugins";
+import type { PluginHook, PluginInvocation } from "@inkway/core/types";
+import { cn } from "@inkway/ui/lib/utils";
 import { useLocale, useT } from "../i18n";
 
 /**

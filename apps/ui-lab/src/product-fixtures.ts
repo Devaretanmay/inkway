@@ -9,15 +9,15 @@ import type {
   StorageAdapter,
   IssueTableQuerySpec,
   Comment,
-} from "@multica/core/types";
-import { STATUS_ORDER } from "@multica/core/issues/config";
-import { ApiClient } from "@multica/core/api";
+} from "@inkway/core/types";
+import { STATUS_ORDER } from "@inkway/core/issues/config";
+import { ApiClient } from "@inkway/core/api";
 
 const time = "2026-09-14T06:00:00Z";
 export const workspace: Workspace = {
   id: "10000000-0000-4000-8000-000000000001",
   slug: "ui-lab",
-  name: "Multica",
+  name: "Inkway",
   description: "UI Lab fixture workspace",
   context: null,
   settings: {},

@@ -7,11 +7,11 @@ vi.mock("@tanstack/react-query", () => ({
   useQuery: vi.fn(),
 }));
 
-vi.mock("@multica/core/hooks", () => ({
+vi.mock("@inkway/core/hooks", () => ({
   useWorkspaceId: () => "workspace-1",
 }));
 
-vi.mock("@multica/core/issue-statuses/hooks", () => ({
+vi.mock("@inkway/core/issue-statuses/hooks", () => ({
   useIssueStatuses: () => ({
     iconOf: () => null,
     colorOf: (status: string) =>
@@ -19,7 +19,7 @@ vi.mock("@multica/core/issue-statuses/hooks", () => ({
   }),
 }));
 
-vi.mock("@multica/core/issues/queries", () => ({
+vi.mock("@inkway/core/issues/queries", () => ({
   issueListOptions: () => ({ queryKey: ["issues"] }),
   issueDetailOptions: (_workspaceId: string, issueId: string) => ({
     queryKey: ["issue", issueId],

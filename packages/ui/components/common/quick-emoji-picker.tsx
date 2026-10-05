@@ -2,8 +2,8 @@
 
 import { useState, lazy, Suspense } from "react";
 import { SmilePlus } from "lucide-react";
-import { cn } from "@multica/ui/lib/utils";
-import { Popover, PopoverTrigger, PopoverContent } from "@multica/ui/components/ui/popover";
+import { cn } from "@inkway/ui/lib/utils";
+import { Popover, PopoverTrigger, PopoverContent } from "@inkway/ui/components/ui/popover";
 
 const EmojiPicker = lazy(() =>
   import("./emoji-picker").then((m) => ({ default: m.EmojiPicker })),

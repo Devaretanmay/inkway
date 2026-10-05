@@ -15,17 +15,17 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { truncateWithEllipsis } from "@multica/core/utils";
-import { cn } from "@multica/ui/lib/utils";
-import { copyText } from "@multica/ui/lib/clipboard";
-import { Button } from "@multica/ui/components/ui/button";
+import { truncateWithEllipsis } from "@inkway/core/utils";
+import { cn } from "@inkway/ui/lib/utils";
+import { copyText } from "@inkway/ui/lib/clipboard";
+import { Button } from "@inkway/ui/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogTitle,
-} from "@multica/ui/components/ui/dialog";
+} from "@inkway/ui/components/ui/dialog";
 import { toast } from "sonner";
-import { useT } from "@multica/views/i18n";
+import { useT } from "@inkway/views/i18n";
 import type { DaemonStatus } from "../../../shared/daemon-types";
 import {
   DAEMON_STATE_COLORS,

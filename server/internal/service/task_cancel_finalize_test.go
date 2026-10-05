@@ -8,10 +8,10 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/multica-ai/multica/server/internal/events"
-	"github.com/multica-ai/multica/server/internal/util"
-	db "github.com/multica-ai/multica/server/pkg/db/generated"
-	"github.com/multica-ai/multica/server/pkg/protocol"
+	"github.com/Devaretanmay/inkway/server/internal/events"
+	"github.com/Devaretanmay/inkway/server/internal/util"
+	db "github.com/Devaretanmay/inkway/server/pkg/db/generated"
+	"github.com/Devaretanmay/inkway/server/pkg/protocol"
 )
 
 func newCancelFinalizePool(t *testing.T) *pgxpool.Pool {
@@ -601,7 +601,7 @@ func (f cancelFinalizeFixture) unbindChannelSession(t *testing.T, ctx context.Co
 }
 
 // Channel-ingested user messages are the durable record of what the platform
-// sender wrote — the sender has no Multica composer to restore a draft into.
+// sender wrote — the sender has no Inkway composer to restore a draft into.
 // The gate is the immutable per-message channel_ingested stamp, so it must
 // hold even after archiving/rebinding deleted the session binding: cancelling
 // the sealed queued task keeps the messages and settles as "Stopped.".

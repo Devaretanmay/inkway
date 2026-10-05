@@ -119,13 +119,16 @@
     "breadcrumb_title": "Tâches",
     "breadcrumb_workspace_fallback": "Espace de travail",
     "empty_title": "Aucune tâche pour l'instant",
-    "move_failed": "Échec du déplacement de la tâche"
+    "move_failed": "Échec du déplacement de la tâche",
+    "subtitle": "Confiez du travail de code à vos agents.",
+    "search_placeholder": "Search issues…",
+    "new_issue": "New Issue"
   },
   "status": {
     "backlog": "À planifier",
     "todo": "À faire",
     "in_progress": "En cours",
-    "in_review": "En relecture",
+    "in_review": "À relire",
     "done": "Terminé",
     "blocked": "Bloqué",
     "cancelled": "Annulé"
@@ -440,6 +443,7 @@
     "prop_start_date": "Date de début",
     "prop_due_date": "Date d'échéance",
     "prop_project": "Projet",
+    "prop_repository": "Dépôt",
     "prop_labels": "Étiquettes",
     "add_property_action": "Ajouter une propriété",
     "prop_created_by": "Créé par",
@@ -877,7 +881,7 @@
       "open_link": "Ouvrir le lien",
       "archived_hint": "Propriété archivée — la valeur est en lecture seule",
       "unknown_value": "Indisponible",
-      "unknown_value_hint": "Cette valeur a été définie par une version plus récente de Multica et ne peut pas être modifiée ici — mettez l'application à jour, ou effacez-la"
+      "unknown_value_hint": "Cette valeur a été définie par une version plus récente de Inkway et ne peut pas être modifiée ici — mettez l'application à jour, ou effacez-la"
     },
     "filter_options_aria": "Options de filtrage",
     "no_results": "Aucun résultat",
@@ -1381,7 +1385,7 @@
     "link_placeholder": "Collez l’URL de la pull request",
     "link_hint": "Les PR dont le titre ou la branche contient {{identifier}} sont liées automatiquement.",
     "link_submit": "Lier",
-    "link_not_found": "Multica n’a pas encore reçu cette PR. Vérifiez que son dépôt est connecté.",
+    "link_not_found": "Inkway n’a pas encore reçu cette PR. Vérifiez que son dépôt est connecté.",
     "link_failed": "Impossible de lier la pull request.",
     "row_menu": "Actions de la pull request",
     "section_menu": "Automatisation des pull requests",
@@ -1439,5 +1443,55 @@
     "overview_close": "Fermer",
     "overview_empty": "Aucun livrable de ce type.",
     "group_comment_by": "Commentaire de {{name}}"
+  },
+  "status_tabs": {
+    "all": "All",
+    "more": "More statuses",
+    "hidden_hint": "Not a board column by default. Select one to add its column back."
+  },
+  "run_state": {
+    "running": "Running",
+    "queued": "Queued",
+    "needs_review": "Needs review",
+    "failed": "Failed",
+    "unassigned": "Unassigned"
+  },
+  "current_run": {
+    "title": "Current Run",
+    "started_ago": "Started {{time}} ago",
+    "stop": "Stop Run",
+    "view_details": "View run details",
+    "stop_confirm": "Stop this run? The issue keeps its history."
+  },
+  "review": {
+    "title": "Ready for review",
+    "performed_by": "Worked on by {{agent}}",
+    "no_agent": "No agent run has produced a result for this issue yet.",
+    "result_label": "Agent result",
+    "no_result": "The agent finished without leaving a result summary.",
+    "accept": "Accept",
+    "accept_hint": "Move this issue to Done",
+    "reopen": "Reopen",
+    "reopen_hint": "Send it back to In Progress",
+    "continue": "Continue",
+    "continue_hint": "Reply to the agent",
+    "provider_tool": "Fournisseur / outil",
+    "agent_report": "Rapport de l’agent"
+  },
+  "back_to_issues": {
+    "0": "B",
+    "1": "a",
+    "2": "c",
+    "3": "k",
+    "4": " ",
+    "5": "t",
+    "6": "o",
+    "7": " ",
+    "8": "I",
+    "9": "s",
+    "10": "s",
+    "11": "u",
+    "12": "e",
+    "13": "s"
   }
 }

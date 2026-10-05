@@ -7,9 +7,9 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 
-	"github.com/multica-ai/multica/server/internal/integrations/channel"
-	"github.com/multica-ai/multica/server/internal/service"
-	db "github.com/multica-ai/multica/server/pkg/db/generated"
+	"github.com/Devaretanmay/inkway/server/internal/integrations/channel"
+	"github.com/Devaretanmay/inkway/server/internal/service"
+	db "github.com/Devaretanmay/inkway/server/pkg/db/generated"
 )
 
 // This file defines the pluggable seams the Router runs the inbound pipeline
@@ -95,7 +95,7 @@ type ResolvedInstallation struct {
 	Platform        any
 }
 
-// ResolvedIdentity is the sender mapped to a Multica user.
+// ResolvedIdentity is the sender mapped to a Inkway user.
 type ResolvedIdentity struct {
 	UserID pgtype.UUID
 }
@@ -267,7 +267,7 @@ type InstallationResolver interface {
 	ResolveInstallation(ctx context.Context, msg channel.InboundMessage) (ResolvedInstallation, error)
 }
 
-// IdentityResolver maps the message sender to a Multica user within the
+// IdentityResolver maps the message sender to a Inkway user within the
 // installation, re-checking workspace membership. Return ErrSenderUnbound or
 // ErrSenderNotMember for the product cases.
 type IdentityResolver interface {

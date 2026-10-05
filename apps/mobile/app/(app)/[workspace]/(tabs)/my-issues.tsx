@@ -21,7 +21,7 @@ import { Ionicons } from "@expo/vector-icons";
 import type {
   IssuePriority,
   IssueStatus,
-} from "@multica/core/types";
+} from "@inkway/core/types";
 import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/ui/header";

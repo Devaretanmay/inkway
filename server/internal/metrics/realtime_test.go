@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/multica-ai/multica/server/internal/realtime"
+	"github.com/Devaretanmay/inkway/server/internal/realtime"
 )
 
 func TestRealtimeCollectorExposesCounters(t *testing.T) {
@@ -31,20 +31,20 @@ func TestRealtimeCollectorExposesCounters(t *testing.T) {
 	body := rec.Body.String()
 
 	for _, want := range []string{
-		"multica_realtime_active_connections 3",
-		"multica_realtime_messages_sent_total 11",
-		"multica_realtime_inbound_too_large_total 7",
-		"multica_realtime_redis_connected 1",
-		`multica_realtime_redis_mirror_errors_total{target="primary"} 2`,
-		`multica_realtime_redis_mirror_errors_total{target="secondary"} 5`,
-		"multica_realtime_redis_stream_trimmed_entries_total 13",
-		"multica_realtime_redis_stream_missing_total 1",
-		"multica_realtime_redis_streams_without_ttl 2",
-		"multica_realtime_redis_used_memory_bytes 4096",
-		"multica_realtime_redis_maxmemory_bytes 8192",
-		"multica_realtime_redis_evicted_keys 3",
-		`multica_realtime_redis_stream_entries{stream="ws:relay:shard:0"} 23`,
-		`multica_realtime_redis_stream_pttl_milliseconds{stream="ws:relay:shard:0"} 60000`,
+		"inkway_realtime_active_connections 3",
+		"inkway_realtime_messages_sent_total 11",
+		"inkway_realtime_inbound_too_large_total 7",
+		"inkway_realtime_redis_connected 1",
+		`inkway_realtime_redis_mirror_errors_total{target="primary"} 2`,
+		`inkway_realtime_redis_mirror_errors_total{target="secondary"} 5`,
+		"inkway_realtime_redis_stream_trimmed_entries_total 13",
+		"inkway_realtime_redis_stream_missing_total 1",
+		"inkway_realtime_redis_streams_without_ttl 2",
+		"inkway_realtime_redis_used_memory_bytes 4096",
+		"inkway_realtime_redis_maxmemory_bytes 8192",
+		"inkway_realtime_redis_evicted_keys 3",
+		`inkway_realtime_redis_stream_entries{stream="ws:relay:shard:0"} 23`,
+		`inkway_realtime_redis_stream_pttl_milliseconds{stream="ws:relay:shard:0"} 60000`,
 	} {
 		if !strings.Contains(body, want) {
 			t.Fatalf("metrics body missing %q\n%s", want, body)

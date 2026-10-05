@@ -12,25 +12,26 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@multica/ui/components/ui/alert-dialog";
+} from "@inkway/ui/components/ui/alert-dialog";
 import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
-} from "@multica/ui/components/ui/resizable";
+} from "@inkway/ui/components/ui/resizable";
 import {
   applyDraftRuntimeChange,
+  isNativeAgentConfigReady,
   decodeBuilderInput,
   encodeBuilderInput,
   mergeBuilderDraft,
   parseBuilderDraft,
   stripBuilderDraft,
-} from "@multica/core/agents";
+} from "@inkway/core/agents";
 import {
   runtimeDisplayLabel,
   runtimeModelsOptions,
-} from "@multica/core/runtimes";
-import type { AgentBuilderSessionSummary } from "@multica/core/types";
+} from "@inkway/core/runtimes";
+import type { AgentBuilderSessionSummary } from "@inkway/core/types";
 import { AgentConfigurationPanel } from "./agent-configuration-panel";
 import { BuilderConversation } from "./builder-conversation";
 import { CreateAgentFooter } from "./create-agent-footer";
@@ -76,7 +77,7 @@ export function BuilderWorkspace({
 }) {
   const { t } = useT("agents");
   const { defaultLayout, onLayoutChanged } = useDefaultLayout({
-    id: "multica_agent_builder_layout",
+    id: "inkway_agent_builder_layout",
   });
 
   // Resuming: the conversation already runs somewhere, and only the server
@@ -266,6 +267,7 @@ export function BuilderWorkspace({
 
   const canCreate =
     draft.name.trim().length > 0 &&
+    isNativeAgentConfigReady(draft) &&
     form.draftReady &&
     !submit.creating &&
     !builder.pending;

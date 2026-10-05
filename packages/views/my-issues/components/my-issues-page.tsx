@@ -2,11 +2,11 @@
 
 import { useStore } from "zustand";
 import { ListTodo } from "lucide-react";
-import { useAuthStore } from "@multica/core/auth";
+import { useAuthStore } from "@inkway/core/auth";
 import {
   myIssuesRelationFromScope,
   myIssuesViewStore,
-} from "@multica/core/issues/stores/my-issues-view-store";
+} from "@inkway/core/issues/stores/my-issues-view-store";
 import { PageHeader } from "../../layout/page-header";
 import { RefreshablePageIcon } from "../../layout/refreshable-page-icon";
 import { IssueSurface } from "../../issues/surface/issue-surface";

@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
-	db "github.com/multica-ai/multica/server/pkg/db/generated"
+	db "github.com/Devaretanmay/inkway/server/pkg/db/generated"
 )
 
 type archivedInboxCursor struct {

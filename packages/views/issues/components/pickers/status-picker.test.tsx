@@ -2,8 +2,8 @@
 
 import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { buildIssueStatusCatalog } from "@multica/core/issue-statuses";
-import type { IssueStatusEntry } from "@multica/core/types";
+import { buildIssueStatusCatalog } from "@inkway/core/issue-statuses";
+import type { IssueStatusEntry } from "@inkway/core/types";
 import { renderWithI18n } from "../../../test/i18n";
 import { StatusPicker } from "./status-picker";
 
@@ -13,11 +13,11 @@ import { StatusPicker } from "./status-picker";
 // the trigger and the list read it from the same place.
 let catalogEntries: IssueStatusEntry[] | undefined;
 
-vi.mock("@multica/core/hooks", () => ({
+vi.mock("@inkway/core/hooks", () => ({
   useWorkspaceId: () => "workspace-1",
 }));
 
-vi.mock("@multica/core/issue-statuses/hooks", () => ({
+vi.mock("@inkway/core/issue-statuses/hooks", () => ({
   useIssueStatuses: () => buildIssueStatusCatalog(catalogEntries),
 }));
 
@@ -85,7 +85,7 @@ describe("StatusPicker trigger color", () => {
     );
 
     const trigger = iconOf(container);
-    const row = iconOf(optionRow("In Review"));
+    const row = iconOf(optionRow("Review"));
 
     // No inline color on either: an inline color is precisely what overrides
     // the token and produces the two-greens mismatch.

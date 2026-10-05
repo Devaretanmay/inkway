@@ -1,7 +1,8 @@
 {
   "page": {
     "title": "インボックス",
-    "back": "インボックス"
+    "back": "インボックス",
+    "subtitle": "Items that need your attention"
   },
   "menu": {
     "mark_all_read": "すべて既読にする",
@@ -116,5 +117,14 @@
     "unarchive_failed": "アーカイブ解除に失敗しました",
     "archived_load_failed": "アーカイブ済み通知を読み込めませんでした",
     "filters_load_failed": "フィルターを読み込めませんでした"
+  },
+  "tabs": {
+    "all": "All",
+    "attention": "Needs attention",
+    "review": "Review",
+    "updates": "Updates",
+    "empty_attention": "Nothing needs your attention.",
+    "empty_review": "Nothing is waiting for review.",
+    "empty_updates": "No updates."
   }
 }

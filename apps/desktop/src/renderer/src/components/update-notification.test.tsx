@@ -5,7 +5,6 @@ import { UpdateNotification } from "./update-notification";
 
 const mocks = vi.hoisted(() => ({
   installUpdate: vi.fn(),
-  openExternal: vi.fn(),
 }));
 
 type UpdateDownloadedListener = (info: {
@@ -18,11 +17,9 @@ describe("UpdateNotification", () => {
 
   beforeEach(() => {
     mocks.installUpdate.mockReset().mockResolvedValue(undefined);
-    mocks.openExternal.mockReset().mockResolvedValue(undefined);
-
     Object.defineProperty(window, "desktopAPI", {
       configurable: true,
-      value: { openExternal: mocks.openExternal },
+      value: {},
     });
     Object.defineProperty(window, "updater", {
       configurable: true,
@@ -36,16 +33,11 @@ describe("UpdateNotification", () => {
     });
   });
 
-  it("opens the downloaded version's changelog from the update prompt", () => {
+  it("does not link updates to the inherited product changelog", () => {
     render(<UpdateNotification />);
     act(() => updateDownloaded({ version: "0.4.27" }));
 
-    expect(screen.queryByRole("button", { name: "Later" })).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "See changelog" }));
-
-    expect(mocks.openExternal).toHaveBeenCalledWith(
-      "https://multica.ai/changelog#release-0-4-27",
-    );
+    expect(screen.queryByRole("button", { name: "See changelog" })).not.toBeInTheDocument();
   });
 
   it("still installs the update immediately from the primary action", () => {

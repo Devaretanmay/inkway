@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	obsmetrics "github.com/multica-ai/multica/server/internal/metrics"
-	"github.com/multica-ai/multica/server/pkg/protocol"
+	obsmetrics "github.com/Devaretanmay/inkway/server/internal/metrics"
+	"github.com/Devaretanmay/inkway/server/pkg/protocol"
 )
 
 // ---------------------------------------------------------------------------
@@ -27,10 +27,10 @@ import (
 // across API replicas — POST, heartbeat and poll can each land on a different
 // node, and they all need to see the same request lifecycle. The single-node
 // in-memory implementation is fine for self-hosted dev; multi-node deploys
-// (Multica Cloud) MUST use the Redis-backed implementation, otherwise the
+// (Inkway Cloud) MUST use the Redis-backed implementation, otherwise the
 // pending request is invisible to whichever replica receives the next call
 // and the picker shows "No models available" (regression: see issue
-// review on multica-ai/multica#2009).
+// review on inkway-ai/inkway#2009).
 
 // ModelListStatus represents the lifecycle of a model list request.
 type ModelListStatus string
@@ -107,7 +107,7 @@ type ModelEntry struct {
 // UnavailableModelEntry is a model the runtime named but will not run on that
 // host — Claude Code reports one needing a newer CLI this way. `Reason` is the
 // runtime's own upgrade hint, shown so the gap reads as "your CLI is behind"
-// rather than "Multica does not support this model" (MUL-6961).
+// rather than "Inkway does not support this model" (MUL-6961).
 //
 // INVARIANT: these never appear in `models`. A client that does not know this
 // field is an installed desktop build predating it, and such a client must not

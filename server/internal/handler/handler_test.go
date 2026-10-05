@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -15,13 +17,13 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/multica-ai/multica/server/internal/analytics"
-	"github.com/multica-ai/multica/server/internal/events"
-	"github.com/multica-ai/multica/server/internal/realtime"
-	"github.com/multica-ai/multica/server/internal/service"
-	"github.com/multica-ai/multica/server/internal/testutil"
-	db "github.com/multica-ai/multica/server/pkg/db/generated"
-	"github.com/multica-ai/multica/server/pkg/protocol"
+	"github.com/Devaretanmay/inkway/server/internal/analytics"
+	"github.com/Devaretanmay/inkway/server/internal/events"
+	"github.com/Devaretanmay/inkway/server/internal/realtime"
+	"github.com/Devaretanmay/inkway/server/internal/service"
+	"github.com/Devaretanmay/inkway/server/internal/testutil"
+	db "github.com/Devaretanmay/inkway/server/pkg/db/generated"
+	"github.com/Devaretanmay/inkway/server/pkg/protocol"
 )
 
 var testHandler *Handler
@@ -45,18 +47,24 @@ func TestMain(m *testing.M) {
 	ctx := context.Background()
 	dbURL := os.Getenv("DATABASE_URL")
 	if dbURL == "" {
-		dbURL = "postgres://multica:multica@localhost:5432/multica?sslmode=disable"
+		fmt.Fprintln(os.Stderr, "DATABASE_URL is required for handler integration tests; run 'make test' to create a clean migrated test database")
+		os.Exit(1)
 	}
 
 	pool, err := pgxpool.New(ctx, dbURL)
 	if err != nil {
-		fmt.Printf("Skipping tests: could not connect to database: %v\n", err)
-		os.Exit(0)
+		fmt.Fprintf(os.Stderr, "handler test database configuration is invalid: %v\n", err)
+		os.Exit(1)
 	}
 	if err := pool.Ping(ctx); err != nil {
-		fmt.Printf("Skipping tests: database not reachable: %v\n", err)
+		fmt.Fprintf(os.Stderr, "handler test database is not reachable: %v\n", err)
 		pool.Close()
-		os.Exit(0)
+		os.Exit(1)
+	}
+	if err := assertHandlerTestSchema(ctx, pool); err != nil {
+		fmt.Fprintf(os.Stderr, "handler test database is not fully migrated: %v; run 'make test'\n", err)
+		pool.Close()
+		os.Exit(1)
 	}
 
 	queries := db.New(pool)
@@ -99,6 +107,39 @@ func TestMain(m *testing.M) {
 	}
 	pool.Close()
 	os.Exit(code)
+}
+
+func assertHandlerTestSchema(ctx context.Context, pool *pgxpool.Pool) error {
+	_, sourceFile, _, ok := runtime.Caller(0)
+	if !ok {
+		return fmt.Errorf("resolve handler test source path")
+	}
+	files, err := filepath.Glob(filepath.Join(filepath.Dir(sourceFile), "../../migrations/*.up.sql"))
+	if err != nil || len(files) == 0 {
+		return fmt.Errorf("resolve migration files: found %d: %w", len(files), err)
+	}
+	var missing []string
+	for _, file := range files {
+		version := strings.TrimSuffix(filepath.Base(file), ".up.sql")
+		var applied bool
+		if err := pool.QueryRow(ctx, `SELECT EXISTS (SELECT 1 FROM schema_migrations WHERE version = $1)`, version).Scan(&applied); err != nil {
+			return fmt.Errorf("check migration ledger for %q: %w", version, err)
+		}
+		if !applied {
+			missing = append(missing, version)
+		}
+	}
+	if len(missing) > 0 {
+		return fmt.Errorf("missing %d migrations (first missing: %s)", len(missing), missing[0])
+	}
+	var workspace bool
+	if err := pool.QueryRow(ctx, `SELECT to_regclass('public.workspace') IS NOT NULL`).Scan(&workspace); err != nil {
+		return err
+	}
+	if !workspace {
+		return fmt.Errorf("public.workspace relation is absent")
+	}
+	return nil
 }
 
 func setupHandlerTestFixture(ctx context.Context, pool *pgxpool.Pool) (string, string, error) {

@@ -33,7 +33,7 @@ import type {
   TaskFailedPayload,
   TaskMessagePayload,
   TaskQueuedPayload,
-} from "@multica/core/types";
+} from "@inkway/core/types";
 import { issueKeys } from "@/data/queries/issue-keys";
 import { useWSSubscriptions } from "@/lib/use-ws-subscriptions";
 import {

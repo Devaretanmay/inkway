@@ -11,11 +11,11 @@ import {
   type ReactElement,
   type ReactNode,
 } from "react";
-import type { Issue } from "@multica/core/types";
+import type { Issue } from "@inkway/core/types";
 import {
   ContextMenu,
   ContextMenuContent,
-} from "@multica/ui/components/ui/context-menu";
+} from "@inkway/ui/components/ui/context-menu";
 import { useIssueActions } from "./use-issue-actions";
 import {
   IssueActionsMenuItems,

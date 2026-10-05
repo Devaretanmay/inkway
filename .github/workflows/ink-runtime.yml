@@ -1,0 +1,71 @@
+name: Ink runtime artifact
+
+on:
+  pull_request:
+    paths:
+      - "apps/desktop/scripts/fetch-ink-runtime.*"
+      - "apps/desktop/scripts/package-ink-runtime.mjs"
+      - "apps/desktop/scripts/ink-runtime.json"
+      - "apps/desktop/scripts/verify-ink-package.cjs"
+      - "apps/desktop/electron-builder.yml"
+      - "server/internal/ink/**"
+      - ".github/workflows/ink-runtime.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  manifest-and-safety:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @inkway/desktop exec vitest run scripts/fetch-ink-runtime.test.mjs
+      - name: Reject developer-local source and model paths in production fetcher
+        run: |
+          if rg -n '../ink/.ink/models|/Users/[^/]+/' apps/desktop/scripts/fetch-ink-runtime.mjs apps/desktop/scripts/package-ink-runtime.mjs apps/desktop/scripts/ink-runtime.json; then
+            echo 'developer-local Ink paths found in production packaging files' >&2
+            exit 1
+          fi
+
+  release-integration:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: [self-hosted, macOS, ARM64]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: server/go.mod
+          cache-dependency-path: server/go.sum
+      - run: pnpm install --frozen-lockfile
+      - run: make ink-runtime
+      - name: Run real SDK/model/FastPath/persistence proof from pinned release
+        working-directory: server
+        env:
+          INKWAY_INK_BUNDLE: ${{ github.workspace }}/apps/desktop/resources/ink
+        run: go test ./internal/ink -run '^TestBundledInk' -count=1 -v
+      - run: pnpm --filter @inkway/desktop package -- --mac dmg zip --arm64 --publish never
+      - name: Verify app signature
+        run: codesign --verify --deep --strict apps/desktop/dist/mac-arm64/Inkway.app
+      - uses: actions/upload-artifact@v4
+        with:
+          name: inkway-ink-macos-arm64
+          path: |
+            apps/desktop/dist/*.dmg
+            apps/desktop/dist/*.zip
+          if-no-files-found: error

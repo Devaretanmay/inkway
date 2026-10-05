@@ -14,11 +14,11 @@ import {
   X,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { useWorkspaceId } from "@multica/core/hooks";
-import { labelListOptions } from "@multica/core/labels/queries";
-import type { Agent, Label, MemberWithUser } from "@multica/core/types";
-import { resolvePublicFileUrl } from "@multica/core/workspace/avatar-url";
-import { Button } from "@multica/ui/components/ui/button";
+import { useWorkspaceId } from "@inkway/core/hooks";
+import { labelListOptions } from "@inkway/core/labels/queries";
+import type { Agent, Label, MemberWithUser } from "@inkway/core/types";
+import { resolvePublicFileUrl } from "@inkway/core/workspace/avatar-url";
+import { Button } from "@inkway/ui/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -31,20 +31,20 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "@multica/ui/components/ui/dropdown-menu";
-import { Input } from "@multica/ui/components/ui/input";
+} from "@inkway/ui/components/ui/dropdown-menu";
+import { Input } from "@inkway/ui/components/ui/input";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@multica/ui/components/ui/popover";
-import { Switch } from "@multica/ui/components/ui/switch";
+} from "@inkway/ui/components/ui/popover";
+import { Switch } from "@inkway/ui/components/ui/switch";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@multica/ui/components/ui/tooltip";
-import { ActorAvatar } from "@multica/ui/components/common/actor-avatar";
+} from "@inkway/ui/components/ui/tooltip";
+import { ActorAvatar } from "@inkway/ui/components/common/actor-avatar";
 import { FILTER_ITEM_CLASS, HoverCheck } from "../../common/hover-check";
 import {
   type SkillColumnKey,
@@ -52,7 +52,7 @@ import {
   type SkillOriginType,
   type SkillSortDirection,
   type SkillSortField,
-} from "@multica/core/skills/stores";
+} from "@inkway/core/skills/stores";
 import { LabelChip } from "../../labels/label-chip";
 import { LabelManager } from "../../labels/label-manager";
 import {
@@ -60,7 +60,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@multica/ui/components/ui/dialog";
+} from "@inkway/ui/components/ui/dialog";
 import { useT } from "../../i18n";
 import type { SkillRow } from "./skill-list-filter";
 import { PAGE_TOOLBAR } from "../../layout/page-header";

@@ -6,15 +6,15 @@ import { Pencil } from "lucide-react";
 import {
   issueWakeupsOptions,
   useEditWakeupInstruction,
-} from "@multica/core/issues/wakeups";
-import type { IssueWakeup } from "@multica/core/types";
-import { Button } from "@multica/ui/components/ui/button";
-import { Textarea } from "@multica/ui/components/ui/textarea";
+} from "@inkway/core/issues/wakeups";
+import type { IssueWakeup } from "@inkway/core/types";
+import { Button } from "@inkway/ui/components/ui/button";
+import { Textarea } from "@inkway/ui/components/ui/textarea";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@multica/ui/components/ui/tooltip";
+} from "@inkway/ui/components/ui/tooltip";
 import {
   Dialog,
   DialogContent,
@@ -22,7 +22,7 @@ import {
   DialogTitle,
   DialogDescription,
   DialogTrigger,
-} from "@multica/ui/components/ui/dialog";
+} from "@inkway/ui/components/ui/dialog";
 import { useT } from "../../i18n";
 import { useWakeupText } from "./wakeup-presentation";
 

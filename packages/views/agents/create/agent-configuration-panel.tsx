@@ -1,19 +1,25 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import {
   AGENT_DESCRIPTION_MAX_LENGTH,
   applyDraftModelChange,
   applyDraftRuntimeChange,
   type AgentDraft,
   type AgentPermissionScope,
-} from "@multica/core/agents";
-import { useConfigStore } from "@multica/core/config";
-import type { MemberWithUser, RuntimeDevice } from "@multica/core/types";
-import { Checkbox } from "@multica/ui/components/ui/checkbox";
-import { Input } from "@multica/ui/components/ui/input";
-import { Textarea } from "@multica/ui/components/ui/textarea";
-import { cn } from "@multica/ui/lib/utils";
+} from "@inkway/core/agents";
+import { useConfigStore } from "@inkway/core/config";
+import type { MemberWithUser, RuntimeDevice } from "@inkway/core/types";
+import { Checkbox } from "@inkway/ui/components/ui/checkbox";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@inkway/ui/components/ui/collapsible";
+import { Input } from "@inkway/ui/components/ui/input";
+import { Textarea } from "@inkway/ui/components/ui/textarea";
+import { cn } from "@inkway/ui/lib/utils";
 import { ActorAvatar } from "../../common/actor-avatar";
 import { AvatarUploadControl } from "../../common/avatar-upload-control";
 import { useT } from "../../i18n";
@@ -68,6 +74,7 @@ export function AgentConfigurationPanel({
   runtimeSwitchInFlight?: boolean;
 }) {
   const { t } = useT("agents");
+  const [advancedOpen, setAdvancedOpen] = useState(false);
   const conversationStartersSupported = useConfigStore(
     (state) => state.agentConversationStartersSupported,
   );
@@ -151,6 +158,62 @@ export function AgentConfigurationPanel({
       </SettingsSection>
 
       <SettingsSection
+        title={t(($) => $.creation_studio.sections.provider_tool)}
+        description={t(($) => $.creation_studio.sections.provider_tool_hint)}
+      >
+        <SettingsCard>
+          <div className="space-y-4 px-4 py-4">
+            <fieldset className="flex flex-wrap gap-4 text-label">
+              <legend className="mb-2 font-medium">{t(($) => $.creation_studio.provider_tool.execution_legend)}</legend>
+              <label className="flex items-center gap-2"><input type="radio" name="agent-execution-type" value="cli" checked={draft.executionType !== "native"} onChange={() => onChange({ ...draft, executionType: "cli", model: "", thinkingLevel: "", serviceTier: "" })} /> {t(($) => $.creation_studio.provider_tool.local_tool)}</label>
+              <label className="flex items-center gap-2"><input type="radio" name="agent-execution-type" value="native" checked={draft.executionType === "native"} onChange={() => onChange({ ...draft, executionType: "native", model: "", thinkingLevel: "", serviceTier: "" })} /> {t(($) => $.creation_studio.provider_tool.api_provider)}</label>
+            </fieldset>
+            {draft.executionType === "native" && (
+              <div className="grid gap-4 sm:grid-cols-2">
+                <label className="grid gap-1.5 text-label">{t(($) => $.creation_studio.provider_tool.provider)}
+                  <select aria-label={t(($) => $.creation_studio.provider_tool.native_provider_aria)} className="h-9 rounded-md border border-input bg-background px-3" value={draft.nativeProvider ?? "openai"} onChange={(event) => onChange({ ...draft, nativeProvider: event.target.value as AgentDraft["nativeProvider"], model: "" })}>
+                    <option value="openai">{t(($) => $.creation_studio.provider_tool.openai)}</option><option value="anthropic">{t(($) => $.creation_studio.provider_tool.anthropic)}</option><option value="groq">{t(($) => $.creation_studio.provider_tool.groq)}</option>
+                  </select>
+                </label>
+                <label className="grid gap-1.5 text-label">{t(($) => $.creation_studio.provider_tool.model)}
+                  <Input aria-label={t(($) => $.creation_studio.provider_tool.native_model_aria)} value={draft.model} onChange={(event) => set("model", event.target.value)} placeholder={t(($) => $.creation_studio.provider_tool.model_id)} />
+                </label>
+                <p className="text-caption text-muted-foreground sm:col-span-2">{t(($) => $.creation_studio.provider_tool.credentials_local)}</p>
+              </div>
+            )}
+            <div className={cn("grid gap-4", !compact && "sm:grid-cols-2")}>
+            <div className="min-w-0">
+              <RuntimePicker
+                runtimes={runtimes}
+                runtimesLoading={runtimesLoading}
+                members={members}
+                currentUserId={currentUserId}
+                selectedRuntimeId={draft.runtimeId}
+                onSelect={handleRuntimeSelect}
+                disabled={runtimeLocked}
+              />
+              {/* A silently greyed-out picker is the worst version of this: the
+                  user reaches for it exactly when the current runtime has gone
+                  wrong, so say what unblocks it instead of just refusing. */}
+              {runtimeSwitchPending && (
+                <p className="mt-1.5 text-caption text-muted-foreground">
+                  {t(($) => $.creation_studio.builder.switch_runtime_pending)}
+                </p>
+              )}
+            </div>
+            {draft.executionType === "native" ? null : <ModelDropdown
+              runtimeId={selectedRuntime?.id ?? null}
+              runtimeOnline={selectedRuntime?.status === "online"}
+              value={draft.model}
+              onChange={(value) => onChange(applyDraftModelChange(draft, value))}
+              disabled={!selectedRuntime || runtimeSwitchInFlight}
+            />}
+            </div>
+          </div>
+        </SettingsCard>
+      </SettingsSection>
+
+      <SettingsSection
         title={t(($) => $.creation_studio.sections.behavior)}
       >
         <SettingsCard>
@@ -173,156 +236,155 @@ export function AgentConfigurationPanel({
               className="min-h-44 resize-y font-mono text-label leading-6"
             />
           </DraftFieldRow>
-          {conversationStartersSupported ? (
-            <div className="px-4 py-4">
-              <ConversationStartersEditor
-                value={draft.conversationStarters}
-                onChange={(value) => set("conversationStarters", value)}
-              />
-            </div>
-          ) : null}
-          <div className="px-4 py-4">
-            <SkillMultiSelect
-              selectedIds={draft.skillIds}
-              onChange={(ids) => set("skillIds", ids)}
-            />
-          </div>
         </SettingsCard>
       </SettingsSection>
 
-      <SettingsSection
-        title={t(($) => $.creation_studio.sections.execution)}
-        description={t(($) => $.creation_studio.sections.execution_hint)}
-      >
-        <SettingsCard>
-          <div
-            className={cn("grid gap-4 px-4 py-4", !compact && "sm:grid-cols-2")}
-          >
-            <div className="min-w-0">
-              <RuntimePicker
-                runtimes={runtimes}
-                runtimesLoading={runtimesLoading}
-                members={members}
-                currentUserId={currentUserId}
-                selectedRuntimeId={draft.runtimeId}
-                onSelect={handleRuntimeSelect}
-                disabled={runtimeLocked}
-              />
-              {/* A silently greyed-out picker is the worst version of this: the
-                  user reaches for it exactly when the current runtime has gone
-                  wrong, so say what unblocks it instead of just refusing. */}
-              {runtimeSwitchPending && (
-                <p className="mt-1.5 text-caption text-muted-foreground">
-                  {t(($) => $.creation_studio.builder.switch_runtime_pending)}
-                </p>
-              )}
-            </div>
-            <ModelDropdown
-              runtimeId={selectedRuntime?.id ?? null}
-              runtimeOnline={selectedRuntime?.status === "online"}
-              value={draft.model}
-              onChange={(value) => onChange(applyDraftModelChange(draft, value))}
-              // A successful switch clears the model, so an edit made while the
-              // rebind is in flight would be silently discarded.
-              disabled={!selectedRuntime || runtimeSwitchInFlight}
-            />
-          </div>
-          {/* Both fields fail closed: they render only when the exact selected
-              model's live catalog advertises the capability (or a value is
-              already set and needs clearing), so an offline runtime, a failed
-              discovery or an empty model shows nothing instead of an input
-              that cannot be honoured. */}
-          <AgentExecutionOverrides
-            draft={draft}
-            runtime={selectedRuntime}
-            disabled={runtimeLocked}
-            onChange={onChange}
-          />
-        </SettingsCard>
-      </SettingsSection>
+      {/* Everything below is real, working configuration — none of it is
+          removed. It sits behind one disclosure because defining an agent in
+          Ink means name, purpose, runtime, model and instructions; the
+          rest is tuning and reach, reached deliberately. */}
+      <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
+        <CollapsibleTrigger
+          className="flex w-full items-center gap-1.5 rounded-lg px-1 py-1 text-body text-muted-foreground transition-colors hover:text-foreground"
+          aria-label={t(($) => $.advanced.label)}
+        >
+          {advancedOpen ? (
+            <ChevronDown className="size-4" aria-hidden="true" />
+          ) : (
+            <ChevronRight className="size-4" aria-hidden="true" />
+          )}
+          <span className="font-medium">{t(($) => $.advanced.label)}</span>
+          <span className="min-w-0 truncate text-caption text-muted-foreground">
+            {t(($) => $.advanced.hint)}
+          </span>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <div className={cn("mt-4 space-y-8", compact && "space-y-6")}>
+            <SettingsSection
+              title={t(($) => $.creation_studio.sections.behavior)}
+            >
+              <SettingsCard>
+                {conversationStartersSupported ? (
+                  <div className="px-4 py-4">
+                    <ConversationStartersEditor
+                      value={draft.conversationStarters}
+                      onChange={(value) => set("conversationStarters", value)}
+                    />
+                  </div>
+                ) : null}
+                <div className="px-4 py-4">
+                  <SkillMultiSelect
+                    selectedIds={draft.skillIds}
+                    onChange={(ids) => set("skillIds", ids)}
+                  />
+                </div>
+              </SettingsCard>
+            </SettingsSection>
 
-      <SettingsSection
-        title={t(($) => $.creation_studio.sections.access)}
-      >
-        <SettingsCard>
-          <div
-            className="space-y-1 p-2"
-            role="radiogroup"
-            aria-label={t(($) => $.creation_studio.sections.access)}
-          >
-            {PERMISSION_SCOPES.map((scope) => (
-              <button
-                key={scope}
-                type="button"
-                role="radio"
-                aria-checked={draft.permissionScope === scope}
-                onClick={() => set("permissionScope", scope)}
-                className={cn(
-                  "flex w-full items-start gap-3 rounded-md px-3 py-2.5 text-left transition-colors",
-                  "hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                  draft.permissionScope === scope && "bg-muted",
-                )}
-              >
-                <span
-                  className={cn(
-                    "mt-1 flex size-3.5 shrink-0 items-center justify-center rounded-full border",
-                    draft.permissionScope === scope && "border-primary",
-                  )}
-                  aria-hidden="true"
+            <SettingsSection
+              title={t(($) => $.creation_studio.sections.execution)}
+              description={t(($) => $.creation_studio.sections.execution_hint)}
+            >
+              <SettingsCard>
+                {/* Both fields fail closed: they render only when the exact selected
+                    model's live catalog advertises the capability (or a value is
+                    already set and needs clearing), so an offline runtime, a failed
+                    discovery or an empty model shows nothing instead of an input
+                    that cannot be honoured. */}
+                <AgentExecutionOverrides
+                  draft={draft}
+                  runtime={selectedRuntime}
+                  disabled={runtimeLocked}
+                  onChange={onChange}
+                />
+              </SettingsCard>
+            </SettingsSection>
+
+            <SettingsSection
+              title={t(($) => $.creation_studio.sections.access)}
+            >
+              <SettingsCard>
+                <div
+                  className="space-y-1 p-2"
+                  role="radiogroup"
+                  aria-label={t(($) => $.creation_studio.sections.access)}
                 >
-                  {draft.permissionScope === scope ? (
-                    <span className="size-1.5 rounded-full bg-primary" />
-                  ) : null}
-                </span>
-                <span className="min-w-0">
-                  <span className="block text-body font-medium">
-                    {t(($) => $.creation_studio.access[scope].title)}
-                  </span>
-                  <span className="mt-0.5 block text-caption leading-5 text-muted-foreground">
-                    {t(($) => $.creation_studio.access[scope].description)}
-                  </span>
-                </span>
-              </button>
-            ))}
+                  {PERMISSION_SCOPES.map((scope) => (
+                    <button
+                      key={scope}
+                      type="button"
+                      role="radio"
+                      aria-checked={draft.permissionScope === scope}
+                      onClick={() => set("permissionScope", scope)}
+                      className={cn(
+                        "flex w-full items-start gap-3 rounded-md px-3 py-2.5 text-left transition-colors",
+                        "hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                        draft.permissionScope === scope && "bg-muted",
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "mt-1 flex size-3.5 shrink-0 items-center justify-center rounded-full border",
+                          draft.permissionScope === scope && "border-primary",
+                        )}
+                        aria-hidden="true"
+                      >
+                        {draft.permissionScope === scope ? (
+                          <span className="size-1.5 rounded-full bg-primary" />
+                        ) : null}
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block text-body font-medium">
+                          {t(($) => $.creation_studio.access[scope].title)}
+                        </span>
+                        <span className="mt-0.5 block text-caption leading-5 text-muted-foreground">
+                          {t(($) => $.creation_studio.access[scope].description)}
+                        </span>
+                      </span>
+                    </button>
+                  ))}
+                </div>
+                {draft.permissionScope === "members" ? (
+                  <div className="max-h-48 overflow-y-auto p-2">
+                    {otherMembers.map((member) => {
+                      const checked = draft.memberIds.has(member.user_id);
+                      return (
+                        <label
+                          key={member.user_id}
+                          className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-2 hover:bg-muted"
+                        >
+                          <Checkbox
+                            checked={checked}
+                            onCheckedChange={(value) => {
+                              const next = new Set(draft.memberIds);
+                              if (value === true) next.add(member.user_id);
+                              else next.delete(member.user_id);
+                              set("memberIds", next);
+                            }}
+                          />
+                          <ActorAvatar
+                            actorType="member"
+                            actorId={member.user_id}
+                            size="sm"
+                          />
+                          <span className="min-w-0 flex-1 truncate text-body">
+                            {member.name}
+                          </span>
+                        </label>
+                      );
+                    })}
+                    {draft.memberIds.size === 0 ? (
+                      <p className="px-2 py-1 text-caption text-destructive">
+                        {t(($) => $.creation_studio.access.members.required)}
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
+              </SettingsCard>
+            </SettingsSection>
           </div>
-          {draft.permissionScope === "members" ? (
-            <div className="max-h-48 overflow-y-auto p-2">
-              {otherMembers.map((member) => {
-                const checked = draft.memberIds.has(member.user_id);
-                return (
-                  <label
-                    key={member.user_id}
-                    className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-2 hover:bg-muted"
-                  >
-                    <Checkbox
-                      checked={checked}
-                      onCheckedChange={(value) => {
-                        const next = new Set(draft.memberIds);
-                        if (value === true) next.add(member.user_id);
-                        else next.delete(member.user_id);
-                        set("memberIds", next);
-                      }}
-                    />
-                    <ActorAvatar
-                      actorType="member"
-                      actorId={member.user_id}
-                      size="sm"
-                    />
-                    <span className="min-w-0 flex-1 truncate text-body">
-                      {member.name}
-                    </span>
-                  </label>
-                );
-              })}
-              {draft.memberIds.size === 0 ? (
-                <p className="px-2 py-1 text-caption text-destructive">
-                  {t(($) => $.creation_studio.access.members.required)}
-                </p>
-              ) : null}
-            </div>
-          ) : null}
-        </SettingsCard>
-      </SettingsSection>
+        </CollapsibleContent>
+      </Collapsible>
     </div>
   );
 }

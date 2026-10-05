@@ -2,10 +2,10 @@ import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import { Inter, Geist_Mono, Source_Serif_4 } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
-import { Toaster } from "@multica/ui/components/ui/sonner";
-import { cn } from "@multica/ui/lib/utils";
+import { Toaster } from "@inkway/ui/components/ui/sonner";
+import { cn } from "@inkway/ui/lib/utils";
 import { WebProviders } from "@/components/web-providers";
-import { RESOURCES } from "@multica/views/locales";
+import { RESOURCES } from "@inkway/views/locales";
 import { getRequestLocale } from "@/lib/request-locale";
 import { HTML_LANG } from "@/lib/html-lang";
 import { SITE_TITLE, TITLE_TEMPLATE } from "@/platform/document-title";
@@ -67,19 +67,18 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#05070b" },
+    { media: "(prefers-color-scheme: light)", color: "#FAF8F4" },
+    { media: "(prefers-color-scheme: dark)", color: "#18202C" },
   ],
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.multica.ai"),
   title: {
     default: SITE_TITLE,
     template: TITLE_TEMPLATE,
   },
   description:
-    "Source-available platform that turns coding agents into real teammates. Assign tasks, track progress, compound skills.",
+    "Connect a coding tool, create an agent, assign an issue, and review the result.",
   icons: {
     icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
     shortcut: ["/favicon.svg"],
@@ -88,13 +87,13 @@ export const metadata: Metadata = {
     apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180" }],
   },
   // Home-screen behaviour: launch without browser chrome, and label the icon
-  // "Multica" rather than the long SEO <title>. `capable` renders the
+  // "Inkway" rather than the long SEO <title>. `capable` renders the
   // standardised `mobile-web-app-capable` tag — Next 16 no longer emits the
   // deprecated apple-prefixed spelling, so iOS standalone rides on the
   // manifest's `display` instead (honoured since iOS 16.4).
   appleWebApp: {
     capable: true,
-    title: "Multica",
+    title: "Inkway",
     // `default` keeps the web view below the status bar. Going edge-to-edge
     // (`black-translucent` + viewport-fit=cover) needs env(safe-area-inset-*)
     // padding, which no surface in the app has yet.
@@ -102,14 +101,10 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    siteName: "Multica",
+    siteName: "Inkway",
     locale: "en_US",
   },
-  twitter: {
-    card: "summary_large_image",
-    site: "@multica_hq",
-    creator: "@multica_hq",
-  },
+  twitter: { card: "summary_large_image" },
   alternates: {
     canonical: "/",
   },

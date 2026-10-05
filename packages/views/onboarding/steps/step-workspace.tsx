@@ -3,22 +3,22 @@
 import { type ReactNode, useRef, useEffect, useState } from "react";
 import { Dices, Plus } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@multica/ui/components/ui/button";
-import { Input } from "@multica/ui/components/ui/input";
+import { Button } from "@inkway/ui/components/ui/button";
+import { Input } from "@inkway/ui/components/ui/input";
 import {
   Field,
   FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
-} from "@multica/ui/components/ui/field";
-import { cn } from "@multica/ui/lib/utils";
-import { useCreateWorkspace } from "@multica/core/workspace/mutations";
-import type { Workspace } from "@multica/core/types";
-import { isImeComposing } from "@multica/core/utils";
-import { matchLocale } from "@multica/core/i18n";
-import { useConfigStore } from "@multica/core/config";
-import { workspaceUrlHost } from "@multica/core/workspace/workspace-url";
+} from "@inkway/ui/components/ui/field";
+import { cn } from "@inkway/ui/lib/utils";
+import { useCreateWorkspace } from "@inkway/core/workspace/mutations";
+import type { Workspace } from "@inkway/core/types";
+import { isImeComposing } from "@inkway/core/utils";
+import { matchLocale } from "@inkway/core/i18n";
+import { useConfigStore } from "@inkway/core/config";
+import { workspaceUrlHost } from "@inkway/core/workspace/workspace-url";
 import { useLogout } from "../../auth";
 import {
   StepFooter,
@@ -33,7 +33,7 @@ import {
   nameToWorkspaceSlug,
   randomCelestialWorkspaceIdentity,
 } from "../../workspace/slug";
-import { isReservedSlug } from "@multica/core/paths";
+import { isReservedSlug } from "@inkway/core/paths";
 
 /**
  * Step 2 — create your first workspace, or continue with one set up in
@@ -323,9 +323,7 @@ export function StepWorkspace({
           {t(($) => $.step_workspace.url_label)}
         </FieldLabel>
         <div className="flex items-center rounded-md border bg-muted transition-colors focus-within:border-foreground aria-invalid:border-destructive">
-          <span className="select-none pl-3 font-mono text-body text-muted-foreground">
-            {`${urlHost}/`}
-          </span>
+          {urlHost && <span className="select-none pl-3 font-mono text-body text-muted-foreground">{`${urlHost}/`}</span>}
           <Input
             id="ws-slug"
             type="text"
@@ -508,7 +506,7 @@ function ExistingWorkspaceCard({
           {workspace.name}
         </div>
         <div className="truncate font-mono text-caption text-muted-foreground">
-          {`${urlHost}/${workspace.slug}`}
+          {urlHost ? `${urlHost}/${workspace.slug}` : workspace.slug}
         </div>
       </div>
       <RadioMark selected={selected} />

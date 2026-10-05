@@ -74,7 +74,7 @@ const windowContext = readDesktopWindowContext(process.argv);
 // Read the OS-preferred locale that main injected via additionalArguments.
 // Zero IPC, zero blocking — process.argv is populated before preload runs.
 function fetchSystemLocale(): string {
-  const arg = process.argv.find((a) => a.startsWith("--multica-locale="));
+  const arg = process.argv.find((a) => a.startsWith("--inkway-locale="));
   return arg?.split("=")[1] ?? "en";
 }
 
@@ -281,6 +281,8 @@ const daemonAPI = {
     ipcRenderer.invoke("daemon:reauthenticate", token, userId),
   isCliInstalled: (): Promise<boolean> =>
     ipcRenderer.invoke("daemon:is-cli-installed"),
+  providerCredential: (request: { action: "status" | "set" | "delete" | "validate"; runtimeId: string; provider: "openai" | "anthropic" | "groq"; model?: string; value?: string }): Promise<{ ok: boolean; message: string; present?: boolean }> =>
+    ipcRenderer.invoke("daemon:provider-credential", request),
   getPrefs: (): Promise<{ autoStart: boolean; autoStop: boolean }> =>
     ipcRenderer.invoke("daemon:get-prefs"),
   setPrefs: (prefs: Partial<{ autoStart: boolean; autoStop: boolean }>): Promise<{ autoStart: boolean; autoStop: boolean }> =>

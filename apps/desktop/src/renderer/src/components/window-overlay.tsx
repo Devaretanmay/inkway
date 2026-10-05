@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { InvitePage } from "@multica/views/invite";
-import { InvitationsPage } from "@multica/views/invitations";
-import { OnboardingFlow } from "@multica/views/onboarding";
-import { useNavigation } from "@multica/views/navigation";
-import { paths } from "@multica/core/paths";
-import { workspaceListOptions } from "@multica/core/workspace/queries";
+import { InvitePage } from "@inkway/views/invite";
+import { InvitationsPage } from "@inkway/views/invitations";
+import { OnboardingFlow } from "@inkway/views/onboarding";
+import { useNavigation } from "@inkway/views/navigation";
+import { paths } from "@inkway/core/paths";
+import { workspaceListOptions } from "@inkway/core/workspace/queries";
 import { useWindowOverlayStore } from "@/stores/window-overlay-store";
 import { useLocalRuntimesPending } from "../platform/use-local-runtimes-pending";
 

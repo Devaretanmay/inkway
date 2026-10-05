@@ -30,16 +30,16 @@ import {
   useSetIssuePRAutoComplete,
   useUnlinkIssuePullRequest,
   type PullRequestVerdict,
-} from "@multica/core/github";
-import { useWorkspaceId } from "@multica/core/hooks";
-import { useIssueStatuses } from "@multica/core/issue-statuses/hooks";
+} from "@inkway/core/github";
+import { useWorkspaceId } from "@inkway/core/hooks";
+import { useIssueStatuses } from "@inkway/core/issue-statuses/hooks";
 import type {
   GitHubPullRequest,
   GitHubPullRequestState,
   PRAutoComplete,
-} from "@multica/core/types";
-import { Button } from "@multica/ui/components/ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@multica/ui/components/ui/tooltip";
+} from "@inkway/core/types";
+import { Button } from "@inkway/ui/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@inkway/ui/components/ui/tooltip";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -47,8 +47,8 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuTrigger,
-} from "@multica/ui/components/ui/dropdown-menu";
-import { cn } from "@multica/ui/lib/utils";
+} from "@inkway/ui/components/ui/dropdown-menu";
+import { cn } from "@inkway/ui/lib/utils";
 import { useT, useTimeAgo } from "../../i18n";
 import { useStatusLabel } from "../utils/status-label";
 import { StatusIcon } from "./status-icon";

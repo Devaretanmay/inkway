@@ -1,6 +1,6 @@
-import type { IssueScope } from "@multica/core/issues/surface/scope";
-import type { CreateIssueRequest } from "@multica/core/types";
-import type { ViewMode } from "@multica/core/issues/stores/view-store";
+import type { IssueScope } from "@inkway/core/issues/surface/scope";
+import type { CreateIssueRequest } from "@inkway/core/types";
+import type { ViewMode } from "@inkway/core/issues/stores/view-store";
 
 export type IssueCreateDefaults = Partial<
   Omit<

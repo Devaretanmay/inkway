@@ -3,13 +3,13 @@
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { api, errorCode } from "@multica/core/api";
-import { Button } from "@multica/ui/components/ui/button";
-import { Card, CardContent } from "@multica/ui/components/ui/card";
-import { Badge } from "@multica/ui/components/ui/badge";
-import { useAuthStore } from "@multica/core/auth";
-import { workspaceKeys } from "@multica/core/workspace/queries";
-import type { ShareLinkInfo, Workspace } from "@multica/core/types";
+import { api, errorCode } from "@inkway/core/api";
+import { Button } from "@inkway/ui/components/ui/button";
+import { Card, CardContent } from "@inkway/ui/components/ui/card";
+import { Badge } from "@inkway/ui/components/ui/badge";
+import { useAuthStore } from "@inkway/core/auth";
+import { workspaceKeys } from "@inkway/core/workspace/queries";
+import type { ShareLinkInfo, Workspace } from "@inkway/core/types";
 
 function JoinInner() {
   const router = useRouter();

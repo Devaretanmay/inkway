@@ -1,0 +1,1 @@
+export { InksPage } from "./components";

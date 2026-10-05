@@ -5,9 +5,9 @@ import {
   TabsList,
   TabsTrigger,
   TabsContent,
-} from "@multica/ui/components/ui/tabs";
+} from "@inkway/ui/components/ui/tabs";
 import { ColorUsage } from "./color-usage";
-import { Input } from "@multica/ui/components/ui/input";
+import { Input } from "@inkway/ui/components/ui/input";
 import { colorToHex } from "./color";
 import {
   colorGroups,
@@ -44,7 +44,7 @@ export function ColorsScene({
     .filter((group) => group.tokens.length > 0);
   const select = (token: ColorToken) =>
     window.parent.postMessage(
-      { type: "multica-ui-lab:color-select", token } satisfies ColorSelection,
+      { type: "inkway-ui-lab:color-select", token } satisfies ColorSelection,
       location.origin,
     );
   return (

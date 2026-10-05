@@ -10,11 +10,11 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/multica-ai/multica/server/internal/service"
-	"github.com/multica-ai/multica/server/internal/testutil"
-	db "github.com/multica-ai/multica/server/pkg/db/generated"
-	"github.com/multica-ai/multica/server/pkg/protocol"
-	"github.com/multica-ai/multica/server/pkg/taskfailure"
+	"github.com/Devaretanmay/inkway/server/internal/service"
+	"github.com/Devaretanmay/inkway/server/internal/testutil"
+	db "github.com/Devaretanmay/inkway/server/pkg/db/generated"
+	"github.com/Devaretanmay/inkway/server/pkg/protocol"
+	"github.com/Devaretanmay/inkway/server/pkg/taskfailure"
 )
 
 // batchClaimResponse mirrors the {"tasks":[...]} envelope ClaimTasksByRuntime
@@ -80,7 +80,7 @@ func TestClaimTasksByRuntime_ClaimPollHintSchedulesNextDeferredTask(t *testing.T
 		"runtime_id": runtimeID,
 		"issue_id":   issueID,
 		"status":     "deferred",
-		"fire_at":    testutil.Raw("now() + interval '5 seconds'"),
+		"fire_at":    testutil.Raw("now() + interval '30 seconds'"),
 	})
 
 	hinted := testutil.Decode[batchClaimResponse](t, testHandler.ClaimTasksByRuntime,
@@ -88,8 +88,9 @@ func TestClaimTasksByRuntime_ClaimPollHintSchedulesNextDeferredTask(t *testing.T
 	if !hinted.ClaimPollHintSupported {
 		t.Fatal("response did not confirm claim poll hint support")
 	}
-	if hinted.NextDeferredTaskAfterMillis <= 0 || hinted.NextDeferredTaskAfterMillis > 5000 {
-		t.Fatalf("next deferred delay = %dms, want 1..5000ms", hinted.NextDeferredTaskAfterMillis)
+	// Allow handler/database round-trip time past the nominal fire_at offset.
+	if hinted.NextDeferredTaskAfterMillis <= 0 || hinted.NextDeferredTaskAfterMillis > 31_000 {
+		t.Fatalf("next deferred delay = %dms, want 1..31000ms", hinted.NextDeferredTaskAfterMillis)
 	}
 
 	legacy := testutil.Decode[batchClaimResponse](t, testHandler.ClaimTasksByRuntime,

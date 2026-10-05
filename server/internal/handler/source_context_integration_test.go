@@ -12,14 +12,14 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/multica-ai/multica/server/internal/entitlement"
-	"github.com/multica-ai/multica/server/internal/entitlement/entitlementtest"
-	"github.com/multica-ai/multica/server/internal/events"
-	"github.com/multica-ai/multica/server/internal/middleware"
-	"github.com/multica-ai/multica/server/internal/service"
-	"github.com/multica-ai/multica/server/internal/util"
-	db "github.com/multica-ai/multica/server/pkg/db/generated"
-	"github.com/multica-ai/multica/server/pkg/protocol"
+	"github.com/Devaretanmay/inkway/server/internal/entitlement"
+	"github.com/Devaretanmay/inkway/server/internal/entitlement/entitlementtest"
+	"github.com/Devaretanmay/inkway/server/internal/events"
+	"github.com/Devaretanmay/inkway/server/internal/middleware"
+	"github.com/Devaretanmay/inkway/server/internal/service"
+	"github.com/Devaretanmay/inkway/server/internal/util"
+	db "github.com/Devaretanmay/inkway/server/pkg/db/generated"
+	"github.com/Devaretanmay/inkway/server/pkg/protocol"
 )
 
 func TestWriteSourceContextErrorHidesInternalDetails(t *testing.T) {

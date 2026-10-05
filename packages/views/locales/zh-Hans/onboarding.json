@@ -1,6 +1,6 @@
 {
   "step_nav": {
-    "wordmark": "Multica",
+    "wordmark": "Inkway",
     "label": "引导步骤",
     "about_you": {
       "label": "关于你"
@@ -13,7 +13,7 @@
     }
   },
   "welcome": {
-    "wordmark": "欢迎使用 Multica",
+    "wordmark": "欢迎使用 Inkway",
     "headline_line1": "你的 AI 队友，",
     "headline_line2": "在",
     "headline_emphasis": "同一个工作区。",
@@ -54,7 +54,7 @@
   },
   "source_backfill": {
     "eyebrow": "顺便问一句",
-    "lede": "帮助我们了解你从哪里知道 Multica。",
+    "lede": "帮助我们了解你从哪里知道 Inkway。",
     "submit": "提交",
     "save_failed_toast": "保存失败"
   },
@@ -63,7 +63,7 @@
       "question": "简单介绍一下你自己。"
     },
     "source": {
-      "question": "你是从哪里了解到 Multica 的？",
+      "question": "你是从哪里了解到 Inkway 的？",
       "friends_colleagues": "朋友或同事",
       "search": "Google / 搜索",
       "social_x": "X / Twitter",
@@ -94,7 +94,7 @@
       "other_placeholder": "例如：教师、支持负责人"
     },
     "use_case": {
-      "question": "你打算用 Multica 做什么？",
+      "question": "你打算用 Inkway 做什么？",
       "ship_code": "让 AI 智能体帮我写代码",
       "manage_team": "给团队做任务管理",
       "personal_tasks": "管理我自己的任务",
@@ -116,7 +116,7 @@
   "cli_install": {
     "copy_aria": "复制",
     "intro": "这台电脑上需要安装一个智能体运行时（Claude Code、Codex、Cursor 等）才能运行你的智能体。也支持服务器和远程开发机。",
-    "step1_label": "安装 Multica CLI",
+    "step1_label": "安装 Inkway CLI",
     "platform_group": "选择你的系统",
     "platform_macos_linux": "macOS / Linux",
     "platform_windows": "Windows",
@@ -138,7 +138,7 @@
   "welcome_after_onboarding": {
     "skip": {
       "loading": "正在为你准备工作区...",
-      "title": "欢迎来到 Multica！",
+      "title": "欢迎来到 Inkway！",
       "subtitle": "我们建了一个任务帮你连接运行时。准备好后，在 \"运行时\" 页面就能开始使用 Mika。",
       "got_it": "知道了",
       "status_in_progress": "进行中",
@@ -188,7 +188,7 @@
     "create_failed_toast": "创建工作区失败",
     "creation_disabled_eyebrow": "工作区创建已禁用",
     "creation_disabled_headline": "请联系管理员邀请你加入工作区。",
-    "creation_disabled_lede": "该 Multica 实例不允许创建新的工作区。等管理员把你邀请到某个工作区后，接受邀请并刷新即可继续。",
+    "creation_disabled_lede": "该 Inkway 实例不允许创建新的工作区。等管理员把你邀请到某个工作区后，接受邀请并刷新即可继续。",
     "creation_disabled_logout": "退出登录",
     "creation_disabled_eyebrow_resume": "你的工作区",
     "creation_disabled_headline_resume": "继续使用 {{name}}。",
@@ -260,5 +260,71 @@
     "name": "Mika",
     "role": "参谋长",
     "blurb": "把你想做的事告诉 Mika，它会变成一个任务，并交给合适的智能体处理。"
+  },
+  "inkway_first_run": {
+    "step_count": "Inkway · 第 {{current}} 步，共 {{total}} 步",
+    "welcome": "欢迎使用 Inkway",
+    "steps_label": "设置步骤",
+    "step_connect": "连接",
+    "create_agent_step": "创建 Agent",
+    "first_issue": "创建首个 Issue",
+    "tool_ready": "本地工具已就绪",
+    "checking_tools": "正在检查已连接的工具…",
+    "no_tool": "未检测到本地工具",
+    "machine": "Connected computer: {{machine}}",
+    "start_retry": "Start local tools / Retry",
+    "check_again": "重新检查",
+    "install_tools_hint": "在此电脑上安装并登录 Claude Code、Codex 或 OpenCode，然后重新检查。",
+    "workspace_name": "工作区名称",
+    "workspace_placeholder": "{{name}} workspace",
+    "create_workspace": "创建工作区",
+    "workspace_label": "Workspace: {{name}}",
+    "connect_a_tool": "连接本地编程工具以继续。本地工具无需 API 密钥。",
+    "optional_provider": "本地工具无需 API 密钥。仅在需要时连接 API 提供商。",
+    "provider": "API provider",
+    "model": "Model",
+    "api_key": "API key (saved locally)",
+    "connect_button": "Connect",
+    "test_connection": "Test connection",
+    "credentials_local": "Provider credentials stay on the connected computer. Inkway never receives API keys.",
+    "choose_agent_tool": "Choose a local tool or connected API provider for this agent.",
+    "local_cli_agent": "Local tool",
+    "native_api_agent": "API provider",
+    "connect_provider_first": "Connect an API provider first",
+    "agent_name": "Agent name",
+    "tool": "Provider / Tool",
+    "provider_and_model": "Provider: {{provider}} · Model: {{model}}",
+    "create_agent": "Create agent",
+    "choose_repository": "Choose a repository for the agent, or continue without one.",
+    "existing_repository": "Existing repository",
+    "choose_later": "Choose later",
+    "repository_name": "Repository name",
+    "repository_folder": "Local repository folder",
+    "repository_folder_placeholder": "/path/to/repository",
+    "choose_folder": "Choose folder",
+    "issue_intro": "Create an issue and send it straight to your new agent.",
+    "issue_title": "Issue title",
+    "description": "Description",
+    "repository": "Repository: {{name}}",
+    "assigned_to": "Assigned to {{name}}",
+    "create_and_run": "Create & Run",
+    "back": "Back",
+    "skip_for_now": "Skip for now",
+    "continue": "Continue",
+    "create_agent_above": "Create agent above",
+    "choose_workspace_slug": "Choose a workspace name that can form a URL.",
+    "workspace_failed": "Could not create the workspace.",
+    "tool_failed": "Could not start local tools.",
+    "repository_unreadable": "Choose a readable local folder.",
+    "repository_runtime_unavailable": "This computer cannot register a local repository yet. Choose an available local tool.",
+    "repository_failed": "Could not register the repository.",
+    "agent_failed": "Could not create the agent.",
+    "issue_failed": "Could not create the issue.",
+    "provider_saved": "{{provider}} saved on this computer.",
+    "desktop_required": "Connect API providers in the Inkway desktop app.",
+    "credential_failed": "Could not save the API key on this computer.",
+    "connection_verified": "Connection verified.",
+    "provider_check_failed": "Could not verify this provider. Check its settings and try again.",
+    "provider_validate_failed": "Could not verify the provider connection."
   }
 }

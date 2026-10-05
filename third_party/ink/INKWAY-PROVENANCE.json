@@ -1,0 +1,12 @@
+{
+  "component": "Ink Python SDK and Decision JIT",
+  "version": "0.6.0rc1",
+  "upstream_repository": "https://github.com/Devaretanmay/ink",
+  "upstream_commit": "2120a0f644fad612e03e6ef109035193ac07de48",
+  "inkway_patches": [
+    "runtime compilation verifies provisioned checkpoints without network downloads",
+    "trained checkpoints validate against their own ink-model.json",
+    "legacy untrained base checkpoint manifests are accepted only when hashes exactly match the pinned base checkpoint"
+  ],
+  "license": "Apache-2.0"
+}

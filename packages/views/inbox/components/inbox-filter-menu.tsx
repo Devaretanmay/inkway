@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { CircleDot, Filter, Mail, RotateCcw, SignalHigh, UserRound } from "lucide-react";
-import { PRIORITY_DISPLAY_ORDER } from "@multica/core/issues/config";
+import { PRIORITY_DISPLAY_ORDER } from "@inkway/core/issues/config";
 import {
   filterInboxItems,
   inboxActorKey,
@@ -12,13 +12,13 @@ import {
   type InboxPriorityFilterSupport,
   useInboxFilters,
   useInboxFilterStore,
-} from "@multica/core/inbox/filter-store";
+} from "@inkway/core/inbox/filter-store";
 import { useQuery } from "@tanstack/react-query";
-import { archivedInboxFacetsOptions } from "@multica/core/inbox/queries";
-import { useActorName } from "@multica/core/workspace/hooks";
-import type { InboxItem } from "@multica/core/types";
-import { ActorAvatar } from "@multica/ui/components/common/actor-avatar";
-import { Button } from "@multica/ui/components/ui/button";
+import { archivedInboxFacetsOptions } from "@inkway/core/inbox/queries";
+import { useActorName } from "@inkway/core/workspace/hooks";
+import type { InboxItem } from "@inkway/core/types";
+import { ActorAvatar } from "@inkway/ui/components/common/actor-avatar";
+import { Button } from "@inkway/ui/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -29,8 +29,8 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "@multica/ui/components/ui/dropdown-menu";
-import { cn } from "@multica/ui/lib/utils";
+} from "@inkway/ui/components/ui/dropdown-menu";
+import { cn } from "@inkway/ui/lib/utils";
 import { PriorityIcon } from "../../issues/components/priority-icon";
 import { StatusIcon } from "../../issues/components/status-icon";
 import { useStatusOptions } from "../../issues/utils/status-options";

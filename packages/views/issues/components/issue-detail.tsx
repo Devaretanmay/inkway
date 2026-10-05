@@ -4,15 +4,17 @@ import {
   issueBehavesAs,
   issueBehavesAsAny,
   issueStatusCategory,
-} from "@multica/core/issues";
+} from "@inkway/core/issues";
 import { useStatusLabel } from "../utils/status-label";
 import { priorityLabel } from "../utils/priority-label";
-import { useIssueStatuses } from "@multica/core/issue-statuses/hooks";
+import { useIssueStatuses } from "@inkway/core/issue-statuses/hooks";
 import { useState, useEffect, useCallback, useMemo, useRef, Fragment, type ReactNode } from "react";
 import { Virtuoso, type VirtuosoHandle } from "react-virtuoso";
 import { useDefaultLayout, usePanelRef } from "react-resizable-panels";
 import { AppLink, useBackOrReplace } from "../../navigation";
 import { IssueDuplicateBanner, IssueDuplicatesSection, isDuplicateIssue } from "./issue-duplicates";
+import { IssueCurrentRunCard } from "./issue-current-run-card";
+import { IssueReviewCard } from "./issue-review-card";
 import {
   Archive,
   Calendar,
@@ -34,11 +36,11 @@ import {
   Users,
 } from "lucide-react";
 import { BreadcrumbHeader, type BreadcrumbSegment } from "../../layout/breadcrumb-header";
-import { Skeleton } from "@multica/ui/components/ui/skeleton";
-import { Button } from "@multica/ui/components/ui/button";
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@multica/ui/components/ui/resizable";
-import { Sheet, SheetContent } from "@multica/ui/components/ui/sheet";
-import { useIsMobile } from "@multica/ui/hooks/use-mobile";
+import { Skeleton } from "@inkway/ui/components/ui/skeleton";
+import { Button } from "@inkway/ui/components/ui/button";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@inkway/ui/components/ui/resizable";
+import { Sheet, SheetContent } from "@inkway/ui/components/ui/sheet";
+import { useIsMobile } from "@inkway/ui/hooks/use-mobile";
 import { ContentEditor, type ContentEditorRef, TitleEditor, type TitleEditorRef, useFileDropZone, FileDropOverlay, useLazyEditor, useEditorUpload, PreviewSequenceProvider, collectPreviewSequence } from "../../editor";
 import {
   WAKEUP_ACTIVITY_ACTIONS,
@@ -47,35 +49,35 @@ import {
   wakeupActivityChip,
 } from "./wakeup-activity";
 import { useWakeupText } from "./wakeup-presentation";
-import type { ImageSequenceBlock } from "@multica/core/attachments/image-sequence";
-import { FileUploadButton } from "@multica/ui/components/common/file-upload-button";
+import type { ImageSequenceBlock } from "@inkway/core/attachments/image-sequence";
+import { FileUploadButton } from "@inkway/ui/components/common/file-upload-button";
 import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
-} from "@multica/ui/components/ui/tooltip";
+} from "@inkway/ui/components/ui/tooltip";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-} from "@multica/ui/components/ui/dropdown-menu";
-import { Popover, PopoverTrigger, PopoverContent } from "@multica/ui/components/ui/popover";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@multica/ui/components/ui/dialog";
-import { Checkbox } from "@multica/ui/components/ui/checkbox";
-import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@multica/ui/components/ui/command";
-import { AvatarGroup, AvatarGroupCount } from "@multica/ui/components/ui/avatar";
+} from "@inkway/ui/components/ui/dropdown-menu";
+import { Popover, PopoverTrigger, PopoverContent } from "@inkway/ui/components/ui/popover";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@inkway/ui/components/ui/dialog";
+import { Checkbox } from "@inkway/ui/components/ui/checkbox";
+import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@inkway/ui/components/ui/command";
+import { AvatarGroup, AvatarGroupCount } from "@inkway/ui/components/ui/avatar";
 import { ActorAvatar } from "../../common/actor-avatar";
 import { PropRow } from "../../common/prop-row";
 import { PropertyIcon } from "../../common/property-icon";
-import type { Attachment, Issue, IssueProperty, IssueStatus, IssueStatusCategory, IssuePriority, TimelineEntry, UpdateIssueRequest } from "@multica/core/types";
-import { contentReferencesAttachment } from "@multica/core/types";
-import { isBuiltInIssueStatus } from "@multica/core/issue-statuses";
-import { commentLandingTarget, isDeletedComment } from "@multica/core/issues/comment-deletion";
-import { formatDateOnly, isPastDateOnly } from "@multica/core/issues/date";
-import { useUpdateIssue } from "@multica/core/issues/mutations";
+import type { Attachment, Issue, IssueProperty, IssueStatus, IssueStatusCategory, IssuePriority, TimelineEntry, UpdateIssueRequest } from "@inkway/core/types";
+import { contentReferencesAttachment } from "@inkway/core/types";
+import { isBuiltInIssueStatus } from "@inkway/core/issue-statuses";
+import { commentLandingTarget, isDeletedComment } from "@inkway/core/issues/comment-deletion";
+import { formatDateOnly, isPastDateOnly } from "@inkway/core/issues/date";
+import { useUpdateIssue } from "@inkway/core/issues/mutations";
 import { toast } from "sonner";
-import { errorCode } from "@multica/core/api";
+import { errorCode } from "@inkway/core/api";
 import { StatusIcon } from "./status-icon";
 import { PriorityIcon } from "./priority-icon";
 import { StatusPicker } from "./pickers/status-picker";
@@ -86,7 +88,7 @@ import { DueDatePicker } from "./pickers/due-date-picker";
 import { AssigneePicker } from "./pickers/assignee-picker";
 import { LabelPicker } from "./pickers/label-picker";
 import { CustomPropertyValueEditor, CustomPropertyValueDisplay } from "./pickers/custom-property-picker";
-import { Switch } from "@multica/ui/components/ui/switch";
+import { Switch } from "@inkway/ui/components/ui/switch";
 import { IssueActionsDropdown, useIssueActions, IssueActionsContextMenu, IssueContextMenuProvider } from "../actions";
 import { LabelChip } from "../../labels/label-chip";
 import { IssueAgentActivityIndicator } from "./issue-agent-activity-indicator";
@@ -97,7 +99,7 @@ import { LocalDirectoryHint } from "../../projects/components/local-directory-hi
 import { useNewRunIds } from "./use-run-comment-motion";
 import { AgentRunComment, CommentCard } from "./comment-card";
 import { EMPTY_COMMENT_RUNS, buildCommentRunView, orderTimelineWithRuns, type CommentRun } from "./comment-runs";
-import { issueTasksOptions } from "@multica/core/issues/queries";
+import { issueTasksOptions } from "@inkway/core/issues/queries";
 import { SourceContextBadge } from "./source-context-viewer";
 import { RevisionConflictCompare } from "./revision-conflict-compare";
 import { CommentInput } from "./comment-input";
@@ -113,7 +115,7 @@ import { WakeupsSection } from "./wakeups-section";
 import { QuickActionsSection } from "./quick-actions-section";
 import { PluginPanelSection } from "../../plugins";
 import { PullRequestsSection } from "./pull-requests-section";
-import { useGitHubSettings } from "@multica/core/github";
+import { useGitHubSettings } from "@inkway/core/github";
 import { DeliverablesSection } from "./deliverables/deliverables-section";
 import { DeliverablesOverview } from "./deliverables/deliverables-overview";
 import {
@@ -121,21 +123,21 @@ import {
   useDeliverableDetails,
   type DeliverableOrigin,
 } from "./deliverables/deliverable-details";
-import { collectDeliverableFiles } from "@multica/core/attachments/deliverables";
+import { collectDeliverableFiles } from "@inkway/core/attachments/deliverables";
 import { AttachmentVersionsProvider } from "./deliverables/attachment-versions";
 import { useQuery } from "@tanstack/react-query";
-import { useAuthStore } from "@multica/core/auth";
-import { useWorkspacePaths } from "@multica/core/paths";
-import { useActorName } from "@multica/core/workspace/hooks";
-import { useWorkspaceId } from "@multica/core/hooks";
-import { useRecentContextStore } from "@multica/core/chat";
-import { useModalStore } from "@multica/core/modals";
-import { issueListOptions, issueDetailOptions, childIssuesOptions, childIssueProgressOptions, issueAttachmentsOptions } from "@multica/core/issues/queries";
-import { projectDetailOptions } from "@multica/core/projects/queries";
+import { useAuthStore } from "@inkway/core/auth";
+import { useWorkspacePaths } from "@inkway/core/paths";
+import { useActorName } from "@inkway/core/workspace/hooks";
+import { useWorkspaceId } from "@inkway/core/hooks";
+import { useRecentContextStore } from "@inkway/core/chat";
+import { useModalStore } from "@inkway/core/modals";
+import { issueListOptions, issueDetailOptions, childIssuesOptions, childIssueProgressOptions, issueAttachmentsOptions } from "@inkway/core/issues/queries";
+import { projectDetailOptions } from "@inkway/core/projects/queries";
 import { ProjectIcon } from "../../projects/components/project-icon";
-import { issueLabelsOptions } from "@multica/core/labels";
-import { propertyListOptions } from "@multica/core/properties";
-import { memberListOptions, agentListOptions } from "@multica/core/workspace/queries";
+import { issueLabelsOptions } from "@inkway/core/labels";
+import { propertyListOptions } from "@inkway/core/properties";
+import { memberListOptions, agentListOptions } from "@inkway/core/workspace/queries";
 import {
   selectExpandedResolved,
   useCommentCollapseStore,
@@ -146,13 +148,13 @@ import {
   SUB_ISSUE_ROW_PROPERTY_KEYS,
   type SubIssueRowProperties,
   type SubIssueRowPropertyKey,
-} from "@multica/core/issues/stores";
-import { useIssueSelectionStore } from "@multica/core/issues/stores/selection-store";
+} from "@inkway/core/issues/stores";
+import { useIssueSelectionStore } from "@inkway/core/issues/stores/selection-store";
 import { BatchActionToolbar } from "./batch-action-toolbar";
 import { useIssueTimeline } from "../hooks/use-issue-timeline";
 import { useIssueReactions } from "../hooks/use-issue-reactions";
 import { useIssueSubscribers } from "../hooks/use-issue-subscribers";
-import { ReactionBar } from "@multica/ui/components/common/reaction-bar";
+import { ReactionBar } from "@inkway/ui/components/common/reaction-bar";
 import { useLocale, useTimeAgo } from "../../i18n";
 import {
   useRestoredScrollOffset,
@@ -160,7 +162,7 @@ import {
   useRestoredViewState,
   useViewStateWriter,
 } from "../../platform";
-import { cn } from "@multica/ui/lib/utils";
+import { cn } from "@inkway/ui/lib/utils";
 import { PAGE_GUTTER } from "../../layout/page-header";
 
 import { ProgressRing } from "./progress-ring";
@@ -1301,7 +1303,7 @@ export function IssueDetailSkeleton({
 // IssueDetail
 // ---------------------------------------------------------------------------
 
-export function IssueDetail({ issueId, onDelete, onDone, defaultSidebarOpen = true, layoutId = "multica_issue_detail_layout", highlightCommentId, highlightRequestToken, leadingAction, variant = "page", trailingActions }: IssueDetailProps) {
+export function IssueDetail({ issueId, onDelete, onDone, defaultSidebarOpen = true, layoutId = "inkway_issue_detail_layout", highlightCommentId, highlightRequestToken, leadingAction, variant = "page", trailingActions }: IssueDetailProps) {
   const isPeek = variant === "peek";
   const { t } = useT("issues");
   const locale = useLocale();
@@ -2440,6 +2442,24 @@ export function IssueDetail({ issueId, onDelete, onDone, defaultSidebarOpen = tr
   const actions = useIssueActions(issue);
   const handleUpdateField = actions.updateField;
 
+  /** Bring the bottom composer into view and put the caret in it. The review
+   *  card's "Continue" hands the human straight back to the conversation
+   *  instead of making them scroll for it. */
+  const focusComposer = useCallback(() => {
+    const container = composerRef.current;
+    if (!container) return;
+    container.scrollIntoView?.({
+      block: "center",
+      behavior: window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+        ? "auto"
+        : "smooth",
+    });
+    const field = container.querySelector<HTMLElement>(
+      "textarea, [contenteditable='true'], input",
+    );
+    field?.focus();
+  }, []);
+
   // Labels live in their own query (not on the issue body) — fetch the count
   // here so seeding can decide whether the "Labels" optional row should be
   // shown for an issue that already has labels attached.
@@ -2687,12 +2707,14 @@ export function IssueDetail({ issueId, onDelete, onDone, defaultSidebarOpen = tr
           <PropRow label={t(($) => $.detail.prop_assignee)}>
             <AssigneePicker assigneeType={issue.assignee_type} assigneeId={issue.assignee_id} onUpdate={handleUpdateField} align="start" />
           </PropRow>
-          <PropRow label={t(($) => $.detail.prop_project)}>
-            <ProjectPicker
-              projectId={issue.project_id}
-              onUpdate={handleUpdateField}
-            />
-          </PropRow>
+          {issue.project_id && (
+            <PropRow label={t(($) => $.detail.prop_repository)}>
+              <ProjectPicker
+                projectId={issue.project_id}
+                onUpdate={handleUpdateField}
+              />
+            </PropRow>
+          )}
 
           {/* Optional props — rendered only when set on the issue OR added
               via "+ Add property" in this session. Row order follows the
@@ -2940,7 +2962,7 @@ export function IssueDetail({ issueId, onDelete, onDone, defaultSidebarOpen = tr
           own token spend, with the issue total on the section header.
           Self-contained; owns its own collapse state and WS subscriptions.
           Hides itself when there are no runs to show. */}
-      <ExecutionLogSection issueId={id} identifier={issue.identifier} issueTitle={issue.title} />
+      <ExecutionLogSection defaultOpen={false} issueId={id} identifier={issue.identifier} issueTitle={issue.title} />
 
       {/* Details — creator and timestamps. Sits below the execution log
           because it is the least-read block in the sidebar: the values
@@ -3386,6 +3408,20 @@ export function IssueDetail({ issueId, onDelete, onDone, defaultSidebarOpen = tr
               )}
             />
           ) : null}
+
+          {/* Execution state, ahead of the description. Two cards that render
+              on condition and never together: one while an agent is working,
+              one while the issue waits on a human. Between them they cover the
+              two moments Ink's loop turns on — work started, and work
+              handed back — without making raw run detail the default screen. */}
+          <IssueCurrentRunCard issueId={id} identifier={issue.identifier} />
+          {issue.status === "in_review" && (
+            <IssueReviewCard
+              issue={issue}
+              onUpdate={handleUpdateField}
+              onContinue={focusComposer}
+            />
+          )}
 
           {parentIssue && !issue.source_context && (
             <AppLink

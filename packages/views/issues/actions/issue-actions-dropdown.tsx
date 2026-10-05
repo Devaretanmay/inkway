@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, type ReactElement } from "react";
-import type { Issue } from "@multica/core/types";
+import type { Issue } from "@inkway/core/types";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
-} from "@multica/ui/components/ui/dropdown-menu";
+} from "@inkway/ui/components/ui/dropdown-menu";
 import { useIssueActions } from "./use-issue-actions";
 import {
   IssueActionsMenuItems,

@@ -10,20 +10,20 @@ func TestRegistryExcludesDatabaseSampledMetrics(t *testing.T) {
 	}
 
 	retired := map[string]struct{}{
-		"multica_agent_task_queued":                               {},
-		"multica_agent_task_running":                              {},
-		"multica_agent_task_stuck_total":                          {},
-		"multica_business_sampler_query_errors_total":             {},
-		"multica_business_sampler_query_seconds":                  {},
-		"multica_workspace_total":                                 {},
-		"multica_seat_capacity_outbox_pending":                    {},
-		"multica_seat_capacity_outbox_dead_lettered":              {},
-		"multica_seat_capacity_outbox_oldest_pending_age_seconds": {},
-		"multica_channel_media_pending_objects":                   {},
-		"multica_channel_media_tombstoned_objects":                {},
-		"multica_runtime_gc_blocked_observation_failed_total":     {},
-		"multica_runtime_gc_blocked_runtimes":                     {},
-		"multica_runtime_gc_backlog_runtimes":                     {},
+		"inkway_agent_task_queued":                               {},
+		"inkway_agent_task_running":                              {},
+		"inkway_agent_task_stuck_total":                          {},
+		"inkway_business_sampler_query_errors_total":             {},
+		"inkway_business_sampler_query_seconds":                  {},
+		"inkway_workspace_total":                                 {},
+		"inkway_seat_capacity_outbox_pending":                    {},
+		"inkway_seat_capacity_outbox_dead_lettered":              {},
+		"inkway_seat_capacity_outbox_oldest_pending_age_seconds": {},
+		"inkway_channel_media_pending_objects":                   {},
+		"inkway_channel_media_tombstoned_objects":                {},
+		"inkway_runtime_gc_blocked_observation_failed_total":     {},
+		"inkway_runtime_gc_blocked_runtimes":                     {},
+		"inkway_runtime_gc_backlog_runtimes":                     {},
 	}
 	for _, family := range families {
 		if _, found := retired[family.GetName()]; found {

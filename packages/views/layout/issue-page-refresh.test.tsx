@@ -5,16 +5,16 @@ import { IssuesPage } from "../issues/components/issues-page";
 import { MyIssuesPage } from "../my-issues/components/my-issues-page";
 
 const state = vi.hoisted(() => ({ refreshing: false, user: { id: "user-1" } as { id: string } | null }));
-vi.mock("@multica/core/auth", () => ({
+vi.mock("@inkway/core/auth", () => ({
   useAuthStore: (select: (s: typeof state) => unknown) => select(state),
 }));
-vi.mock("@multica/core/issues/stores/issues-scope-store", () => ({
+vi.mock("@inkway/core/issues/stores/issues-scope-store", () => ({
   useIssuesScope: () => "all",
 }));
-vi.mock("@multica/core/issues/stores/view-store-context", () => ({
+vi.mock("@inkway/core/issues/stores/view-store-context", () => ({
   useViewStore: (select: (s: object) => unknown) => select({ dateFilter: null, setDateFilter: vi.fn() }),
 }));
-vi.mock("@multica/core/issues/stores/my-issues-view-store", () => {
+vi.mock("@inkway/core/issues/stores/my-issues-view-store", () => {
   const scopeState = { scope: "all", setScope: vi.fn() };
   return {
     myIssuesRelationFromScope: () => "all",
@@ -28,6 +28,13 @@ vi.mock("../issues/surface/issue-surface", () => ({
 }));
 vi.mock("../issues/components/issues-header", () => ({
   IssuesHeader: () => <div>Issue controls</div>,
+}));
+// The status tab row resolves the workspace status catalog through react-query.
+// This file is about page-title refresh feedback and stubs `IssueSurface` down to
+// a bare controller, so the catalog has no provider to read from. It is covered
+// on its own in issues-status-tabs.test.tsx.
+vi.mock("../issues/components/issues-status-tabs", () => ({
+  IssuesStatusTabs: () => <div>Issue status tabs</div>,
 }));
 vi.mock("../my-issues/components/my-issues-header", () => ({
   MyIssuesHeader: () => <div>My issue controls</div>,

@@ -31,7 +31,7 @@ import type { useT } from "../i18n";
 //
 // `runtime_profile_missing` is split from `runtime_unusable`
 // on the same rule: the CLI there runs perfectly and is missing a runtime
-// profile (DSH's `multica` profile, which supplies the protocol Multica
+// profile (DSH's `inkway` profile, which supplies the protocol Inkway
 // drives). "Reinstall the CLI" copy sends the user to re-run an install that
 // was never broken; the fix is installing the profile.
 type IssuesT = ReturnType<typeof useT<"issues">>["t"];

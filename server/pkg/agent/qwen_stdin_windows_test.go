@@ -14,9 +14,9 @@ import (
 )
 
 const (
-	qwenShimHelperEnv      = "MULTICA_QWEN_SHIM_HELPER"
-	qwenShimHelperArgvFile = "MULTICA_QWEN_SHIM_ARGV_FILE"
-	qwenShimHelperInFile   = "MULTICA_QWEN_SHIM_STDIN_FILE"
+	qwenShimHelperEnv      = "INKWAY_QWEN_SHIM_HELPER"
+	qwenShimHelperArgvFile = "INKWAY_QWEN_SHIM_ARGV_FILE"
+	qwenShimHelperInFile   = "INKWAY_QWEN_SHIM_STDIN_FILE"
 )
 
 // TestQwenShimHelperProcess is re-executed by the fake qwen.ps1 as its native

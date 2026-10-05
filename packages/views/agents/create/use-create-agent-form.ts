@@ -14,19 +14,19 @@ import {
   AGENT_CONVERSATION_STARTER_LABEL_MAX_LENGTH,
   AGENT_CONVERSATION_STARTER_MAX_LENGTH,
   type AgentDraft,
-} from "@multica/core/agents";
-import { useAuthStore } from "@multica/core/auth";
-import { useWorkspaceId } from "@multica/core/hooks";
-import { isRuntimeUsableForUser, runtimeListOptions } from "@multica/core/runtimes";
+} from "@inkway/core/agents";
+import { useAuthStore } from "@inkway/core/auth";
+import { useWorkspaceId } from "@inkway/core/hooks";
+import { isRuntimeUsableForUser, runtimeListOptions } from "@inkway/core/runtimes";
 import type {
   MemberWithUser,
   RuntimeDevice,
   SkillSummary,
-} from "@multica/core/types";
+} from "@inkway/core/types";
 import {
   memberListOptions,
   skillListOptions,
-} from "@multica/core/workspace/queries";
+} from "@inkway/core/workspace/queries";
 
 interface CreateAgentForm {
   draft: AgentDraft;

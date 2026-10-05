@@ -192,7 +192,33 @@ export const DEFAULT_CARD_PROPERTIES: Readonly<CardProperties> = {
   labels: false,
 };
 
+/**
+ * Ink's permanent board columns. A Kanban control plane reads fastest at
+ * five, and these are the five a human works through: captured, claimed,
+ * executing, awaiting judgment, finished.
+ *
+ * Presentation only. The backend status set is untouched — `blocked`,
+ * `cancelled` and every custom workspace status keep their existing semantics,
+ * stay listed in the status filter, and return as board columns the moment
+ * they are selected (see DEFAULT_HIDDEN_STATUSES and `showStatus`).
+ */
+export const INK_BOARD_STATUSES: readonly IssueStatus[] = [
+  "backlog",
+  "todo",
+  "in_progress",
+  "in_review",
+  "done",
+];
+
+/**
+ * Statuses that do not occupy a permanent column by default. `cancelled` is
+ * closed work; `blocked` is work that cannot proceed and would otherwise add a
+ * permanently sparse column between In Review and Done. Neither is deleted or
+ * re-keyed — both remain visible in the filter menu, in issue detail, and on
+ * the board the moment either is selected.
+ */
 export const DEFAULT_HIDDEN_STATUSES: readonly IssueStatus[] = [
+  "blocked",
   "cancelled",
 ];
 
@@ -820,7 +846,7 @@ export function createIssueViewStore(persistKey: string): StoreApi<IssueViewStat
 
 /** Global singleton for the /issues page. */
 export const useIssueViewStore = create<IssueViewState>()(
-  persist(viewStoreSlice, viewStorePersistOptions("multica_issues_view"))
+  persist(viewStoreSlice, viewStorePersistOptions("inkway_issues_view"))
 );
 
 registerForWorkspaceRehydration(() => useIssueViewStore.persist.rehydrate());

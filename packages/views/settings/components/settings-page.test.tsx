@@ -1,12 +1,12 @@
 import { fireEvent, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { SidebarProvider, useSidebar } from "@multica/ui/components/ui/sidebar";
-import { configStore } from "@multica/core/config";
+import { SidebarProvider, useSidebar } from "@inkway/ui/components/ui/sidebar";
+import { configStore } from "@inkway/core/config";
 import {
   BILLING_WORKSPACE_SUBSCRIPTIONS_FLAG,
   PLUGINS_V1_FLAG,
-} from "@multica/core/feature-flags";
+} from "@inkway/core/feature-flags";
 import { renderWithI18n } from "../../test/i18n";
 
 // This file tests the settings SHELL — the chrome around the tabs — so every
@@ -40,16 +40,16 @@ vi.mock("./connected-apps-tab", () => ({
   useComposioAvailable: () => shell.appsAvailable,
 }));
 
-vi.mock("@multica/core/paths", () => ({
+vi.mock("@inkway/core/paths", () => ({
   useCurrentWorkspace: () => ({ id: "ws-1", name: "Acme" }),
 }));
-vi.mock("@multica/core/workspace/avatar-url", () => ({
+vi.mock("@inkway/core/workspace/avatar-url", () => ({
   resolvePublicFileUrl: (url: string | null | undefined) => url ?? null,
 }));
-vi.mock("@multica/core/permissions", () => ({
+vi.mock("@inkway/core/permissions", () => ({
   useCurrentMember: () => ({ role: shell.role, isLoading: false }),
 }));
-vi.mock("@multica/core/auth", () => {
+vi.mock("@inkway/core/auth", () => {
   const state = { user: { id: "user-1", name: "Ada Lovelace", avatar_url: null } };
   const useAuthStore = Object.assign(
     (selector?: (s: typeof state) => unknown) =>
@@ -76,7 +76,7 @@ vi.mock("../../navigation/context", async (importOriginal) => ({
 // Compact by default: that is the width where the nav is a sheet and this
 // trigger is the only way to reach it.
 const layout = { compact: true };
-vi.mock("@multica/ui/hooks/use-mobile", () => ({
+vi.mock("@inkway/ui/hooks/use-mobile", () => ({
   useIsMobile: () => layout.compact,
   useIsCompact: () => layout.compact,
 }));
@@ -162,13 +162,13 @@ describe("SettingsPage Plugin feature flag", () => {
     expect(screen.getByText("AccountTab")).toBeInTheDocument();
   });
 
-  it("shows and mounts Plugins when explicitly enabled", () => {
+  it("keeps Plugins mountable by direct link when enabled but out of the primary menu", () => {
     navigationState.search = "tab=plugins";
     configStore.getState().setFeatureFlags({ [PLUGINS_V1_FLAG]: true });
 
     renderWithI18n(<SettingsPage />);
 
-    expect(screen.getByRole("link", { name: "Plugins" })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Plugins" })).not.toBeInTheDocument();
     expect(screen.getByText("PluginsTab")).toBeInTheDocument();
   });
 });
@@ -194,29 +194,25 @@ describe("SettingsPage workspace subscription feature flag", () => {
 
     renderWithI18n(<SettingsPage />);
 
-    expect(screen.getByRole("link", { name: "Billing" })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Billing" })).not.toBeInTheDocument();
     expect(screen.getByText("BillingTab")).toBeInTheDocument();
   });
 });
 
 describe("SettingsPage information architecture", () => {
-  it("groups pages by who they affect, then by topic", () => {
+  it("shows only account, connection, and tool settings in the primary menu", () => {
     renderWithI18n(<SettingsPage />);
-    const personal = within(nav()).getByRole("region", { name: /Personal/ });
-    expect(within(personal).getByRole("link", { name: "Preferences" })).toBeInTheDocument();
-    expect(within(personal).getByRole("link", { name: "API Tokens" })).toBeInTheDocument();
-
-    // The workspace group is named after the workspace it configures.
-    const workspace = within(nav()).getByRole("region", { name: /Acme/ });
-    const issues = within(workspace).getByRole("group", { name: "Issues & workflow" });
-    expect(
-      within(issues).getByRole("link", { name: "Issue Statuses" }),
-    ).toBeInTheDocument();
-    const connections = within(workspace).getByRole("group", {
-      name: "Connections & extensions",
-    });
-    for (const name of ["Code", "Messaging", "MCP servers"]) {
+    const sidebar = within(nav());
+    const account = sidebar.getByRole("region", { name: /Account/ });
+    expect(within(account).getByRole("link", { name: "Account" })).toBeInTheDocument();
+    expect(within(account).getByRole("link", { name: "General" })).toBeInTheDocument();
+    expect(within(account).queryByRole("link", { name: "API Tokens" })).toBeNull();
+    const connections = sidebar.getByRole("region", { name: /Tools & repositories/ });
+    for (const name of ["Local tools", "Repositories"]) {
       expect(within(connections).getByRole("link", { name })).toBeInTheDocument();
+    }
+    for (const name of ["Issue Statuses", "Labels", "MCP servers", "Messaging"]) {
+      expect(sidebar.queryByRole("link", { name })).toBeNull();
     }
   });
 
@@ -224,7 +220,7 @@ describe("SettingsPage information architecture", () => {
     renderWithI18n(<SettingsPage />);
     expect(
       within(nav()).queryByRole("link", {
-        name: /^(Issue|Chat|GitHub|Labs|Integrations|Repositories)$/,
+        name: /^(Issue|Chat|GitHub|Labs|Integrations|Projects|Squads|Autopilots)$/,
       }),
     ).not.toBeInTheDocument();
   });
@@ -233,17 +229,17 @@ describe("SettingsPage information architecture", () => {
     navigationState.search = "tab=issue";
     renderWithI18n(<SettingsPage />);
     expect(screen.getByText("PreferencesTab")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Preferences" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "General" })).toHaveAttribute(
       "aria-current",
       "page",
     );
   });
 
-  it("opens the GitHub App return URL on the Code page", () => {
+  it("opens the GitHub App return URL on the Repositories page", () => {
     navigationState.search = "tab=repositories&github_connected=1";
     renderWithI18n(<SettingsPage />);
     expect(screen.getByText("CodeTab")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Code" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Repositories" })).toHaveAttribute(
       "aria-current",
       "page",
     );
@@ -257,23 +253,21 @@ describe("SettingsPage information architecture", () => {
     shell.appsAvailable = true;
     navigationState.search = "tab=integrations&connected=notion";
     renderWithI18n(<SettingsPage />);
-    const personal = within(nav()).getByRole("region", { name: /Personal/ });
+    const personal = within(nav()).getByRole("region", { name: /Account/ });
     expect(
-      within(personal).getByRole("link", { name: "Connected apps" }),
-    ).toHaveAttribute("aria-current", "page");
+      within(personal).queryByRole("link", { name: "Connected apps" }),
+    ).toBeNull();
     expect(screen.getByText("ConnectedAppsTab")).toBeInTheDocument();
   });
 
   it("marks pages a member can only view", () => {
     shell.role = "member";
     renderWithI18n(<SettingsPage />);
-    const general = screen.getByRole("link", { name: /^General/ });
+    const general = screen.getByRole("link", { name: /^Local tools/ });
     expect(
       within(general).getByLabelText("Only owners and admins can change this"),
     ).toBeInTheDocument();
-    // Labels stay editable for every member, so they carry no lock.
-    const labels = screen.getByRole("link", { name: "Labels" });
-    expect(within(labels).queryByLabelText(/Only owners/)).toBeNull();
+    expect(screen.queryByRole("link", { name: "Labels" })).toBeNull();
   });
 
   it("places platform settings in a device group", () => {
@@ -289,10 +283,8 @@ describe("SettingsPage information architecture", () => {
         ]}
       />,
     );
-    const device = screen.getByRole("region", { name: "This device" });
-    expect(
-      within(device).getByRole("link", { name: "Updates" }),
-    ).toBeInTheDocument();
+    const device = screen.getByRole("region", { name: "Providers" });
+    expect(within(device).getByRole("link", { name: "Updates" })).toBeInTheDocument();
   });
 
   it("navigates from the compact selector and clears the old detail", () => {
@@ -315,7 +307,7 @@ describe("SettingsPage search", () => {
 
     const results = screen.getByRole("listbox", { name: "Search settings" });
     const option = within(results).getByRole("option", { name: /Time zone/ });
-    expect(option).toHaveTextContent("Personal › Preferences");
+    expect(option).toHaveTextContent("Account › General");
 
     fireEvent.click(option);
     expect(push).toHaveBeenCalledWith(
@@ -329,9 +321,10 @@ describe("SettingsPage search", () => {
 
     fireEvent.change(input, { target: { value: "slack" } });
     fireEvent.keyDown(input, { key: "Enter" });
-    expect(push).toHaveBeenCalledWith(
-      "/acme/settings?tab=channels&integration=slack",
-    );
+    expect(
+      within(screen.getByRole("listbox", { name: "Search settings" })).queryByRole("option"),
+    ).toBeNull();
+    expect(push).not.toHaveBeenCalled();
 
     fireEvent.keyDown(input, { key: "Escape" });
     expect(input).toHaveValue("");

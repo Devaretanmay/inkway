@@ -1,11 +1,11 @@
 // Package plugincontract defines the versioned public contract between plugin
-// authors and the Multica host. It must stay independent from private handlers,
+// authors and the Inkway host. It must stay independent from private handlers,
 // services, and database implementations.
 //
-// A plugin relates to Multica in exactly three ways:
+// A plugin relates to Inkway in exactly three ways:
 //
-//   - Action   (plugin -> Multica): host capabilities the plugin calls.
-//   - Hook     (Multica -> plugin): plugin capabilities the host calls.
+//   - Action   (plugin -> Inkway): host capabilities the plugin calls.
+//   - Hook     (Inkway -> plugin): plugin capabilities the host calls.
 //   - Resource (no call at all):    static contributions such as skill text.
 //
 // "Who triggers" and "what capability is called" are orthogonal: a hook is
@@ -22,7 +22,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/multica-ai/multica/server/pkg/eventcontract"
+	"github.com/Devaretanmay/inkway/server/pkg/eventcontract"
 	"github.com/robfig/cron/v3"
 )
 
@@ -31,7 +31,7 @@ const (
 	ManifestVersion1 = 1
 
 	// ManifestFilename is the conventional file name inside a plugin package.
-	ManifestFilename = "multica.plugin.json"
+	ManifestFilename = "inkway.plugin.json"
 
 	// MaxManifestSize bounds a fetched manifest before it is parsed.
 	MaxManifestSize = 1 << 20

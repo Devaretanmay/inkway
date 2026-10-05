@@ -4,8 +4,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/multica-ai/multica/server/internal/service"
-	"github.com/multica-ai/multica/server/pkg/taskfailure"
+	"github.com/Devaretanmay/inkway/server/internal/service"
+	"github.com/Devaretanmay/inkway/server/pkg/taskfailure"
 )
 
 // codexRetiredCompactionError is the failure exactly as GH #8000 reported it.
@@ -40,8 +40,8 @@ func TestAnnotateCodexRetiredCompaction(t *testing.T) {
 				t.Errorf("hint must mention %q, got: %s", want, got)
 			}
 		}
-		// Having sent people to look at Multica-side launch arguments, the
-		// hint must not then tell them nothing on the Multica side needs
+		// Having sent people to look at Inkway-side launch arguments, the
+		// hint must not then tell them nothing on the Inkway side needs
 		// changing. The only target it can safely exclude is the generated
 		// per-task copy, which is rebuilt from the shared config every run.
 		if strings.Contains(strings.ToLower(got), "nothing needs changing") {

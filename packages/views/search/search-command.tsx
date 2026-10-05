@@ -1,6 +1,6 @@
 "use client";
 
-import { issueStatusCategory } from "@multica/core/issues";
+import { issueStatusCategory } from "@inkway/core/issues";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Check,
@@ -26,44 +26,44 @@ import type {
   MemberWithUser,
   SearchIssueResult,
   SearchProjectResult,
-} from "@multica/core/types";
-import { isLocalSearchReady, searchIssues, searchProjects } from "@multica/core/search-index";
-import { partitionAggregatedSearchResults } from "@multica/core/search/cancelled-rank";
+} from "@inkway/core/types";
+import { isLocalSearchReady, searchIssues, searchProjects } from "@inkway/core/search-index";
+import { partitionAggregatedSearchResults } from "@inkway/core/search/cancelled-rank";
 import {
   openCreateIssueWithPreference,
   selectRecentIssues,
   useCommentCollapseStore,
   useRecentIssuesStore,
   useResolvedExpandStore,
-} from "@multica/core/issues/stores";
-import { issueDetailOptions, issueTimelineOptions } from "@multica/core/issues/queries";
-import { useWorkspaceId } from "@multica/core";
-import { useIssueStatuses } from "@multica/core/issue-statuses/hooks";
-import { useWorkspacePaths, WORKSPACE_PAGES } from "@multica/core/paths";
-import type { WorkspacePageKey, WorkspacePaths } from "@multica/core/paths";
-import { useModalStore } from "@multica/core/modals";
-import { createShortcutChord } from "@multica/core/shortcuts";
-import { memberListOptions } from "@multica/core/workspace/queries";
-import { resolvePublicFileUrl } from "@multica/core/workspace/avatar-url";
+} from "@inkway/core/issues/stores";
+import { issueDetailOptions, issueTimelineOptions } from "@inkway/core/issues/queries";
+import { useWorkspaceId } from "@inkway/core";
+import { useIssueStatuses } from "@inkway/core/issue-statuses/hooks";
+import { useWorkspacePaths, WORKSPACE_PAGES } from "@inkway/core/paths";
+import type { WorkspacePageKey, WorkspacePaths } from "@inkway/core/paths";
+import { useModalStore } from "@inkway/core/modals";
+import { createShortcutChord } from "@inkway/core/shortcuts";
+import { memberListOptions } from "@inkway/core/workspace/queries";
+import { resolvePublicFileUrl } from "@inkway/core/workspace/avatar-url";
 import { StatusIcon } from "../issues/components";
 import { resolvedThreadRootIds, rootCommentIds } from "../issues/components/thread-utils";
 import { ProjectIcon } from "../projects/components/project-icon";
 import { useProjectStatusLabels } from "../projects/components/labels";
 import { routeIconForPath } from "../layout/route-icon-components";
-import { PROJECT_STATUS_CONFIG } from "@multica/core/projects/config";
-import type { ProjectStatus } from "@multica/core/types";
+import { PROJECT_STATUS_CONFIG } from "@inkway/core/projects/config";
+import type { ProjectStatus } from "@inkway/core/types";
 import { ActorAvatar } from "../common/actor-avatar";
 import { ShortcutKeycaps } from "../common/shortcut-keycaps";
-import { ActorAvatar as ActorAvatarBase } from "@multica/ui/components/common/actor-avatar";
+import { ActorAvatar as ActorAvatarBase } from "@inkway/ui/components/common/actor-avatar";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@multica/ui/components/ui/dialog";
-import { useTheme } from "@multica/ui/components/common/theme-provider";
-import { copyText } from "@multica/ui/lib/clipboard";
+} from "@inkway/ui/components/ui/dialog";
+import { useTheme } from "@inkway/ui/components/common/theme-provider";
+import { copyText } from "@inkway/ui/lib/clipboard";
 import {
   resolveClickIntent,
   useIntentNavigate,
@@ -75,22 +75,16 @@ import { matchesPinyin } from "../editor/extensions/pinyin-match";
 import { HighlightText } from "./highlight-text";
 import { useSearchStore } from "./search-store";
 
-// The palette's Pages group is generated from WORKSPACE_PAGES, the same
-// registry the sidebar nav and the desktop tab bar read. It used to be a
-// hand-written list, which silently went stale every time a page was added:
-// Chat, Autopilot, Squads and Analytics shipped in the sidebar but were
-// unreachable from the palette (MUL-6272). Deriving the list means a new
-// workspace page is in the palette the moment it is in the registry.
-//
-// Page keys double as WorkspacePaths method names, so `p[key]()` resolves the
-// destination against the current workspace slug at render time. Every
-// WorkspacePageKey must therefore stay a parameterless path builder.
+// The command palette follows the Ink release-candidate navigation.
+// Legacy workspace routes stay registered for compatibility and deep links,
+// but should not re-expand the visible product surface.
 
 // Extra query aliases per page, on top of the localized label. Declared as a
 // total Record so adding a workspace page is a compile error until its
 // keywords are filled in.
 const PAGE_KEYWORDS: Record<WorkspacePageKey, string[]> = {
   inbox: ["inbox", "notifications", "收件箱", "通知"],
+  inks: ["inks", "ink", "fastpaths", "fastpath", "decisions"],
   chat: ["chat", "messages", "conversation", "聊天", "消息", "对话"],
   myIssues: ["my", "issues", "assigned", "mine", "我的", "任务"],
   issues: ["issues", "tasks", "bugs", "任务"],
@@ -104,7 +98,7 @@ const PAGE_KEYWORDS: Record<WorkspacePageKey, string[]> = {
   settings: ["settings", "config", "preferences", "设置", "配置"],
 };
 
-const NAV_PAGE_KEYS = Object.keys(WORKSPACE_PAGES) as WorkspacePageKey[];
+const NAV_PAGE_KEYS = ["inbox", "issues", "agents", "inks", "settings"] as const satisfies readonly WorkspacePageKey[];
 
 // No `icon` field: like the sidebar nav, a page's icon is derived from its
 // destination path via routeIconForPath, so all navigation surfaces show the

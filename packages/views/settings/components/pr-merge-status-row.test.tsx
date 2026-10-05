@@ -2,8 +2,8 @@ import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { I18nProvider } from "@multica/core/i18n/react";
-import type { IssueStatusEntry } from "@multica/core/types";
+import { I18nProvider } from "@inkway/core/i18n/react";
+import type { IssueStatusEntry } from "@inkway/core/types";
 import enCommon from "../../locales/en/common.json";
 import enIssues from "../../locales/en/issues.json";
 import enSettings from "../../locales/en/settings.json";
@@ -19,9 +19,9 @@ vi.mock("@tanstack/react-query", () => ({
   useQueryClient: () => ({ setQueryData: vi.fn() }),
   queryOptions: <T,>(opts: T) => opts,
 }));
-vi.mock("@multica/core/hooks", () => ({ useWorkspaceId: () => "workspace-1" }));
-vi.mock("@multica/core/paths", () => ({ useCurrentWorkspace: () => workspaceRef.current }));
-vi.mock("@multica/core/api", () => ({ api: { updateWorkspace: mockUpdateWorkspace } }));
+vi.mock("@inkway/core/hooks", () => ({ useWorkspaceId: () => "workspace-1" }));
+vi.mock("@inkway/core/paths", () => ({ useCurrentWorkspace: () => workspaceRef.current }));
+vi.mock("@inkway/core/api", () => ({ api: { updateWorkspace: mockUpdateWorkspace } }));
 vi.mock("sonner", () => ({ toast: { error: vi.fn() } }));
 
 import { PRMergeStatusRow } from "./pr-merge-status-row";

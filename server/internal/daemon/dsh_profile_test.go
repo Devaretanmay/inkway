@@ -24,13 +24,13 @@ import (
 // developer's ~/.dsh.
 func fakeDsh(t *testing.T) (path, record string) {
 	t.Helper()
-	return fakeDshScript(t, `mkdir -p "$DSH_HOME/profiles/multica" && printf '{}' > "$DSH_HOME/profiles/multica/package.json"`)
+	return fakeDshScript(t, `mkdir -p "$DSH_HOME/profiles/inkway" && printf '{}' > "$DSH_HOME/profiles/inkway/package.json"`)
 }
 
 // fakeDshSilentlySucceeds exits 0 from `add` and writes no profile: a package
 // manager reporting success over a run that produced nothing. Whether any real
 // bundle behaves this way, the daemon must not disagree with
-// dshMulticaProfilePresent about whether a profile exists, because that is the
+// dshInkwayProfilePresent about whether a profile exists, because that is the
 // fact every other part of it reads.
 func fakeDshSilentlySucceeds(t *testing.T) (path, record string) {
 	t.Helper()
@@ -60,9 +60,9 @@ func fakeDshScript(t *testing.T, onSuccess string) (path, record string) {
 
 // pinnedDshHome points DSH_HOME at a directory the test owns and reports it.
 //
-// Without this, dshMulticaProfilePresent() reads the developer's real ~/.dsh,
+// Without this, dshInkwayProfilePresent() reads the developer's real ~/.dsh,
 // so whether a test passes depends on whether the machine running it happens to
-// have a `multica` profile installed. That is the ambient-agent-state
+// have a `inkway` profile installed. That is the ambient-agent-state
 // dependency the repo forbids, and it hid here until the install path started
 // checking the profile rather than only the exit status.
 func pinnedDshHome(t *testing.T) string {
@@ -72,10 +72,10 @@ func pinnedDshHome(t *testing.T) string {
 	return home
 }
 
-// installMulticaProfile creates the manifest dshMulticaProfilePresent looks for.
-func installMulticaProfile(t *testing.T, dshHome string) {
+// installInkwayProfile creates the manifest dshInkwayProfilePresent looks for.
+func installInkwayProfile(t *testing.T, dshHome string) {
 	t.Helper()
-	dir := filepath.Join(dshHome, "profiles", dshMulticaProfileName)
+	dir := filepath.Join(dshHome, "profiles", dshInkwayProfileName)
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -98,7 +98,7 @@ func readRecord(t *testing.T, record string) string {
 
 // An unconfigured daemon must leave the user's DSH installation alone: the
 // reported drop is the whole response.
-func TestProvisionDshMulticaProfile_UnconfiguredIsANoOp(t *testing.T) {
+func TestProvisionDshInkwayProfile_UnconfiguredIsANoOp(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("shell fixture")
 	}
@@ -106,7 +106,7 @@ func TestProvisionDshMulticaProfile_UnconfiguredIsANoOp(t *testing.T) {
 	t.Setenv(dshProfileBundleEnv, "")
 
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
-	if err := provisionDshMulticaProfile(context.Background(), dshPath, logger); err != nil {
+	if err := provisionDshInkwayProfile(context.Background(), dshPath, logger); err != nil {
 		t.Fatalf("provision returned %v, want nil", err)
 	}
 	if got := readRecord(t, record); got != "" {
@@ -114,17 +114,17 @@ func TestProvisionDshMulticaProfile_UnconfiguredIsANoOp(t *testing.T) {
 	}
 }
 
-func TestProvisionDshMulticaProfile_InstallsTheFirstWorkingCandidate(t *testing.T) {
+func TestProvisionDshInkwayProfile_InstallsTheFirstWorkingCandidate(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("shell fixture")
 	}
 	dshPath, record := fakeDsh(t)
 	pluginDir := t.TempDir()
-	t.Setenv(dshProfileBundleEnv, " FAILME-package , @multica-ai/dsh-runtime , /tmp/local-bundle ")
+	t.Setenv(dshProfileBundleEnv, " FAILME-package , @inkway-ai/dsh-runtime , /tmp/local-bundle ")
 	t.Setenv(dshPluginPathEnv, pluginDir)
 
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
-	if err := provisionDshMulticaProfile(context.Background(), dshPath, logger); err != nil {
+	if err := provisionDshInkwayProfile(context.Background(), dshPath, logger); err != nil {
 		t.Fatalf("provision returned %v, want nil once a later candidate succeeds", err)
 	}
 
@@ -134,11 +134,11 @@ func TestProvisionDshMulticaProfile_InstallsTheFirstWorkingCandidate(t *testing.
 		t.Fatalf("dsh was invoked %d time(s), want 2 (first candidate fails, second succeeds):\n%s", len(lines)/2, got)
 	}
 	// Candidates are trimmed and tried in order.
-	first := "args=plugin --profile multica add FAILME-package"
+	first := "args=plugin --profile inkway add FAILME-package"
 	if lines[0] != first {
 		t.Errorf("first invocation = %q, want %q", lines[0], first)
 	}
-	second := "args=plugin --profile multica add @multica-ai/dsh-runtime"
+	second := "args=plugin --profile inkway add @inkway-ai/dsh-runtime"
 	if lines[2] != second {
 		t.Errorf("second invocation = %q, want %q", lines[2], second)
 	}
@@ -156,27 +156,27 @@ func TestProvisionDshMulticaProfile_InstallsTheFirstWorkingCandidate(t *testing.
 }
 
 // The whole point of the knob is to be able to point it at a local build before
-// Multica's bridge is published (multica#6936), so a directory spec must reach
+// Inkway's bridge is published (inkway#6936), so a directory spec must reach
 // dsh unmodified.
-func TestProvisionDshMulticaProfile_ForwardsTheSpecVerbatim(t *testing.T) {
+func TestProvisionDshInkwayProfile_ForwardsTheSpecVerbatim(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("shell fixture")
 	}
 	dshPath, record := fakeDsh(t)
-	t.Setenv(dshProfileBundleEnv, "/Users/someone/builds/dsh-multica-runtime")
+	t.Setenv(dshProfileBundleEnv, "/Users/someone/builds/dsh-inkway-runtime")
 	t.Setenv(dshPluginPathEnv, "")
 
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
-	if err := provisionDshMulticaProfile(context.Background(), dshPath, logger); err != nil {
+	if err := provisionDshInkwayProfile(context.Background(), dshPath, logger); err != nil {
 		t.Fatalf("provision returned %v, want nil", err)
 	}
-	want := "args=plugin --profile multica add /Users/someone/builds/dsh-multica-runtime"
+	want := "args=plugin --profile inkway add /Users/someone/builds/dsh-inkway-runtime"
 	if got := readRecord(t, record); !strings.Contains(got, want) {
 		t.Fatalf("recorded %q, want it to contain %q", got, want)
 	}
 }
 
-func TestProvisionDshMulticaProfile_ReportsEveryCandidateFailure(t *testing.T) {
+func TestProvisionDshInkwayProfile_ReportsEveryCandidateFailure(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("shell fixture")
 	}
@@ -185,7 +185,7 @@ func TestProvisionDshMulticaProfile_ReportsEveryCandidateFailure(t *testing.T) {
 	t.Setenv(dshPluginPathEnv, "")
 
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
-	err := provisionDshMulticaProfile(context.Background(), dshPath, logger)
+	err := provisionDshInkwayProfile(context.Background(), dshPath, logger)
 	if err == nil {
 		t.Fatal("provision returned nil, want the last failure")
 	}
@@ -205,7 +205,7 @@ func TestProvisionDshMulticaProfile_ReportsEveryCandidateFailure(t *testing.T) {
 // that returns 0 and writes no profile leaves the operator exactly where a
 // failure does, so it must not end the loop, must not be logged as an install,
 // and must let the next candidate try.
-func TestProvisionDshMulticaProfile_ExitZeroWithoutAProfileIsAFailedCandidate(t *testing.T) {
+func TestProvisionDshInkwayProfile_ExitZeroWithoutAProfileIsAFailedCandidate(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("shell fixture")
 	}
@@ -214,7 +214,7 @@ func TestProvisionDshMulticaProfile_ExitZeroWithoutAProfileIsAFailedCandidate(t 
 	t.Setenv(dshPluginPathEnv, "")
 
 	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
-	err := provisionDshMulticaProfile(context.Background(), dshPath, logger)
+	err := provisionDshInkwayProfile(context.Background(), dshPath, logger)
 	if err == nil {
 		t.Fatal("provision returned nil while the profile is still absent")
 	}
@@ -238,7 +238,7 @@ func TestStartDshProfileProvision_RunsAtMostOnce(t *testing.T) {
 		t.Skip("shell fixture")
 	}
 	dshPath, record := fakeDsh(t)
-	t.Setenv(dshProfileBundleEnv, "@multica-ai/dsh-runtime")
+	t.Setenv(dshProfileBundleEnv, "@inkway-ai/dsh-runtime")
 	t.Setenv(dshPluginPathEnv, "")
 
 	// A tracked workspace keeps the finished install on the cheap kick path;
@@ -257,12 +257,17 @@ func TestStartDshProfileProvision_RunsAtMostOnce(t *testing.T) {
 
 	deadline := time.Now().Add(10 * time.Second)
 	for time.Now().Before(deadline) {
-		if strings.Contains(readRecord(t, record), "plugin --profile multica add") {
+		invoked := strings.Contains(readRecord(t, record), "plugin --profile inkway add")
+		// The daemon provisions asynchronously. Wait for both the profile
+		// manifest and the goroutine's completion before t.TempDir cleanup;
+		// observing the shell's first log line alone leaves it writing into a
+		// directory that the test runner may already be removing.
+		if invoked && dshInkwayProfilePresent() && !d.dshInstallInFlight.Load() {
 			return
 		}
 		time.Sleep(20 * time.Millisecond)
 	}
-	t.Fatalf("the install never ran; recorded %q", readRecord(t, record))
+	t.Fatalf("the install did not finish with a profile; recorded %q", readRecord(t, record))
 }
 
 func TestStartDshProfileProvision_UnconfiguredNeverStarts(t *testing.T) {
@@ -287,7 +292,7 @@ func TestStartDshProfileProvision_KicksDiscoveryWhenTheInstallFinishes(t *testin
 		t.Skip("shell fixture")
 	}
 	dshPath, _ := fakeDsh(t)
-	t.Setenv(dshProfileBundleEnv, "@multica-ai/dsh-runtime")
+	t.Setenv(dshProfileBundleEnv, "@inkway-ai/dsh-runtime")
 	t.Setenv(dshPluginPathEnv, "")
 
 	d := &Daemon{
@@ -318,7 +323,7 @@ func TestStartDshProfileProvision_SuccessWithoutAProfileWithdrawsTheWait(t *test
 		t.Skip("shell fixture")
 	}
 	dshPath, _ := fakeDshSilentlySucceeds(t)
-	t.Setenv(dshProfileBundleEnv, "@multica-ai/dsh-runtime")
+	t.Setenv(dshProfileBundleEnv, "@inkway-ai/dsh-runtime")
 	t.Setenv(dshPluginPathEnv, "")
 
 	rec, client := newDeregisterRecorder(t)
@@ -392,33 +397,33 @@ func TestKickAgentDiscovery_NonBlockingAndCollapsing(t *testing.T) {
 // The stat is what the discovery loop polls every tick to decide whether to
 // force a round, so it has to mean exactly what DSH means by "this profile is
 // installed" — a directory alone is not one.
-func TestDshMulticaProfilePresent(t *testing.T) {
+func TestDshInkwayProfilePresent(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("DSH_HOME", home)
 
-	if dshMulticaProfilePresent() {
+	if dshInkwayProfilePresent() {
 		t.Fatal("profile reported installed before it exists")
 	}
-	dir := filepath.Join(home, "profiles", dshMulticaProfileName)
+	dir := filepath.Join(home, "profiles", dshInkwayProfileName)
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		t.Fatal(err)
 	}
 	// DSH's loadProfile falls back to a built-in template (or fails, for a
 	// profile that has none) when the manifest is missing, so a bare directory
 	// is not an installed profile.
-	if dshMulticaProfilePresent() {
+	if dshInkwayProfilePresent() {
 		t.Fatal("a directory without a manifest was reported as an installed profile")
 	}
 	if err := os.WriteFile(filepath.Join(dir, "package.json"), []byte("{}\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	if !dshMulticaProfilePresent() {
+	if !dshInkwayProfilePresent() {
 		t.Fatal("manifest present but the profile was reported missing")
 	}
 	if err := os.RemoveAll(dir); err != nil {
 		t.Fatal(err)
 	}
-	if dshMulticaProfilePresent() {
+	if dshInkwayProfilePresent() {
 		t.Fatal("removing the profile was not observed; the loop would never force a demotion round")
 	}
 }
@@ -466,8 +471,8 @@ func TestDshProvisionCommand(t *testing.T) {
 	pluginDir := t.TempDir()
 	t.Setenv(dshPluginPathEnv, pluginDir)
 
-	cmd := dshProvisionCommand("/usr/local/bin/dsh", "@multica-ai/dsh-runtime")
-	want := []string{"/usr/local/bin/dsh", "plugin", "--profile", "multica", "add", "@multica-ai/dsh-runtime"}
+	cmd := dshProvisionCommand("/usr/local/bin/dsh", "@inkway-ai/dsh-runtime")
+	want := []string{"/usr/local/bin/dsh", "plugin", "--profile", "inkway", "add", "@inkway-ai/dsh-runtime"}
 	if strings.Join(cmd.Args, "\x00") != strings.Join(want, "\x00") {
 		t.Fatalf("argv = %q, want %q", cmd.Args, want)
 	}
@@ -520,7 +525,7 @@ func TestDshProvisionOutput(t *testing.T) {
 	t.Run("leaves ordinary URLs intact", func(t *testing.T) {
 		for _, raw := range []string{
 			"GET https://registry.example.com:8443/@acme/pkg failed",
-			"cloning ssh://git@github.com/multica-ai/multica.git",
+			"cloning ssh://git@github.com/Devaretanmay/inkway.git",
 			"see https://example.com/a:b for details",
 		} {
 			if got := dshProvisionOutput([]byte(raw)); got != raw {
@@ -549,7 +554,7 @@ func processAlive(pid int) bool {
 // own wait, so the assertion is about survival rather than about a race: an
 // unsynchronized grandchild can be killed before it publishes anything, which
 // would let this pass without testing anything.
-func TestProvisionDshMulticaProfile_CancellationKillsTheWholeTree(t *testing.T) {
+func TestProvisionDshInkwayProfile_CancellationKillsTheWholeTree(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("shell fixture; the tree is a Job Object there")
 	}
@@ -567,13 +572,13 @@ func TestProvisionDshMulticaProfile_CancellationKillsTheWholeTree(t *testing.T) 
 	if err := os.WriteFile(dshPath, []byte(script), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	t.Setenv(dshProfileBundleEnv, "@multica-ai/dsh-runtime")
+	t.Setenv(dshProfileBundleEnv, "@inkway-ai/dsh-runtime")
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	provisionDone := make(chan error, 1)
 	go func() {
-		provisionDone <- provisionDshMulticaProfile(ctx, dshPath,
+		provisionDone <- provisionDshInkwayProfile(ctx, dshPath,
 			slog.New(slog.NewTextHandler(io.Discard, nil)))
 	}()
 

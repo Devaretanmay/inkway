@@ -5,9 +5,9 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/multica-ai/multica/server/internal/events"
-	"github.com/multica-ai/multica/server/internal/testutil"
-	"github.com/multica-ai/multica/server/pkg/protocol"
+	"github.com/Devaretanmay/inkway/server/internal/events"
+	"github.com/Devaretanmay/inkway/server/internal/testutil"
+	"github.com/Devaretanmay/inkway/server/pkg/protocol"
 )
 
 // Enable step for duplicate marks (MUL-7349). The column and the code that

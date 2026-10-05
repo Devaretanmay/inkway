@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/multica-ai/multica/server/internal/daemon"
-	"github.com/multica-ai/multica/server/internal/util"
+	"github.com/Devaretanmay/inkway/server/internal/daemon"
+	"github.com/Devaretanmay/inkway/server/internal/util"
 )
 
 // seededReadyAgentID returns a workspace agent that has a runtime bound (the

@@ -6,10 +6,10 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@multica/ui/components/ui/tabs";
+} from "@inkway/ui/components/ui/tabs";
 
 /**
- * The Multica CLI install commands, one per platform family.
+ * The Inkway CLI install commands, one per platform family.
  *
  * Three surfaces render install instructions — the runtimes "add computer"
  * dialog, onboarding's CLI card, and the landing download page. They read the
@@ -19,9 +19,9 @@ import {
  */
 export const CLI_INSTALL_COMMANDS = {
   macosLinux:
-    "curl -fsSL https://raw.githubusercontent.com/multica-ai/multica/main/scripts/install.sh | bash",
+    "curl -fsSL https://raw.githubusercontent.com/inkway-ai/inkway/main/scripts/install.sh | bash",
   windows:
-    "irm https://raw.githubusercontent.com/multica-ai/multica/main/scripts/install.ps1 | iex",
+    "irm https://raw.githubusercontent.com/inkway-ai/inkway/main/scripts/install.ps1 | iex",
 } as const;
 
 export type CliInstallPlatform = keyof typeof CLI_INSTALL_COMMANDS;

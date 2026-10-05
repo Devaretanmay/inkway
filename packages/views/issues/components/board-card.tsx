@@ -5,29 +5,29 @@ import { AppLink } from "../../navigation";
 import { useSortable, defaultAnimateLayoutChanges } from "@dnd-kit/sortable";
 import type { AnimateLayoutChanges } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import type { Issue, IssueProperty, Project, UpdateIssueRequest } from "@multica/core/types";
+import type { Issue, IssueProperty, Project, UpdateIssueRequest } from "@inkway/core/types";
 import { useQuery } from "@tanstack/react-query";
-import { useWorkspaceId } from "@multica/core/hooks";
-import { propertyListOptions } from "@multica/core/properties";
+import { useWorkspaceId } from "@inkway/core/hooks";
+import { propertyListOptions } from "@inkway/core/properties";
 import { CustomPropertyValueDisplay } from "./pickers/custom-property-picker";
 import { descriptionPreview } from "./description-preview";
-import { formatDateOnly, isPastDateOnly } from "@multica/core/issues/date";
+import { formatDateOnly, isPastDateOnly } from "@inkway/core/issues/date";
 import { CalendarClock, CalendarDays } from "lucide-react";
 import { ActorAvatar } from "../../common/actor-avatar";
 import { PropertyIcon } from "../../common/property-icon";
-import { useWorkspacePaths } from "@multica/core/paths";
-import { useActorName } from "@multica/core/workspace/hooks";
+import { useWorkspacePaths } from "@inkway/core/paths";
+import { useActorName } from "@inkway/core/workspace/hooks";
 import { useLocale, useT, useTimeAgo } from "../../i18n";
 import { ProjectIcon } from "../../projects/components/project-icon";
 import { PriorityIcon } from "./priority-icon";
 import { PriorityPicker, AssigneePicker, StartDatePicker, DueDatePicker } from "./pickers";
-import { useViewStore } from "@multica/core/issues/stores/view-store-context";
-import { propertyIdFromViewKey } from "@multica/core/issues/stores/view-store";
+import { useViewStore } from "@inkway/core/issues/stores/view-store-context";
+import { propertyIdFromViewKey } from "@inkway/core/issues/stores/view-store";
 import { ProgressRing } from "./progress-ring";
 import type { ChildProgress } from "./list-row";
 import { IssueActionsContextMenu } from "../actions";
 import { LabelChip } from "../../labels/label-chip";
-import { IssueAgentActivityIndicator } from "./issue-agent-activity-indicator";
+import { IssueRunStateLine } from "./issue-run-state-line";
 import { CustomStatusChip, useIsCustomStatus } from "./custom-status-chip";
 import { IssueDuplicateOfMarker } from "./issue-duplicates";
 import { useIssueSurfaceActionsOptional } from "../surface/actions-context";
@@ -198,20 +198,25 @@ export const BoardCardContent = memo(function BoardCardContent({
 
   return (
     <div className="rounded-lg border-[0.5px] border-surface-border bg-surface py-3 px-2.5 shadow-[var(--surface-shadow)] transition-colors group-hover/card:border-foreground/15 group-hover/card:bg-surface-hover group-data-[popup-open]/card:border-foreground/15 group-data-[popup-open]/card:bg-surface-hover group-data-[peeked]/card:ring-2 group-data-[peeked]/card:ring-brand/50">
-      {/* Row 1: priority + identifier (left), agent activity + assignee (right) */}
+      {/* Row 1: priority + identifier (left) */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5 min-w-0">
           {priorityIconNode}
           <p className="text-caption text-muted-foreground truncate">{issue.identifier}</p>
           <IssueDuplicateOfMarker issue={issue} insideLink />
         </div>
-        <IssueAgentActivityIndicator issueId={issue.id} />
       </div>
 
       {/* Row 2: Title */}
       <p className="mt-1 text-body font-medium leading-snug line-clamp-2">
         {issue.title}
       </p>
+
+      {/* Execution line: agent + run state, or nothing. Board cards read the
+          run state here rather than through the corner badge — one state, one
+          place, with the agent named next to it. List rows, which have no
+          second line, keep the badge. */}
+      <IssueRunStateLine issue={issue} />
 
       {showDescription && (() => {
         const preview = descriptionPreview(issue.description!);

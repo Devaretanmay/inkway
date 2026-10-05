@@ -18,25 +18,25 @@ import {
   autopilotDeliveriesOptions,
   autopilotDeliveryOptions,
   useReplayAutopilotDelivery,
-} from "@multica/core/autopilots";
-import { useWorkspaceId } from "@multica/core/hooks";
-import { Skeleton } from "@multica/ui/components/ui/skeleton";
-import { Button } from "@multica/ui/components/ui/button";
-import { Badge } from "@multica/ui/components/ui/badge";
+} from "@inkway/core/autopilots";
+import { useWorkspaceId } from "@inkway/core/hooks";
+import { Skeleton } from "@inkway/ui/components/ui/skeleton";
+import { Button } from "@inkway/ui/components/ui/button";
+import { Badge } from "@inkway/ui/components/ui/badge";
 import {
   Dialog,
   DialogContent,
   DialogTitle,
-} from "@multica/ui/components/ui/dialog";
-import { cn } from "@multica/ui/lib/utils";
-import { copyText } from "@multica/ui/lib/clipboard";
+} from "@inkway/ui/components/ui/dialog";
+import { cn } from "@inkway/ui/lib/utils";
+import { copyText } from "@inkway/ui/lib/clipboard";
 import { toast } from "sonner";
 import { useLocale, useT } from "../../i18n";
 import type {
   WebhookDelivery,
   WebhookDeliveryStatus,
   WebhookSignatureStatus,
-} from "@multica/core/types";
+} from "@inkway/core/types";
 
 // --- Status visuals -------------------------------------------------------
 

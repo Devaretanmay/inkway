@@ -12,9 +12,9 @@ import { ChevronRight, ExternalLink, RefreshCw, Trash2 } from "lucide-react";
 // was fine. The named export maps straight to `exports.QRCode` and
 // resolves correctly under both bundlers.
 import { QRCode } from "react-qr-code";
-import { cn } from "@multica/ui/lib/utils";
-import { Button } from "@multica/ui/components/ui/button";
-import { Card, CardContent } from "@multica/ui/components/ui/card";
+import { cn } from "@inkway/ui/lib/utils";
+import { Button } from "@inkway/ui/components/ui/button";
+import { Card, CardContent } from "@inkway/ui/components/ui/card";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,7 +24,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@multica/ui/components/ui/alert-dialog";
+} from "@inkway/ui/components/ui/alert-dialog";
 import {
   Dialog,
   DialogContent,
@@ -32,16 +32,15 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@multica/ui/components/ui/dialog";
-import { useAuthStore } from "@multica/core/auth";
-import { useWorkspaceId } from "@multica/core/hooks";
-import { memberListOptions } from "@multica/core/workspace/queries";
-import { useActorName } from "@multica/core/workspace/hooks";
-import { larkInstallationsOptions, larkKeys } from "@multica/core/lark";
-import { api, ApiError } from "@multica/core/api";
-import type { LarkInstallation, LarkInstallStatusResponse } from "@multica/core/types";
+} from "@inkway/ui/components/ui/dialog";
+import { useAuthStore } from "@inkway/core/auth";
+import { useWorkspaceId } from "@inkway/core/hooks";
+import { memberListOptions } from "@inkway/core/workspace/queries";
+import { useActorName } from "@inkway/core/workspace/hooks";
+import { larkInstallationsOptions, larkKeys } from "@inkway/core/lark";
+import { api, ApiError } from "@inkway/core/api";
+import type { LarkInstallation, LarkInstallStatusResponse } from "@inkway/core/types";
 import { ActorAvatar } from "../../common/actor-avatar";
-import { docsLocalePrefix } from "../../common/docs-locale";
 import { useLocale, useT } from "../../i18n";
 
 // MUL-3083: the Lark (international, open.larksuite.com) "connect a Bot"
@@ -58,7 +57,7 @@ const LARK_INTL_CONNECT_ENABLED: boolean = false;
 // backend enforces it; the UI hides the button for non-admins to match).
 //
 // Adding a new installation flows through the Agent detail page: the
-// install path is per-agent (each Multica Agent gets exactly one Bot —
+// install path is per-agent (each Inkway Agent gets exactly one Bot —
 // see the (workspace_id, agent_id) UNIQUE in lark_installation), so
 // asking the user to pick an agent here would re-create that page's
 // picker. The "Bind your first agent" copy in the empty state hints
@@ -115,7 +114,7 @@ export function LarkTab() {
             <p className="text-caption text-muted-foreground">
               {t(($) => $.lark.not_enabled_description_prefix)}{" "}
               <code className="rounded-xs bg-muted px-1 py-0.5 text-micro">
-                MULTICA_LARK_SECRET_KEY
+                INKWAY_LARK_SECRET_KEY
               </code>{" "}
               {t(($) => $.lark.not_enabled_description_suffix)}{" "}
               {t(($) => $.lark.not_enabled_self_host_hint)}
@@ -216,8 +215,8 @@ function InstallationRow({
 }) {
   const { t } = useT("settings");
   const locale = useLocale();
-  // The bot is bound 1:1 to a Multica Agent (per the (workspace_id,
-  // agent_id) UNIQUE in lark_installation). Render the Multica agent's
+  // The bot is bound 1:1 to a Inkway Agent (per the (workspace_id,
+  // agent_id) UNIQUE in lark_installation). Render the Inkway agent's
   // identity here rather than the raw Lark app_id / bot_open_id — those
   // mean nothing to product users. getAgentName falls back to
   // "Unknown Agent" when the agent has been deleted; the Disconnect
@@ -508,11 +507,6 @@ function larkDevConsoleHost(region?: string): string {
     : "https://open.feishu.cn";
 }
 
-// larkDocsUrl points at the Lark/Feishu integration guide, localized the
-// same way as the Telegram and Slack docs links.
-function larkDocsUrl(lang: string | undefined): string {
-  return `https://multica.ai/docs${docsLocalePrefix(lang)}/lark-bot-integration`;
-}
 
 function LarkAgentBotConnectedBadge({
   installation,
@@ -521,7 +515,7 @@ function LarkAgentBotConnectedBadge({
   installation: LarkInstallation;
   className?: string;
 }) {
-  const { t, i18n } = useT("settings");
+  const { t } = useT("settings");
   const wsId = useWorkspaceId();
   const qc = useQueryClient();
   const manageHref = `${larkDevConsoleHost(installation.region)}/app/${encodeURIComponent(installation.app_id)}`;
@@ -617,15 +611,7 @@ function LarkAgentBotConnectedBadge({
           and this row is where someone looks when the Bot stays quiet —
           the install dialog closes itself a beat after success. */}
       <p className="text-caption text-muted-foreground">
-        {t(($) => $.lark.agent_bot_silent_hint)}{" "}
-        <a
-          href={larkDocsUrl(i18n.language)}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="underline underline-offset-2 transition-colors hover:text-foreground"
-        >
-          {t(($) => $.lark.agent_bot_silent_hint_link)}
-        </a>
+        {t(($) => $.lark.agent_bot_silent_hint)}
       </p>
 
       <AlertDialog

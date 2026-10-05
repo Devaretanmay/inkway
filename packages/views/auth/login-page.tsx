@@ -9,20 +9,20 @@ import {
   CardDescription,
   CardContent,
   CardFooter,
-} from "@multica/ui/components/ui/card";
-import { Alert, AlertDescription } from "@multica/ui/components/ui/alert";
-import { Input } from "@multica/ui/components/ui/input";
-import { Button } from "@multica/ui/components/ui/button";
-import { Label } from "@multica/ui/components/ui/label";
+} from "@inkway/ui/components/ui/card";
+import { Alert, AlertDescription } from "@inkway/ui/components/ui/alert";
+import { Input } from "@inkway/ui/components/ui/input";
+import { Button } from "@inkway/ui/components/ui/button";
+import { Label } from "@inkway/ui/components/ui/label";
 import {
   InputOTP,
   InputOTPGroup,
   InputOTPSlot,
-} from "@multica/ui/components/ui/input-otp";
-import { useAuthStore } from "@multica/core/auth";
-import { workspaceKeys } from "@multica/core/workspace/queries";
-import { api } from "@multica/core/api";
-import type { User } from "@multica/core/types";
+} from "@inkway/ui/components/ui/input-otp";
+import { useAuthStore } from "@inkway/core/auth";
+import { workspaceKeys } from "@inkway/core/workspace/queries";
+import { api } from "@inkway/core/api";
+import type { User } from "@inkway/core/types";
 import { useT } from "../i18n";
 
 // ---------------------------------------------------------------------------
@@ -134,7 +134,7 @@ export function LoginPage({
     // for a token-mode session, and a 401 ends the session — clearing this
     // very key — so reading it after the probe would always come back null
     // and the fallback could never run.
-    const storedToken = localStorage.getItem("multica_token");
+    const storedToken = localStorage.getItem("inkway_token");
 
     // Ensure no stale bearer token interferes — we want to test the cookie first.
     api.setToken(null);
@@ -150,7 +150,7 @@ export function LoginPage({
         // Cookie auth failed — fall back to the token this browser had.
         if (!storedToken) return;
 
-        localStorage.setItem("multica_token", storedToken);
+        localStorage.setItem("inkway_token", storedToken);
         api.setToken(storedToken);
         api
           .getMe()
@@ -161,7 +161,7 @@ export function LoginPage({
           })
           .catch(() => {
             api.setToken(null);
-            localStorage.removeItem("multica_token");
+            localStorage.removeItem("inkway_token");
           });
       });
   }, [cliCallback]);
@@ -209,7 +209,7 @@ export function LoginPage({
         if (cliCallback) {
           // CLI path: get token directly for the redirect URL
           const { token } = await api.verifyCode(email, value);
-          localStorage.setItem("multica_token", token);
+          localStorage.setItem("inkway_token", token);
           api.setToken(token);
           onTokenObtained?.();
           redirectToCliCallback(cliCallback.url, token, cliCallback.state);
@@ -260,7 +260,7 @@ export function LoginPage({
 
       if (authSourceRef.current === "localStorage") {
         // Session was detected via localStorage — reuse that token directly.
-        const stored = localStorage.getItem("multica_token");
+        const stored = localStorage.getItem("inkway_token");
         if (!stored) throw new Error("token missing");
         token = stored;
       } else {

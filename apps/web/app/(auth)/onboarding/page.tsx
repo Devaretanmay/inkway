@@ -2,14 +2,14 @@
 
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@multica/core/auth";
+import { useAuthStore } from "@inkway/core/auth";
 import {
   paths,
   resolvePostAuthDestination,
   useHasOnboarded,
-} from "@multica/core/paths";
-import { useWorkspaceList } from "@multica/core/workspace";
-import { CliInstallInstructions, OnboardingFlow } from "@multica/views/onboarding";
+} from "@inkway/core/paths";
+import { useWorkspaceList } from "@inkway/core/workspace";
+import { CliInstallInstructions, OnboardingFlow } from "@inkway/views/onboarding";
 
 /**
  * Web shell for the onboarding flow. The route is the platform chrome on

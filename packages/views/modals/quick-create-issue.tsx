@@ -15,40 +15,40 @@ import {
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { DialogTitle } from "@multica/ui/components/ui/dialog";
+import { DialogTitle } from "@inkway/ui/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@multica/ui/components/ui/dropdown-menu";
-import { Button } from "@multica/ui/components/ui/button";
-import { Switch } from "@multica/ui/components/ui/switch";
-import { cn } from "@multica/ui/lib/utils";
-import { api, ApiError } from "@multica/core/api";
-import { useWorkspaceId } from "@multica/core/hooks";
-import { useCurrentWorkspace, useWorkspacePaths } from "@multica/core/paths";
+} from "@inkway/ui/components/ui/dropdown-menu";
+import { Button } from "@inkway/ui/components/ui/button";
+import { Switch } from "@inkway/ui/components/ui/switch";
+import { cn } from "@inkway/ui/lib/utils";
+import { api, ApiError } from "@inkway/core/api";
+import { useWorkspaceId } from "@inkway/core/hooks";
+import { useCurrentWorkspace, useWorkspacePaths } from "@inkway/core/paths";
 import { AppLink, resolveClickIntent } from "../navigation";
-import { agentListOptions, squadListOptions } from "@multica/core/workspace/queries";
-import { projectListOptions } from "@multica/core/projects/queries";
+import { agentListOptions, squadListOptions } from "@inkway/core/workspace/queries";
+import { projectListOptions } from "@inkway/core/projects/queries";
 import {
   useQuickCreateStore,
   type QuickCreateActorType,
-} from "@multica/core/issues/stores/quick-create-store";
+} from "@inkway/core/issues/stores/quick-create-store";
 import {
   useIssueCreateSettingsStore,
   type QuickCreateField,
-} from "@multica/core/issues/stores/issue-create-settings-store";
-import { useIssueDraftStore, type IssueCreateDraft } from "@multica/core/issues/stores/draft-store";
-import { useCreateModeStore } from "@multica/core/issues/stores/create-mode-store";
+} from "@inkway/core/issues/stores/issue-create-settings-store";
+import { useIssueDraftStore, type IssueCreateDraft } from "@inkway/core/issues/stores/draft-store";
+import { useCreateModeStore } from "@inkway/core/issues/stores/create-mode-store";
 import {
   runtimeListOptions,
   checkQuickCreateCliVersion,
   checkQuickCreateFieldsCliVersion,
   readRuntimeCliVersion,
-} from "@multica/core/runtimes";
-import { useShortcut } from "@multica/core/shortcuts";
+} from "@inkway/core/runtimes";
+import { useShortcut } from "@inkway/core/shortcuts";
 import { ShortcutKeycaps } from "../common/shortcut-keycaps";
 import {
   contentReferencesAttachment,
@@ -56,21 +56,21 @@ import {
   type IssuePriority,
   type SourceContextPreview,
   type Squad,
-} from "@multica/core/types";
+} from "@inkway/core/types";
 import { ActorAvatar } from "../common/actor-avatar";
 import { ClearablePillButton, PillButton } from "../common/pill-button";
 import { ProjectPicker } from "../projects/components/project-picker";
 import { DueDatePicker, PriorityIcon, PriorityPicker } from "../issues/components";
 import { canAssignAgent } from "../issues/components/pickers/assignee-picker";
-import { isAgentRuntimeBound } from "@multica/core/agents";
+import { isAgentRuntimeBound } from "@inkway/core/agents";
 import {
   PropertyPicker,
   PickerItem,
   PickerSection,
   PickerEmpty,
 } from "../issues/components/pickers/property-picker";
-import { useAuthStore } from "@multica/core/auth";
-import { memberListOptions } from "@multica/core/workspace/queries";
+import { useAuthStore } from "@inkway/core/auth";
+import { memberListOptions } from "@inkway/core/workspace/queries";
 import {
   ContentEditor,
   type ContentEditorRef,
@@ -80,7 +80,7 @@ import {
   useComposerSubmit,
 } from "../editor";
 import { useIssueCreateUploads } from "./use-issue-create-uploads";
-import { FileUploadButton } from "@multica/ui/components/common/file-upload-button";
+import { FileUploadButton } from "@inkway/ui/components/common/file-upload-button";
 import { useT } from "../i18n";
 import { matchesPinyin } from "../editor/extensions/pinyin-match";
 import { SourceContextPreviewCard, useSourceContextFailureMessage } from "./source-context-preview";
@@ -322,7 +322,7 @@ export function AgentCreatePanel({
   }, [setActiveMode]);
 
   // Daemon CLI version gate. The agent-create flow needs the runtime's
-  // bundled multica CLI to be ≥ MIN_QUICK_CREATE_CLI_VERSION; older
+  // bundled inkway CLI to be ≥ MIN_QUICK_CREATE_CLI_VERSION; older
   // daemons handle attachments and partial-failure retries incorrectly
   // (see PR #1851 / MUL-1496). Pre-check on the picker so the user gets
   // immediate feedback instead of waiting for the inbox failure; the
@@ -725,9 +725,10 @@ export function AgentCreatePanel({
           <div className="px-5 pb-2 text-caption text-destructive">{error}</div>
         )}
 
-        {/* Property toolbar — the project is visible by default; priority and
-            due date live behind the overflow until exposed in settings or
-            given a value. Unfinished picks remain workspace-persistent.
+        {/* Property toolbar — only the task essentials render by default;
+            project, priority, and due date stay behind the overflow until
+            exposed in settings or given a value. Unfinished picks remain
+            workspace-persistent.
             When the modal was opened from "Add sub issue" on an existing
             issue, a read-only chip on the same row tells the user that the
             new issue will be filed as a sub-issue of that parent — the agent

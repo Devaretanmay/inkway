@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { I18nProvider } from "@multica/core/i18n/react";
+import { I18nProvider } from "@inkway/core/i18n/react";
 import enCommon from "../../locales/en/common.json";
 import enSettings from "../../locales/en/settings.json";
 
@@ -71,17 +71,17 @@ vi.mock("@tanstack/react-query", () => ({
   infiniteQueryOptions: <T,>(options: T) => options,
 }));
 
-vi.mock("@multica/core/hooks", () => ({ useWorkspaceId: () => "workspace-1" }));
-vi.mock("@multica/core/permissions", () => ({
+vi.mock("@inkway/core/hooks", () => ({ useWorkspaceId: () => "workspace-1" }));
+vi.mock("@inkway/core/permissions", () => ({
   useCurrentMember: () => ({ role: roleRef.current, isLoading: false }),
 }));
-vi.mock("@multica/core/paths", () => ({
+vi.mock("@inkway/core/paths", () => ({
   useCurrentWorkspace: () => workspaceRef.current,
 }));
-vi.mock("@multica/core/workspace/queries", () => ({
+vi.mock("@inkway/core/workspace/queries", () => ({
   workspaceKeys: { list: () => ["workspaces"] },
 }));
-vi.mock("@multica/core/api", () => ({
+vi.mock("@inkway/core/api", () => ({
   api: {
     updateWorkspace: mockUpdateWorkspace,
     getGitHubConnectURL: mockGetGitHubConnectURL,
@@ -115,7 +115,7 @@ beforeEach(() => {
     id: "workspace-1",
     name: "Test Workspace",
     slug: "test-workspace",
-    repos: [{ url: "https://github.com/multica-ai/multica", description: "Main app" }],
+    repos: [{ url: "https://github.com/Devaretanmay/inkway", description: "Main app" }],
   };
   roleRef.current = "owner";
   githubRef.current = {
@@ -141,7 +141,7 @@ describe("RepositoriesSection", () => {
   it("lists repositories as read-only rows with their description", () => {
     render(<RepositoriesSection />, { wrapper: Wrapper });
 
-    expect(screen.getByText("https://github.com/multica-ai/multica")).toBeInTheDocument();
+    expect(screen.getByText("https://github.com/Devaretanmay/inkway")).toBeInTheDocument();
     expect(screen.getByText("Main app")).toBeInTheDocument();
     expect(screen.queryByRole("textbox")).toBeNull();
   });
@@ -169,7 +169,7 @@ describe("RepositoriesSection", () => {
     await waitFor(() => {
       expect(mockUpdateWorkspace).toHaveBeenCalledWith("workspace-1", {
         repos: [
-          { url: "https://github.com/multica-ai/multica", description: "Main app" },
+          { url: "https://github.com/Devaretanmay/inkway", description: "Main app" },
           { url: "git@github.com:acme/api.git", description: "Go API" },
         ],
       });
@@ -186,7 +186,7 @@ describe("RepositoriesSection", () => {
     const dialog = await screen.findByRole("dialog", { name: "Add repository" });
     await user.type(
       within(dialog).getByRole("textbox", { name: "Repository URL" }),
-      "git@github.com:multica-ai/multica.git",
+      "git@github.com:Devaretanmay/inkway.git",
     );
 
     expect(within(dialog).getByText("This repository is already added.")).toBeInTheDocument();
@@ -198,7 +198,7 @@ describe("RepositoriesSection", () => {
     const user = userEvent.setup();
     render(<RepositoriesSection />, { wrapper: Wrapper });
 
-    await user.click(screen.getByRole("button", { name: /Actions for https:\/\/github.com\/multica-ai\/multica/ }));
+    await user.click(screen.getByRole("button", { name: /Actions for https:\/\/github.com\/Devaretanmay\/inkway/ }));
     await user.click(await screen.findByRole("menuitem", { name: "Edit" }));
     const dialog = await screen.findByRole("dialog", { name: "Edit repository" });
     const description = within(dialog).getByRole("textbox", { name: "Description" });
@@ -215,7 +215,7 @@ describe("RepositoriesSection", () => {
     const user = userEvent.setup();
     render(<RepositoriesSection />, { wrapper: Wrapper });
 
-    await user.click(screen.getByRole("button", { name: /Actions for https:\/\/github.com\/multica-ai\/multica/ }));
+    await user.click(screen.getByRole("button", { name: /Actions for https:\/\/github.com\/Devaretanmay\/inkway/ }));
     await user.click(await screen.findByRole("menuitem", { name: "Delete repository" }));
     expect(mockUpdateWorkspace).not.toHaveBeenCalled();
     await user.click(
@@ -240,7 +240,7 @@ describe("RepositoriesSection", () => {
   it("starts GitHub connection with the signed repository return target", async () => {
     mockGetGitHubConnectURL.mockResolvedValue({
       configured: true,
-      url: "https://github.com/apps/multica/installations/new",
+      url: "https://github.com/apps/inkway/installations/new",
     });
     const open = vi.spyOn(window, "open").mockImplementation(() => null);
     const user = userEvent.setup();
@@ -252,7 +252,7 @@ describe("RepositoriesSection", () => {
     await waitFor(() => {
       expect(mockGetGitHubConnectURL).toHaveBeenCalledWith("workspace-1", "repositories");
       expect(open).toHaveBeenCalledWith(
-        "https://github.com/apps/multica/installations/new",
+        "https://github.com/apps/inkway/installations/new",
         "_blank",
         "noopener",
       );
@@ -274,18 +274,18 @@ describe("RepositoriesSection", () => {
   it("imports selected GitHub repositories and deduplicates HTTPS against SSH", async () => {
     workspaceRef.current = {
       ...workspaceRef.current,
-      repos: [{ url: "git@github.com:multica-ai/multica.git" }],
+      repos: [{ url: "git@github.com:Devaretanmay/inkway.git" }],
     };
     githubRef.current = {
       ...githubRef.current,
-      installations: [{ id: "installation-row-1", account_login: "multica-ai" }],
+      installations: [{ id: "installation-row-1", account_login: "Devaretanmay" }],
     };
     githubRepositoriesRef.current = [
       {
         id: 1,
-        full_name: "multica-ai/multica",
-        html_url: "https://github.com/multica-ai/multica",
-        clone_url: "https://github.com/multica-ai/multica.git",
+        full_name: "Devaretanmay/inkway",
+        html_url: "https://github.com/Devaretanmay/inkway",
+        clone_url: "https://github.com/Devaretanmay/inkway.git",
         description: "Existing repository",
         private: false,
         archived: false,
@@ -293,9 +293,9 @@ describe("RepositoriesSection", () => {
       },
       {
         id: 2,
-        full_name: "multica-ai/console",
-        html_url: "https://github.com/multica-ai/console",
-        clone_url: "https://github.com/multica-ai/console.git",
+        full_name: "Devaretanmay/console",
+        html_url: "https://github.com/Devaretanmay/console",
+        clone_url: "https://github.com/Devaretanmay/console.git",
         description: "Console app",
         private: true,
         archived: false,
@@ -320,8 +320,8 @@ describe("RepositoriesSection", () => {
     await waitFor(() => {
       expect(mockUpdateWorkspace).toHaveBeenCalledWith("workspace-1", {
         repos: [
-          { url: "git@github.com:multica-ai/multica.git" },
-          { url: "https://github.com/multica-ai/console.git", description: "Console app" },
+          { url: "git@github.com:Devaretanmay/inkway.git" },
+          { url: "https://github.com/Devaretanmay/console.git", description: "Console app" },
         ],
       });
     });
@@ -330,7 +330,7 @@ describe("RepositoriesSection", () => {
   it("opens the picker after returning from a GitHub connection", async () => {
     githubRef.current = {
       ...githubRef.current,
-      installations: [{ id: "installation-row-1", account_login: "multica-ai" }],
+      installations: [{ id: "installation-row-1", account_login: "Devaretanmay" }],
     };
     searchParamsRef.current = new URLSearchParams("tab=repositories&github_connected=1");
 

@@ -2,10 +2,10 @@
 
 import { useMemo, useState } from "react";
 import { CircleEqual } from "lucide-react";
-import type { IssueStatus, UpdateIssueRequest } from "@multica/core/types";
-import { STATUS_CONFIG } from "@multica/core/issues/config";
-import { useIssueStatuses } from "@multica/core/issue-statuses/hooks";
-import { useWorkspaceId } from "@multica/core/hooks";
+import type { IssueStatus, UpdateIssueRequest } from "@inkway/core/types";
+import { STATUS_CONFIG } from "@inkway/core/issues/config";
+import { useIssueStatuses } from "@inkway/core/issue-statuses/hooks";
+import { useWorkspaceId } from "@inkway/core/hooks";
 import { StatusIcon } from "../status-icon";
 import { PropertyPicker, PickerItem } from "./property-picker";
 import { useT } from "../../../i18n";

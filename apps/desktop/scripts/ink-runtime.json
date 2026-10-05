@@ -1,0 +1,12 @@
+{
+  "artifact_version": "0.6.0rc2.1",
+  "ink_engine_version": "0.6.0rc2",
+  "model_version": "1.0.0",
+  "model_identifier": "ink-decision-v1",
+  "bridge_protocol_version": 1,
+  "platform": "darwin",
+  "architecture": "arm64",
+  "model_sha256": "9ba6a441bfd5c71a758f596e5f7b6edb74c0e16242c02a82064bfd55e52b96e7",
+  "url": "https://github.com/Devaretanmay/ink/releases/download/ink-runtime-v0.6.0rc2.1/ink-runtime-0.6.0rc2.1-darwin-arm64.zip",
+  "sha256": "98e3210587886cedcec8d9564591eeb5448e154ee794d850ea19a5d59bf03e97"
+}

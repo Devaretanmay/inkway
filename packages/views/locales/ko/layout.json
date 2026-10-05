@@ -1,6 +1,8 @@
 {
   "nav": {
     "inbox": "인박스",
+    "providers": "Providers",
+    "fastpaths": "Inks",
     "chat": "채팅",
     "my_issues": "내 태스크",
     "issues": "태스크",
@@ -12,6 +14,36 @@
     "runtimes": "런타임",
     "skills": "스킬",
     "settings": "설정"
+  },
+  "fastpaths": {
+    "title": "Inks",
+    "empty_heading": "No Inks connected",
+    "empty_body": "No Inks yet. Once Inkway is connected, repeated agent decisions will move through Learning, Shadow and Active as they are independently verified against real outcomes.",
+    "stage_learning": "Learning",
+    "stage_shadow": "Shadow",
+    "stage_active": "Active",
+    "stage_note": "Explanatory only. Inkway is not connected, so there is no Ink data to show.",
+    "subtitle": "Verified local decisions for common agent tasks.",
+    "stage_learning_detail": "Collect decision and outcome evidence from real agent runs. Nothing is served locally yet.",
+    "stage_shadow_detail": "Compare local decisions against the cloud decisions they would have replaced.",
+    "stage_active_detail": "Serve a verified decision locally, and fall back the moment it stops matching reality.",
+    "loading": "Ink 데이터를 불러오는 중…",
+    "load_error": "Ink 데이터를 불러오지 못했습니다.",
+    "observations": "관측 수",
+    "fast_served": "Ink 제공 수",
+    "coverage": "커버리지",
+    "false_serves": "잘못된 제공 수",
+    "last_maintenance": "마지막 유지보수",
+    "runtime": "런타임",
+    "connected": "연결됨",
+    "degraded": "저하됨",
+    "unavailable": "사용 불가",
+    "candidate": "후보",
+    "demoted": "강등됨",
+    "retired": "중단됨",
+    "updated": "업데이트",
+    "verified_outcomes": "검증된 결과",
+    "model_calls_avoided": "절감된 모델 호출"
   },
   "tab": {
     "issue": "태스크",
@@ -53,7 +85,7 @@
     "new_issue_shortcut": "C",
     "pinned_label": "고정됨",
     "work_group": "업무",
-    "ai_team_group": "AI 팀",
+    "ai_team_group": "AI 작업",
     "show_more_pins": "{{count}}개 더 보기…",
     "show_fewer_pins": "접기",
     "unread_overflow": "99+",
@@ -61,5 +93,6 @@
       "title": "Discord 참여하기",
       "dismiss": "닫기"
     }
-  }
+  },
+  "brand_name": "Inkway"
 }

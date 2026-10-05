@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { AlertTriangle, ChevronRight, LocateFixed, Maximize2, Minimize2, XIcon } from "lucide-react";
-import { issueStatusCategory } from "@multica/core/issues";
-import { useWorkspaceId } from "@multica/core/hooks";
-import { useIssueStatuses } from "@multica/core/issue-statuses/hooks";
-import type { Issue, IssueSourceContext, SourceContextCommentSnapshot } from "@multica/core/types";
-import { Button } from "@multica/ui/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@multica/ui/components/ui/dialog";
-import { cn } from "@multica/ui/lib/utils";
-import { useWorkspacePaths } from "@multica/core/paths";
+import { issueStatusCategory } from "@inkway/core/issues";
+import { useWorkspaceId } from "@inkway/core/hooks";
+import { useIssueStatuses } from "@inkway/core/issue-statuses/hooks";
+import type { Issue, IssueSourceContext, SourceContextCommentSnapshot } from "@inkway/core/types";
+import { Button } from "@inkway/ui/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@inkway/ui/components/ui/dialog";
+import { cn } from "@inkway/ui/lib/utils";
+import { useWorkspacePaths } from "@inkway/core/paths";
 import { AppLink, useNavigation } from "../../navigation";
 import { useLocale, useT } from "../../i18n";
 import { ProgressRing } from "./progress-ring";

@@ -15,9 +15,9 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/prometheus/client_golang/prometheus/testutil"
 
-	"github.com/multica-ai/multica/server/internal/metrics"
-	"github.com/multica-ai/multica/server/internal/util"
-	db "github.com/multica-ai/multica/server/pkg/db/generated"
+	"github.com/Devaretanmay/inkway/server/internal/metrics"
+	"github.com/Devaretanmay/inkway/server/internal/util"
+	db "github.com/Devaretanmay/inkway/server/pkg/db/generated"
 )
 
 type fakeObjectDeleter struct {
@@ -85,7 +85,7 @@ func seedReconcilerFixture(t *testing.T, pool *pgxpool.Pool) reconcilerFixture {
 
 	var userID, runtimeID, agentID string
 	if err := pool.QueryRow(ctx, `INSERT INTO "user" (name, email) VALUES ($1, $2) RETURNING id`,
-		"Reconciler test", fmt.Sprintf("media-reconciler-%d@multica.test", suffix)).Scan(&userID); err != nil {
+		"Reconciler test", fmt.Sprintf("media-reconciler-%d@inkway.test", suffix)).Scan(&userID); err != nil {
 		t.Fatalf("create user: %v", err)
 	}
 	if err := pool.QueryRow(ctx, `INSERT INTO workspace (name, slug, description) VALUES ($1, $2, '') RETURNING id`,
@@ -100,7 +100,7 @@ func seedReconcilerFixture(t *testing.T, pool *pgxpool.Pool) reconcilerFixture {
 	})
 	if err := pool.QueryRow(ctx, `
 		INSERT INTO agent_runtime (workspace_id, name, runtime_mode, provider, owner_id)
-		VALUES ($1, $2, 'local', 'multica_daemon', $3) RETURNING id`,
+		VALUES ($1, $2, 'local', 'inkway_daemon', $3) RETURNING id`,
 		f.workspaceID, fmt.Sprintf("media-reconciler-rt-%d", suffix), userID).Scan(&runtimeID); err != nil {
 		t.Fatalf("create runtime: %v", err)
 	}

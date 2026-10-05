@@ -18,7 +18,7 @@ func TestCLIConfig_BackwardCompat_OldFileLoadsWithNilBackends(t *testing.T) {
 	t.Setenv("HOME", tmp)
 
 	// Write a 4-field config exactly as the historical daemon would have.
-	cfgDir := filepath.Join(tmp, ".multica")
+	cfgDir := filepath.Join(tmp, ".inkway")
 	if err := os.MkdirAll(cfgDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -65,7 +65,7 @@ func TestCLIConfig_BackwardCompat_NilBackendsOmittedFromJSON(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data, err := os.ReadFile(filepath.Join(tmp, ".multica", "config.json"))
+	data, err := os.ReadFile(filepath.Join(tmp, ".inkway", "config.json"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -144,7 +144,7 @@ func TestCLIConfig_OpenClawOverride_PartialFieldsOmitted(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data, err := os.ReadFile(filepath.Join(tmp, ".multica", "config.json"))
+	data, err := os.ReadFile(filepath.Join(tmp, ".inkway", "config.json"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -239,7 +239,7 @@ func TestCLIConfig_ProfileCommandOverrides_OmittedWhenEmpty(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	data, err := os.ReadFile(filepath.Join(tmp, ".multica", "config.json"))
+	data, err := os.ReadFile(filepath.Join(tmp, ".inkway", "config.json"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -267,7 +267,7 @@ func TestCLIConfig_UnknownFieldsArePreserved(t *testing.T) {
 	tmp := t.TempDir()
 	t.Setenv("HOME", tmp)
 
-	cfgDir := filepath.Join(tmp, ".multica")
+	cfgDir := filepath.Join(tmp, ".inkway")
 	if err := os.MkdirAll(cfgDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -339,11 +339,11 @@ func TestCLIConfig_DaemonKnobs_RoundTrip(t *testing.T) {
 
 func TestCLIConfig_TaskRootOverridesOwnerHome(t *testing.T) {
 	ownerHome := t.TempDir()
-	taskRoot := filepath.Join(t.TempDir(), "task-multica")
+	taskRoot := filepath.Join(t.TempDir(), "task-inkway")
 	t.Setenv("HOME", ownerHome)
-	t.Setenv("MULTICA_TASK_CONFIG_ROOT", taskRoot)
+	t.Setenv("INKWAY_TASK_CONFIG_ROOT", taskRoot)
 
-	ownerPath := filepath.Join(ownerHome, ".multica", "config.json")
+	ownerPath := filepath.Join(ownerHome, ".inkway", "config.json")
 	if err := os.MkdirAll(filepath.Dir(ownerPath), 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -402,20 +402,20 @@ func TestCLIConfig_TaskRootOverridesOwnerHome(t *testing.T) {
 func TestCLIConfig_NoTaskRootKeepsInteractiveHomeResolution(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)
-	t.Setenv("MULTICA_TASK_CONFIG_ROOT", "")
+	t.Setenv("INKWAY_TASK_CONFIG_ROOT", "")
 
 	path, err := CLIConfigPathForProfile("dev")
 	if err != nil {
 		t.Fatalf("CLIConfigPathForProfile: %v", err)
 	}
-	want := filepath.Join(home, ".multica", "profiles", "dev", "config.json")
+	want := filepath.Join(home, ".inkway", "profiles", "dev", "config.json")
 	if path != want {
 		t.Fatalf("path = %q, want interactive path %q", path, want)
 	}
 }
 
 func TestCLIConfig_TaskRootRejectsProfilePathTraversal(t *testing.T) {
-	t.Setenv("MULTICA_TASK_CONFIG_ROOT", filepath.Join(t.TempDir(), "task-multica"))
+	t.Setenv("INKWAY_TASK_CONFIG_ROOT", filepath.Join(t.TempDir(), "task-inkway"))
 
 	for _, profile := range []string{".", "..", "../owner", "nested/profile", filepath.Join(string(filepath.Separator), "owner")} {
 		if path, err := CLIConfigPathForProfile(profile); err == nil {
@@ -428,7 +428,7 @@ func TestCLIConfig_TaskRootRejectsProfilePathTraversal(t *testing.T) {
 }
 
 func TestCLIConfig_TaskRootMustBeAbsolute(t *testing.T) {
-	t.Setenv("MULTICA_TASK_CONFIG_ROOT", "relative/task-multica")
+	t.Setenv("INKWAY_TASK_CONFIG_ROOT", "relative/task-inkway")
 
 	if _, err := CLIConfigPath(); err == nil || !strings.Contains(err.Error(), "must be an absolute path") {
 		t.Fatalf("CLIConfigPath error = %v, want absolute path validation", err)

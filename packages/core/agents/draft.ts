@@ -30,6 +30,8 @@ export interface AgentDraft {
   avatarUrl: string | null;
   runtimeId: string;
   model: string;
+  executionType?: "cli" | "native";
+  nativeProvider?: "openai" | "anthropic" | "groq";
   /** Runtime-native reasoning/effort token, scoped to `model`. */
   thinkingLevel: string;
   /** Runtime-native execution tier (Codex Speed), scoped to `model`. */
@@ -94,6 +96,12 @@ export function applyDraftModelChange(
  * an AI-builder draft can seed a longer value programmatically — without this
  * the create button would submit into a guaranteed 400.
  */
+
+export function isNativeAgentConfigReady(draft: AgentDraft): boolean {
+  if (draft.executionType !== "native") return true;
+  return !!draft.model.trim() && ["openai", "anthropic", "groq"].includes(draft.nativeProvider ?? "");
+}
+
 export function isDraftDescriptionWithinLimit(description: string): boolean {
   return [...description].length <= AGENT_DESCRIPTION_MAX_LENGTH;
 }
@@ -164,7 +172,7 @@ export function deriveDuplicateAccess(
  * they were chosen for, so they ride along only when the copy stays on that
  * exact runtime. When the source runtime is gone, private to somebody else or
  * offline, the draft falls back to another runtime and the three are cleared
- * for the user to pick again — the same rule `multica agent copy` already
+ * for the user to pick again — the same rule `inkway agent copy` already
  * enforces server-side (cmd_agent_copy.go). Before MUL-5390 the fallback kept
  * the source `model` and silently persisted a cross-provider value.
  */
@@ -197,6 +205,7 @@ export function buildDuplicateDraft(
     model: keepsRuntime ? source.model ?? "" : "",
     thinkingLevel: keepsRuntime ? source.thinking_level ?? "" : "",
     serviceTier: keepsRuntime ? source.service_tier ?? "" : "",
+    ...(keepsRuntime && source.runtime_config?.execution_type === "native" ? { executionType: "native" as const, nativeProvider: source.runtime_config.provider === "openai" || source.runtime_config.provider === "anthropic" || source.runtime_config.provider === "groq" ? source.runtime_config.provider : "openai" } : {}),
     skillIds: new Set(source.skills.map((skill) => skill.id)),
     ...deriveDuplicateAccess(source),
   };
@@ -206,7 +215,7 @@ export function buildDuplicateDraft(
  * Assembles the `POST /api/agents` body. Empty execution overrides are omitted
  * rather than sent as `""` so the runtime resolves its own default, and the
  * duplicate-only fields are the runtime-independent ones (`custom_args`,
- * concurrency) — mirroring `multica agent copy`.
+ * concurrency) — mirroring `inkway agent copy`.
  */
 export function buildCreateAgentRequest(options: {
   draft: AgentDraft;
@@ -239,6 +248,13 @@ export function buildCreateAgentRequest(options: {
     skill_ids: [...draft.skillIds],
     template,
   };
+  if (draft.executionType === "native") {
+    request.runtime_config = {
+      execution_type: "native",
+      provider: draft.nativeProvider ?? "openai",
+      model: draft.model.trim(),
+    };
+  }
   if (duplicateSource) {
     if (duplicateSource.custom_args.length > 0) {
       request.custom_args = duplicateSource.custom_args;

@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/multica-ai/multica/server/internal/auth"
+	"github.com/Devaretanmay/inkway/server/internal/auth"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -378,7 +378,7 @@ func TestAuth_PATCacheHit(t *testing.T) {
 }
 
 // TestAuth_MCN_NoVerifierConfigured pins the same fail-closed branch
-// as the daemon side: with no MULTICA_CLOUD_URL configured, an
+// as the daemon side: with no INKWAY_CLOUD_URL configured, an
 // mcn_ bearer token must be rejected with 401 at the prefix branch.
 // We don't fall through — an mcn_ string can't be a valid mul_ PAT or
 // JWT, so any fall-through would be wasted work.

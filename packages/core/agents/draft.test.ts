@@ -8,6 +8,7 @@ import {
   buildInvocationTargets,
   deriveDuplicateAccess,
   isDraftDescriptionWithinLimit,
+  isNativeAgentConfigReady,
   type AgentDraft,
 } from "./draft";
 
@@ -123,6 +124,15 @@ describe("agent conversation starters", () => {
       buildCreateAgentRequest({ draft: duplicate, runtimeId: "runtime-1" })
         .conversation_starters,
     ).toEqual(conversationStarters);
+  });
+
+  it("submits native provider configuration without changing the existing CLI default", () => {
+    const cli = buildCreateAgentRequest({ draft: draft(), runtimeId: "runtime-1" });
+    expect(cli).not.toHaveProperty("runtime_config");
+    const native = buildCreateAgentRequest({ draft: { ...draft(), executionType: "native", nativeProvider: "groq", model: "openai/gpt-oss-120b" }, runtimeId: "runtime-1" });
+    expect(native.runtime_config).toEqual({ execution_type: "native", provider: "groq", model: "openai/gpt-oss-120b" });
+    expect(isNativeAgentConfigReady({ ...draft(), executionType: "native", nativeProvider: "groq", model: "gpt-oss" })).toBe(true);
+    expect(isNativeAgentConfigReady({ ...draft(), executionType: "native", model: "" })).toBe(false);
   });
 
   it("trims prompt fields before submission", () => {

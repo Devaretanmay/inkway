@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { createMemoryRouter, Outlet, useMatches } from "react-router-dom";
+import { createMemoryRouter, Outlet, redirect, useMatches } from "react-router-dom";
 import type { RouteObject } from "react-router-dom";
 import { IssueDetailPage } from "./pages/issue-detail-page";
 import { ProjectDetailPage } from "./pages/project-detail-page";
@@ -13,27 +13,29 @@ import {
   RuntimeSettingsPage,
 } from "./pages/runtime-detail-page";
 import { AttachmentPreviewRoute } from "./pages/attachment-preview-page";
-import { IssuesPage } from "@multica/views/issues/components";
-import { ProjectsPage } from "@multica/views/projects/components";
-import { DashboardPage } from "@multica/views/dashboard";
-import { AutopilotsPage } from "@multica/views/autopilots/components";
-import { MyIssuesPage } from "@multica/views/my-issues";
-import { SkillsPage } from "@multica/views/skills";
+import { IssuesPage } from "@inkway/views/issues/components";
+import { ProjectsPage } from "@inkway/views/projects/components";
+import { DashboardPage } from "@inkway/views/dashboard";
+import { AutopilotsPage } from "@inkway/views/autopilots/components";
+import { MyIssuesPage } from "@inkway/views/my-issues";
+import { SkillsPage } from "@inkway/views/skills";
 import { DesktopRuntimesPage } from "./components/desktop-runtimes-page";
 import { DesktopAgentsPage } from "./components/desktop-agents-page";
 import {
   AiCreateAgentPage,
-  ChooseCreateMethodPage,
   ManualCreateAgentPage,
-} from "@multica/views/agents";
-import { SquadsPage, SquadDetailPage as SquadDetailPageView } from "@multica/views/squads/components";
-import { InboxPage } from "@multica/views/inbox";
-import { ChatPage } from "@multica/views/chat";
-import { SettingsPage } from "@multica/views/settings";
-import { useT } from "@multica/views/i18n";
-import { Download, Server } from "lucide-react";
+} from "@inkway/views/agents";
+import { SquadsPage, SquadDetailPage as SquadDetailPageView } from "@inkway/views/squads/components";
+import { InboxPage } from "@inkway/views/inbox";
+import { InksPage } from "@inkway/views/inks";
+import { ChatPage } from "@inkway/views/chat";
+import { SettingsPage } from "@inkway/views/settings";
+import { useT } from "@inkway/views/i18n";
+import { Download, KeyRound, Server } from "lucide-react";
 import { DaemonSettingsTab } from "./components/daemon-settings-tab";
 import { UpdatesSettingsTab } from "./components/updates-settings-tab";
+import { ProviderSettingsTab } from "./components/provider-settings-tab";
+import { useDesktopRuntimeContext } from "./components/use-desktop-runtime-context";
 import { WorkspaceRouteLayout } from "./components/workspace-route-layout";
 import { DesktopRouteErrorPage } from "./components/route-error-page";
 
@@ -52,16 +54,29 @@ function DesktopSettingsRoute() {
           label: t(($) => $.desktop.daemon.title),
           icon: Server,
           content: <DaemonSettingsTab />,
+          navHidden: true,
         },
         {
           value: "updates",
           label: t(($) => $.desktop.tabs.updates),
           icon: Download,
           content: <UpdatesSettingsTab />,
+          navHidden: true,
+        },
+        {
+          value: "providers",
+          label: t(($) => $.page.tabs.providers),
+          icon: KeyRound,
+          content: <DesktopProviderSettingsTab />,
         },
       ]}
     />
   );
+}
+
+function DesktopProviderSettingsTab() {
+  const { localDaemonId } = useDesktopRuntimeContext();
+  return <ProviderSettingsTab localDaemonId={localDaemonId} />;
 }
 
 /**
@@ -186,7 +201,7 @@ export const appRoutes: RouteObject[] = [
           { path: "agents", element: <DesktopAgentsPage />, handle: { title: "Agents" } },
           {
             path: "agents/new",
-            element: <ChooseCreateMethodPage />,
+            element: <ManualCreateAgentPage />,
             handle: { title: "Create Agent" },
           },
           {
@@ -221,6 +236,8 @@ export const appRoutes: RouteObject[] = [
             handle: { title: "Squad" },
           },
           { path: "inbox", element: <InboxPage />, handle: { title: "Inbox" } },
+          { path: "inks", element: <InksPage />, handle: { title: "Inks" } },
+          { path: "fastpaths", loader: () => redirect("../inks") },
           { path: "chat", element: <ChatPage />, handle: { title: "Chat" } },
           {
             path: "attachments/:id/preview",

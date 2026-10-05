@@ -9,10 +9,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/multica-ai/multica/server/internal/events"
-	"github.com/multica-ai/multica/server/internal/testutil"
-	"github.com/multica-ai/multica/server/pkg/llm"
-	"github.com/multica-ai/multica/server/pkg/protocol"
+	"github.com/Devaretanmay/inkway/server/internal/events"
+	"github.com/Devaretanmay/inkway/server/internal/testutil"
+	"github.com/Devaretanmay/inkway/server/pkg/llm"
+	"github.com/Devaretanmay/inkway/server/pkg/protocol"
 )
 
 func TestChannelChatTitle_UsesCurrentSourceForLLMAndPublishesAfterCAS(t *testing.T) {

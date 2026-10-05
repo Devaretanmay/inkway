@@ -2,27 +2,27 @@ import { productLocale, type LabLocale } from "./locale";
 import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { createAuthStore, registerAuthStore } from "@multica/core/auth";
-import { createChatStore, registerChatStore } from "@multica/core/chat";
-import { setApiInstance } from "@multica/core/api";
-import { WSProvider } from "@multica/core/realtime";
-import { I18nProvider } from "@multica/core/i18n/react";
-import { WorkspaceSlugProvider } from "@multica/core/paths";
-import { workspaceKeys } from "@multica/core/workspace/queries";
-import { setCurrentWorkspace } from "@multica/core/platform";
-import { getIssueSurfaceViewStore } from "@multica/core/issues/stores/surface-view-store";
-import { AppSidebar } from "@multica/views/layout";
-import { IssueDetail, IssuesPage } from "@multica/views/issues/components";
+import { createAuthStore, registerAuthStore } from "@inkway/core/auth";
+import { createChatStore, registerChatStore } from "@inkway/core/chat";
+import { setApiInstance } from "@inkway/core/api";
+import { WSProvider } from "@inkway/core/realtime";
+import { I18nProvider } from "@inkway/core/i18n/react";
+import { WorkspaceSlugProvider } from "@inkway/core/paths";
+import { workspaceKeys } from "@inkway/core/workspace/queries";
+import { setCurrentWorkspace } from "@inkway/core/platform";
+import { getIssueSurfaceViewStore } from "@inkway/core/issues/stores/surface-view-store";
+import { AppSidebar } from "@inkway/views/layout";
+import { IssueDetail, IssuesPage } from "@inkway/views/issues/components";
 import {
   NavigationProvider,
   type NavigationAdapter,
-} from "@multica/views/navigation";
-import { RESOURCES } from "@multica/views/locales";
+} from "@inkway/views/navigation";
+import { RESOURCES } from "@inkway/views/locales";
 import {
   SidebarInset,
   SidebarProvider,
-} from "@multica/ui/components/ui/sidebar";
-import { TooltipProvider } from "@multica/ui/components/ui/tooltip";
+} from "@inkway/ui/components/ui/sidebar";
+import { TooltipProvider } from "@inkway/ui/components/ui/tooltip";
 import { Toaster, toast } from "sonner";
 import {
   createFixtureApi,
