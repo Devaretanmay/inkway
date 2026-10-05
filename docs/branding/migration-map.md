@@ -42,7 +42,7 @@ Active owned source, package scopes, CLI, Go module path, Python distribution/im
 
 ## Repository and release state
 
-- Product origin is `multica-ai/multica`; moving it to `Devaretanmay/inkway` is an ownership transfer, not a rename. Do not create a duplicate. Complete the transfer only with destination-owner permission, then update remotes.
-- Engine origin is `Devaretanmay/microloop`; this can be renamed in place to `Devaretanmay/ink` after local source, package, runtime, and clean-checkout checks pass.
-- Local directories become `Agent/inkway` and `Agent/ink` after all commands using the old paths finish.
-- Inkway must pin a newly built and published Ink runtime. The old release is not an active dependency. Final package hash and mounted-DMG model/lifecycle proof must be regenerated for that artifact.
+- Product origin remains `multica-ai/multica`. The preferred `Devaretanmay/inkway` destination does not exist and the current GitHub identity has no push/admin permission on the source repository; do not create a duplicate or break the valid origin. Transfer/rename remains an external ownership action.
+- Engine origin is `Devaretanmay/ink`; its repository was renamed in place without rewriting history.
+- Local directories are now `Agent/inkway` and `Agent/ink`.
+- Inkway pins the published `ink-runtime-v0.6.0rc2.1` artifact. Its checksum was verified from a detached clean checkout; the newly built DMG's embedded engine/model lifecycle and persistence proof passed.
