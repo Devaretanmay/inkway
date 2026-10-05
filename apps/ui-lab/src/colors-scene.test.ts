@@ -25,7 +25,6 @@ describe("semantic color catalog", () => {
     for (const [key] of colorTokens) {
       for (const theme of ["light", "dark"] as const) {
         const value = baseline[theme][key]!;
-        expect(value, `${theme}: ${key}`).toMatch(/^oklch\(/);
         expect(
           isDraft({ ...emptyDraft(), [theme]: { [key]: value } }),
           `${theme}: ${key}`,

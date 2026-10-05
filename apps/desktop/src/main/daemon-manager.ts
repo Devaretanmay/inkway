@@ -23,6 +23,7 @@ import type {
 } from "../shared/daemon-types";
 import { daemonStatusAlive } from "../shared/daemon-types";
 import { packagedInkEnv } from "./ink-runtime";
+import { migrateLegacyInkDatabase } from "./ink-state-migration";
 import { ensureManagedCli, managedCliPath } from "./cli-bootstrap";
 import { decideVersionAction } from "./version-decision";
 import {
@@ -956,6 +957,19 @@ async function startDaemon(
   const bin = await resolveCliBinary();
   if (!bin) return { success: false, error: "Inkway runtime CLI is not installed" };
 
+  const runtimeEnv = desktopSpawnEnv();
+  if (app.isPackaged && runtimeEnv.INK_PYTHON && runtimeEnv.INK_DB_PATH) {
+    try {
+      migrateLegacyInkDatabase(
+        join(homedir(), ".microloop", "decisions.db"),
+        runtimeEnv.INK_DB_PATH,
+        runtimeEnv.INK_PYTHON,
+      );
+    } catch {
+      return { success: false, error: "Could not safely migrate existing Ink decision history" };
+    }
+  }
+
   const active = await ensureActiveProfile();
   if (!active) {
     return { success: false, error: "Waiting for the service address" };
@@ -1009,7 +1023,7 @@ async function startDaemon(
     execFile(
       bin,
       args,
-      { timeout: DAEMON_START_EXEC_TIMEOUT_MS, env: desktopSpawnEnv() },
+      { timeout: DAEMON_START_EXEC_TIMEOUT_MS, env: runtimeEnv },
       (err) => {
         if (err) {
           currentState = "stopped";

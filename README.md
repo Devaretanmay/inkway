@@ -7,13 +7,13 @@ Connect a provider or coding tool
 → Create an agent
 → Create an issue
 → Assign the agent
-→ Follow the work
+→ Run
 → Review the result
 ```
 
 Local tools such as Claude Code, Codex, and OpenCode use their own sign-in and do not need an API key. OpenAI, Anthropic, and Groq can be connected for Native API agents. Provider credentials stay on the selected runtime in its operating-system credential store.
 
-FastPaths are verified local decisions learned from agent work. They stay out of the way until the evidence supports serving a decision locally.
+Ink is built into Inkway. Inks are verified local decisions learned by the Ink engine; they serve only after the evidence supports a local decision.
 
 ## Develop Inkway
 
@@ -38,4 +38,4 @@ Run Go integration tests with `make test`; frontend checks are `pnpm lint`, `pnp
 
 ## Source and compatibility
 
-This source repository retains historical package names, database identifiers, CLI/config paths, and protocol aliases where changing them could break existing installations. These are internal compatibility identifiers; the product is Inkway.
+This source repository retains historical package names, database identifiers, CLI/config paths, and protocol aliases where changing them could break existing installations. These are internal compatibility identifiers; the product is Inkway. The upstream project history and notices remain intact.

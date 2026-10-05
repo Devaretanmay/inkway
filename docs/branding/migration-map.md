@@ -18,7 +18,7 @@ Active owned source, package scopes, CLI, Go module path, Python distribution/im
 ## B — migrate with backward compatibility
 
 - Desktop user data: copy the first available legacy app-data folder to `Inkway` atomically; verify the copied tree; leave the source intact. Candidates cover Microloop, Issuway, Multica, and suffixed development folders.
-- Ink SQLite state: copy the previous `microloop/decisions.db` into the new `ink/decisions.db` using SQLite backup and integrity checks; keep the source. Migration is idempotent.
+- Ink SQLite state: copy `~/.microloop/decisions.db` into the packaged Ink runtime's `Inkway/ink/decisions.db` using SQLite backup and an integrity check before starting the managed daemon; keep the source. Migration is idempotent.
 - Model cache: copy the old Microloop cache/checkpoint to the Ink cache, verify model bytes, and write Ink metadata; do not rewrite weights.
 - Provider credentials: read legacy Keychain service names, write and verify the Inkway service, retain the old entries. Disconnect removes both namespaces.
 - Browser state and CSRF: copy old `multica*` storage keys without overwriting Inkway keys; accept old CSRF cookies while sessions age out.
@@ -43,7 +43,7 @@ Active owned source, package scopes, CLI, Go module path, Python distribution/im
 
 ## Repository and release state
 
-- Product origin remains `multica-ai/multica`. The preferred `Devaretanmay/inkway` destination does not exist and the current GitHub identity has no push/admin permission on the source repository; do not create a duplicate or break the valid origin. Transfer/rename remains an external ownership action.
-- Engine origin is `Devaretanmay/ink`; its repository was renamed in place without rewriting history.
+- Product origin is `Devaretanmay/inkway`, with `multica-ai/multica` retained as `upstream`. Canonical `main` preserves the complete upstream history and contains the Inkway commits.
+- Engine origin is `Devaretanmay/ink`; its repository remains canonical without rewriting history.
 - Local directories are now `Agent/inkway` and `Agent/ink`.
 - Inkway pins the published `ink-runtime-v0.6.0rc2.1` artifact. Its checksum was verified from a detached clean checkout; the newly built DMG's embedded engine/model lifecycle and persistence proof passed.

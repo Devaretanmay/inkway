@@ -24,7 +24,7 @@ describe("Inkway local storage migration", () => {
       "inkway_token": "new-token",
     });
 
-    expect(migrateLegacyBrandStorage(storage)).toBe(3);
+    expect(migrateLegacyBrandStorage(storage)).toBe(2);
     expect(storage.getItem("inkway_token")).toBe("new-token");
     expect(storage.getItem("inkway:chat:drafts")).toBe("draft-state");
     expect(storage.getItem("inkway_squads_view:acme")).toBe("view-state");

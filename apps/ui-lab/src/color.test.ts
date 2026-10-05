@@ -8,6 +8,7 @@ import {
   emptyDraft,
   exportCss,
   isDraft,
+  parseColor,
   updateToken,
 } from "./tokens";
 import { decodeSession, encodeSession } from "./storage";
@@ -61,9 +62,12 @@ describe("transparent semantic colors", () => {
     );
     expect(exportCss(draft)).toContain(" / 0.06)");
   });
-  it("restores equivalent percentage and decimal alpha without leaving a change", () => {
+  it("restores an equivalent color representation without leaving a change", () => {
     const original = baseline.dark["--border"]!;
     expect(withColorAlpha(original, colorAlpha(original))).toBe(original);
+    expect(colorAlpha("oklch(1 0 0 / 6%)")).toBe(
+      colorAlpha("oklch(1 0 0 / 0.06)"),
+    );
     const draft = updateToken(
       emptyDraft(),
       "dark",
@@ -71,7 +75,7 @@ describe("transparent semantic colors", () => {
       "oklch(1 0 0 / 0.2)",
     );
     expect(
-      updateToken(draft, "dark", "--border", "oklch(1 0 0 / 0.06)"),
+      updateToken(draft, "dark", "--border", `oklch(${parseColor(original).join(" ")})`),
     ).toEqual(emptyDraft());
     for (const value of [
       "oklch(1 0 0 / 0)",

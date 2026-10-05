@@ -4,12 +4,13 @@ import { readFileSync } from "node:fs";
 
 const allowed = [
   /^docs\/branding\//,
+  /^docs\/inkway-domain-migration\.md$/,
   /^scripts\/check-brand-hygiene\.mjs$/,
   /^docs\/(legacy|evidence)\//,
   /^benchmarks\/results\//,
   /^artifacts\/archive\/pre-inkway\//,
   /^server\/migrations\//,
-  /^apps\/desktop\/src\/main\/(index|daemon-manager|user-data-migration)\.(ts|test\.ts)$/,
+  /^apps\/desktop\/src\/main\/(index|daemon-manager|user-data-migration|ink-state-migration)\.(ts|test\.ts)$/,
   /^apps\/desktop\/electron-builder\.yml$/,
   /^server\/internal\/nativeagent\/secrets(_test)?\.go$/,
   /^server\/internal\/ink\/db_migration(_test)?\.py$/,

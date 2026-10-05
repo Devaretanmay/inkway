@@ -1,4 +1,5 @@
 import { UI_EASE_OUT_CSS, UI_EASE_IN } from "@inkway/ui/lib/motion";
+import Color from "colorjs.io";
 import source from "@inkway/ui/styles/tokens.css?raw";
 
 export type Theme = "light" | "dark";
@@ -285,15 +286,30 @@ export function numericTokenValue(key: string, value: number): string {
 }
 const colorPattern =
   /^oklch\(([\d.]+) ([\d.]+) ([\d.]+)(?: \/ ([\d.]+)(%)?)?\)$/;
+const hexColorPattern = /^#(?:[\da-f]{3}|[\da-f]{6})$/i;
 export function parseColor(value: string): [number, number, number] {
   const match = colorPattern.exec(value);
-  if (!match) throw new Error(`Unsupported color: ${value}`);
-  return [Number(match[1]), Number(match[2]), Number(match[3])];
+  if (match) return [Number(match[1]), Number(match[2]), Number(match[3])];
+  if (!hexColorPattern.test(value)) throw new Error(`Unsupported color: ${value}`);
+  try {
+    const channels = new Color(value).to("oklch").coords;
+    if (channels.some((channel) => !Number.isFinite(channel))) throw new Error();
+    return [channels[0]!, channels[1]!, channels[2]!];
+  } catch {
+    throw new Error(`Unsupported color: ${value}`);
+  }
 }
 export function colorAlpha(value: string): number {
   const match = colorPattern.exec(value);
-  if (!match) throw new Error(`Unsupported color: ${value}`);
-  return match[4] === undefined ? 1 : Number(match[4]) / (match[5] ? 100 : 1);
+  if (match) return match[4] === undefined ? 1 : Number(match[4]) / (match[5] ? 100 : 1);
+  if (!hexColorPattern.test(value)) throw new Error(`Unsupported color: ${value}`);
+  try {
+    const alpha = new Color(value).alpha;
+    if (!Number.isFinite(alpha)) throw new Error();
+    return alpha;
+  } catch {
+    throw new Error(`Unsupported color: ${value}`);
+  }
 }
 export function withColorAlpha(value: string, alpha: number): string {
   if (alpha === colorAlpha(value)) return value;
@@ -304,7 +320,7 @@ function equalColors(value: string, original: string): boolean {
     return (
       colorAlpha(value) === colorAlpha(original) &&
       parseColor(value).every(
-        (channel, index) => channel === parseColor(original)[index],
+        (channel, index) => Math.abs(channel - parseColor(original)[index]!) < 1e-6,
       )
     );
   } catch {
