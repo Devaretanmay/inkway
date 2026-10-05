@@ -3933,7 +3933,7 @@ func TestCodexCancellationDuringInitializeStopsProcessImmediately(t *testing.T) 
 	fakePath := writeFakeCodexAppServer(t, ""+
 		`read line`+"\n"+
 		`echo ready > `+marker+"\n"+
-		`sleep 30`+"\n")
+		`exec sleep 30`+"\n")
 
 	result, elapsed := cancelFakeCodexAfterMarker(t, fakePath, marker, ExecOptions{})
 	if result.Status != "failed" || !strings.Contains(result.Error, "initialize failed") {
@@ -3960,7 +3960,7 @@ func TestCodexCancellationBeforeTurnStartedStopsProcessImmediately(t *testing.T)
 		`echo '{"jsonrpc":"2.0","id":2,"result":{"thread":{"id":"thr-race"}}}'`+"\n"+
 		`read line`+"\n"+
 		`echo ready > `+marker+"\n"+
-		`sleep 30`+"\n")
+		`exec sleep 30`+"\n")
 
 	result, elapsed := cancelFakeCodexAfterMarker(t, fakePath, marker, ExecOptions{})
 	if result.Status != "aborted" {
