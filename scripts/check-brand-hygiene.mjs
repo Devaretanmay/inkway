@@ -10,6 +10,7 @@ const allowed = [
   /^benchmarks\/results\//,
   /^artifacts\/archive\/pre-inkway\//,
   /^server\/migrations\//,
+  /^server\/cmd\/migrate\/(main|migrate_runtime_ink_renamed_alias_test)\.go$/,
   /^apps\/desktop\/src\/main\/(index|daemon-manager|user-data-migration|ink-state-migration)\.(ts|test\.ts)$/,
   /^apps\/desktop\/electron-builder\.yml$/,
   /^server\/internal\/nativeagent\/secrets(_test)?\.go$/,
