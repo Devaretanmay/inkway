@@ -27,6 +27,7 @@ Active owned source, package scopes, CLI, Go module path, Python distribution/im
 - Existing SQL migration contents and migration IDs are immutable. New schema changes use a later forward migration; migration comments and runtime references can mention old identifiers when needed to explain historical state.
 - `channel_user_binding.multica_user_id` is renamed in place to `inkway_user_id` by migration 566. The old migration stays unchanged; the rename preserves stored bindings and indexes, and its down migration restores the previous column name.
 - The transaction-local setting `multica.workspace_teardown` is renamed to `inkway.workspace_teardown` in application code; migration 567 recreates the active task-usage and search-index guards against the new setting. Earlier trigger migrations remain immutable and the down migration restores their prior conditions.
+- Wakeup actor and source-task settings migrate from `multica.*` to `inkway.*` in migration 568 by replacing only active public trigger functions that read those keys. Its down migration restores the old keys; the immutable event migrations remain untouched.
 
 ## C — historical / immutable
 

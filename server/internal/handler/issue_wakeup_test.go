@@ -8,10 +8,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/Devaretanmay/inkway/server/internal/service"
 	"github.com/Devaretanmay/inkway/server/internal/testutil"
 	db "github.com/Devaretanmay/inkway/server/pkg/db/generated"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func TestIssueWakeupAPIAndTrustedOrigin(t *testing.T) {
@@ -257,9 +257,9 @@ func TestIssueWakeupMutationTrustedActor(t *testing.T) {
 	dbfx.Exec(t, "UPDATE agent_task_queue SET context=jsonb_build_object('wakeup_id',$2::text) WHERE id=$1", run, uuidToString(w.ID))
 	call(testHandler.UpdateComment, withURLParam(newRequest("PATCH", "/", map[string]any{"content": "admin edit"}), "commentId", comment), false)
 	var actorType, actorID string
-	var source *string
+	var source pgtype.Text
 	dbfx.QueryRow(t, "SELECT payload->>'actor_type',payload->>'actor_id',payload->>'source_task_id' FROM issue_wakeup_receipt WHERE wakeup_id=$1", w.ID).Scan(&actorType, &actorID, &source)
-	if actorType != "member" || actorID != testUserID || source != nil {
+	if actorType != "member" || actorID != testUserID || source.Valid {
 		t.Fatalf("wrong editor identity %s %s %v", actorType, actorID, source)
 	}
 	count := func() int { return dbfx.Count(t, "SELECT count(*) FROM issue_wakeup_receipt WHERE wakeup_id=$1", w.ID) }
@@ -278,7 +278,7 @@ func TestIssueWakeupMutationTrustedActor(t *testing.T) {
 		t.Fatalf("external run not captured: %d", count())
 	}
 	dbfx.QueryRow(t, "SELECT payload->>'actor_type',payload->>'actor_id',payload->>'source_task_id' FROM issue_wakeup_receipt WHERE wakeup_id=$1 AND event_type='issue.metadata_changed'", w.ID).Scan(&actorType, &actorID, &source)
-	if actorType != "agent" || actorID != agent || source == nil || *source != run {
+	if actorType != "agent" || actorID != agent || !source.Valid || source.String != run {
 		t.Fatalf("wrong source identity %s %s %v", actorType, actorID, source)
 	}
 }
