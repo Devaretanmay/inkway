@@ -746,6 +746,13 @@ const migrationAdvisoryLockKey int64 = 7244554146635925501
 // Postgres without colliding with the production table.
 const defaultSchemaMigrationsTable = "schema_migrations"
 
+// migrationAliases maps a historical migration filename to its current
+// equivalent. Keep the old ledger entry intact: installations may have
+// applied the same DDL before a brand rename changed the filename.
+var migrationAliases = map[string]string{
+	"564_runtime_ink_snapshots": "564_runtime_microloop_snapshots",
+}
+
 // runOptions carries everything runMigrations needs that is not the
 // pool itself. Tests use it to inject a hermetic migrations directory,
 // a unique per-test bookkeeping table, and a unique advisory-lock key
@@ -987,6 +994,28 @@ func runMigrations(ctx context.Context, pool *pgxpool.Pool, opts runOptions) err
 			if exists {
 				fmt.Printf("  skip  %s (already applied)\n", version)
 				continue
+			}
+			if legacyVersion, ok := migrationAliases[version]; ok {
+				var legacyExists bool
+				if err := conn.QueryRow(ctx, existsSQL, legacyVersion).Scan(&legacyExists); err != nil {
+					return fmt.Errorf("check legacy migration %q for %q: %w", legacyVersion, version, err)
+				}
+				if legacyExists {
+					var schemaReady bool
+					if err := conn.QueryRow(ctx, `SELECT
+						to_regclass('runtime_microloop_health') IS NOT NULL AND
+						to_regclass('runtime_microloop_sites') IS NOT NULL`).Scan(&schemaReady); err != nil {
+						return fmt.Errorf("verify legacy migration %q schema for %q: %w", legacyVersion, version, err)
+					}
+					if !schemaReady {
+						return fmt.Errorf("legacy migration %q is recorded but its expected schema for %q is missing", legacyVersion, version)
+					}
+					fmt.Printf("  skip  %s (equivalent legacy migration %s already applied)\n", version, legacyVersion)
+					if _, err := conn.Exec(ctx, insertSQL, version); err != nil {
+						return fmt.Errorf("record equivalent migration %q: %w", version, err)
+					}
+					continue
+				}
 			}
 		} else {
 			if !exists {
