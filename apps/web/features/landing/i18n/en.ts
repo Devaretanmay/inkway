@@ -402,111 +402,62 @@ export function createEnDict(
 
   privacy: {
     title: "Privacy Policy",
-    lastUpdated: "Last updated: September 24, 2026",
+    lastUpdated: "Last updated: October 5, 2026",
     intro: [
-      "This Privacy Policy explains how Index Labs (Hong Kong) Limited (“Inkway”, “we”, “us”) collects, uses, and shares personal information when you visit multica.ai, contact us, or use Inkway Cloud, our hosted service, including the web, desktop, and mobile apps.",
-      "It does not cover Inkway deployments you host yourself. The operator of a self-hosted deployment controls its data, and any AI providers, integrations, or analytics it uses depend on how they configure it. The only thing a self-hosted server sends us is a daily usage snapshot: a random ID for the deployment, so snapshots from the same server can be linked; the server version; approximate counts of workspaces, members, agents, and connected daemons; and the number of agent runs started, completed, failed, and cancelled that day. It contains no names, email addresses, or content. Setting DO_NOT_TRACK=1 turns off this snapshot.",
+      "This policy explains how Index Labs (Hong Kong) Limited (“Inkway”, “we”, “us”) handles information submitted through the Inkway website and how the Inkway desktop app handles your data.",
+      "Inkway is local-first desktop software. It does not require an account and does not send your local issues, files, or usage analytics to Inkway. Your local product data stays on your device. If you choose to use an external coding agent, model provider, or integration, the information you send through that service is handled under its own terms.",
     ],
     sections: [
       {
-        heading: "Information we collect",
+        heading: "Information you provide",
         bullets: [
-          "Account information: your name, email address, and profile picture. If you sign in with Google, we receive your name, email address, and profile picture from Google. You can also add profile details such as language, time zone, and a short bio, and answer onboarding questions such as your role, your use case, and how you heard about Inkway.",
-          "Content you create: workspaces, issues, comments, chat messages, attachments, agent instructions, and anything else you or your agents put into Inkway Cloud.",
-          "Contact Sales inquiries: your name, business email, company name and size, country or region, use case, goals, and communication preferences. To prevent abuse, we also record the IP address and browser user agent the form was sent from.",
-          "Billing information: subscription payments are handled by Stripe on pages hosted by Stripe. We never receive or store your full card details.",
-          "Usage and device information: app version, operating system, client type, and a randomly generated installation ID; the name of each machine you connect as a runtime (its hostname by default); and crash and error reports. Before a report is sent, we filter recognizable email addresses and credentials out of the error message, but reports can still contain other details about what went wrong.",
-          "Feedback: when you send feedback, we receive your message along with the page, app version, operating system, and any error details.",
+          "If you submit a website contact form, we receive the details and message you choose to provide so we can respond.",
+          "The desktop app stores issues, agent configuration, run records, and related project data locally on your device.",
+          "Provider credentials are stored in your operating system’s local credential store. They are used only when you choose to run the corresponding provider or tool.",
         ],
       },
       {
-        heading: "How we use information",
+        heading: "How information is used",
         bullets: [
-          "To provide, operate, and secure Inkway Cloud, including signing you in, syncing your workspaces, and delivering notifications and invitations.",
-          "To respond to Contact Sales inquiries and support requests.",
-          "To send service messages such as sign-in codes and workspace invitations. We only send product updates or marketing if you opted in, and you can unsubscribe at any time.",
-          "To understand how Inkway is used, fix bugs, and improve the product.",
-          "To prevent abuse and meet our legal obligations.",
+          "We use contact-form information to answer your request.",
+          "The desktop app uses local data to provide its issue, agent, and run features. It does not require an Inkway account or transmit usage analytics to Inkway.",
+          "External tools and providers receive information only when you choose to use them; their own privacy terms apply.",
         ],
       },
       {
-        heading: "Legal bases",
+        heading: "Website and local data",
         paragraphs: [
-          "Where the law requires a legal basis for processing, we rely on performing our contract with you, to provide Inkway Cloud; our legitimate interests in securing, supporting, and improving Inkway and responding to inquiries; your consent, for marketing messages; and compliance with our legal obligations.",
+          "The website may receive ordinary connection information needed to deliver pages and protect the service. Desktop project data is stored in the application’s local data directory and can be removed by uninstalling the app and deleting that data. Keep backups if you need to preserve it.",
         ],
       },
       {
-        heading: "AI features",
+        heading: "External services",
         paragraphs: [
-          "Your coding agents run on your own machines or on runtimes you connect, using the coding tools and accounts you set up. An agent running on your machine does not mean the model runs there: those tools send prompts, code, files, and tool results to their model providers, under the terms of the tool and account you use. Inkway coordinates their work.",
-          "Some Inkway Cloud features, such as chat titles and suggested follow-ups, send your first chat message or a few recent messages to a third-party large language model provider we choose, to generate the result. Inkway does not use your content to train AI models.",
+          "When you configure and run a CLI agent, API model, or integration, that service may receive prompts, code, files, or tool results needed for your request. Review the selected provider’s terms and configure only services you trust.",
         ],
       },
       {
-        heading: "Cookies and analytics",
+        heading: "Retention and your choices",
         paragraphs: [
-          "We use cookies that are needed to keep you signed in, protect against cross-site request forgery, and give you access to files you uploaded. We also use a cookie that remembers which campaign or website referred you, for up to 30 days, and cookies that remember your language and the last workspace you opened.",
-          "We use PostHog to understand product usage and to collect crash reports. When you are signed in, PostHog receives your account name and email so we can match reports to your account. We do not use advertising cookies, and we do not sell your personal information.",
-        ],
-      },
-      {
-        heading: "Who we share information with",
-        paragraphs: [
-          "Information you put into a workspace is visible to its other members and admins, and to the agents and integrations they authorize, according to the workspace’s permissions. If your workspace belongs to an organization, that organization manages its content and may handle requests about it.",
-          "We also disclose information when the law requires it, and to a buyer or successor if Inkway is involved in a merger, acquisition, or sale of assets.",
-          "Beyond that, we share personal information only with the service providers that help us run Inkway and with integrations you choose to connect:",
-        ],
-        bullets: [
-          "Amazon Web Services: hosting, file storage, and content delivery",
-          "Vercel: hosting for the website and web app",
-          "Stripe: payments and billing",
-          "Resend: sign-in and invitation emails",
-          "PostHog: product analytics and crash reports",
-          "Google: sign-in, if you choose Sign in with Google",
-          "Large language model providers: the AI features described above",
-          "Integrations you connect, such as Slack, Lark, DingTalk, WeCom, Telegram, GitHub, GitLab, or apps connected through Composio: the data you choose to exchange with them, which is also subject to their own terms",
-        ],
-      },
-      {
-        heading: "Where information is stored",
-        paragraphs: [
-          "Inkway Cloud is hosted on Amazon Web Services and Vercel. We and our service providers may process your information in the United States and other countries. Wherever it is processed, we protect it as described in this policy.",
-        ],
-      },
-      {
-        heading: "How long we keep information",
-        paragraphs: [
-          "We keep account information and workspace content for as long as your account or workspace exists. When a workspace owner deletes a workspace, its issues, comments, and other content are removed from Inkway Cloud, though backups we keep for recovery may still contain copies for a period afterwards. To have files uploaded to a deleted workspace erased from our file storage, email [support@multica.ai](mailto:support@multica.ai). We keep billing records for as long as accounting and tax rules require, and product analytics, crash reports, Contact Sales inquiries, and feedback for as long as they are useful for supporting you and improving Inkway. We delete inquiries and feedback on request.",
-        ],
-      },
-      {
-        heading: "Your choices and rights",
-        paragraphs: [
-          "Depending on where you live, you may have the right to access, correct, delete, or export your personal information; to object to or restrict certain processing; to withdraw consent you have given, such as for marketing messages; and to complain to your local data protection authority. You can update your profile in Inkway at any time and delete a workspace you own from its settings. For anything else, including deleting your account, email [support@multica.ai](mailto:support@multica.ai). We will respond within 30 days.",
+          "Contact-form information is retained only as needed to respond and maintain business records. Local app data remains on your device until you delete it. You can contact us through the website about information you submitted to us.",
         ],
       },
       {
         heading: "Security",
         paragraphs: [
-          "We protect your information with encryption in transit, access controls, and encrypted storage for integration credentials. No system is perfectly secure, so please contact us right away if you believe your account has been compromised.",
-        ],
-      },
-      {
-        heading: "Children",
-        paragraphs: [
-          "Inkway is not directed to children under 16, and we do not knowingly collect their personal information.",
+          "We use reasonable safeguards for information submitted through the website. The desktop app keeps its data and credentials on your device; protect your device and operating-system account. No system is perfectly secure.",
         ],
       },
       {
         heading: "Changes to this policy",
         paragraphs: [
-          "We may update this policy from time to time. We will post the new version on this page and update the date at the top. If a change is significant, we will let you know before it takes effect.",
+          "We may update this policy as the website or app changes. The current version and date will appear on this page.",
         ],
       },
       {
         heading: "Contact us",
         paragraphs: [
-          "Inkway is operated by Index Labs (Hong Kong) Limited, which is responsible for your personal information. For privacy questions or requests, email [support@multica.ai](mailto:support@multica.ai).",
+          "Inkway is operated by Index Labs (Hong Kong) Limited. For privacy questions about information submitted through the website, use the website contact form.",
         ],
       },
     ],

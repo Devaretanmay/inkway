@@ -22,7 +22,7 @@ export function daemonStateLabel(
       return t(($) => $.desktop.daemon.state_installing_cli);
     case "recovery_paused":
       return t(($) => $.desktop.daemon.state_recovery_paused);
-    case "auth_expired":
-      return t(($) => $.desktop.daemon.state_auth_expired);
+    case "credential_expired":
+      return t(($) => $.desktop.daemon.state_credential_expired);
   }
 }

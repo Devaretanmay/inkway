@@ -28,33 +28,24 @@ export function createRendererWebPreferences(
     // which bundles @electron-toolkit/preload into the output instead of
     // leaving it external.
     sandbox: true,
-    // Still intentionally off. Restoring webSecurity requires migrating the
-    // renderer off the opaque file:// origin onto a privileged custom protocol
-    // (so CORS preflight requests carry a real Origin the server can allow),
-    // which needs server-side coordination first. The rest of the secure
-    // baseline (contextIsolation on, nodeIntegration off, sandbox on) is
-    // enforced regardless of this flag.
-    webSecurity: false,
+    // The local backend allows the packaged file:// renderer's serialized
+    // null origin. Keep Chromium's origin and mixed-content checks enabled.
+    webSecurity: true,
     // Required for the Chromium PDF viewer (PDFium) to activate inside
     // iframes — used by the attachment preview modal for application/pdf
     // files. Default is false in Electron; without it <iframe src=*.pdf>
     // renders blank.
     //
-    // Security trade-off, accepted intentionally:
-    //   1. These windows still run with `webSecurity: false` (see above), so
-    //      `plugins: true` does not meaningfully widen the renderer's attack
-    //      surface beyond what is already accepted. The process sandbox is
-    //      now on, which is the containment boundary that matters here.
-    //   2. The only PDFs that reach an iframe here are signed CloudFront URLs
-    //      we ourselves issued (see useDownloadAttachment); user-supplied URLs
+    // Security trade-off:
+    //   1. The only PDFs that reach an iframe here are signed storage URLs
+    //      issued by the local backend; user-supplied URLs
     //      are routed through `setWindowOpenHandler` → `openExternalSafely` and
     //      cannot land in this renderer.
     //   3. Chromium's PDFium plugin is itself sandboxed inside its own process
     //      and only handles the `application/pdf` MIME.
     //
-    // When webSecurity comes back on, revisit this by hosting the PDF viewer
-    // in a dedicated WebContentsView with `plugins: true` scoped to that view,
-    // keeping the main renderer plugin-free.
+    // If this permission becomes unnecessary, remove it to keep the main
+    // renderer plugin-free.
     plugins: true,
     additionalArguments: [
       `--inkway-locale=${systemLocale}`,

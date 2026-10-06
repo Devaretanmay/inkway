@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v5"
@@ -33,6 +34,15 @@ var (
 	validIssueViewWorkspaceVariants = []string{"members", "agents"}
 	validIssueViewVisibilities      = []string{"private", "workspace"}
 )
+
+func contains(values []string, target string) bool {
+	for _, value := range values {
+		if strings.EqualFold(value, target) {
+			return true
+		}
+	}
+	return false
+}
 
 // validateIssueViewVariant returns the pgtype value for a scope_variant
 // input under the given scope_type, or ok=false when the pairing is

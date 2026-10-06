@@ -23,7 +23,6 @@ import {
 } from "./session-renewal";
 import type { CoreProviderProps, ClientIdentity } from "./types";
 import type { StorageAdapter } from "../types/storage";
-import { ClientUsageReporter } from "../client-usage";
 import {
   configureShortcutPlatform,
   configureShortcutRuntime,
@@ -38,29 +37,30 @@ let chatStore: ReturnType<typeof createChatStore>;
 // server on any authenticated request, so there is nothing for a client-side
 // renewer to do there (MUL-7436).
 let sessionRenewal: SessionRenewal | null = null;
-// Named rather than positional: onLogin / onLogout / onSessionExpired are
-// three adjacent `() => void`, and nothing but the argument order would tell
-// them apart at the call site.
 interface InitCoreOptions {
   apiBaseUrl: string;
   storage: StorageAdapter;
-  onLogin?: () => void;
   onLogout?: () => void;
   onSessionExpired?: () => void;
   cookieAuth?: boolean;
   identity?: ClientIdentity;
+  localAppToken?: string;
 }
 
 function initCore({
   apiBaseUrl,
   storage,
-  onLogin,
   onLogout,
   onSessionExpired,
   cookieAuth,
   identity,
+  localAppToken,
 }: InitCoreOptions) {
   if (initialized) return;
+
+  if (localAppToken) {
+    storage.setItem("inkway_token", localAppToken);
+  }
 
   configureShortcutPlatform(
     identity?.os === "macos" ||
@@ -115,7 +115,6 @@ function initCore({
   authStore = createAuthStore({
     api,
     storage,
-    onLogin,
     onLogout,
     onSessionExpired,
     cookieAuth,
@@ -125,7 +124,7 @@ function initCore({
   chatStore = createChatStore({ storage });
   registerChatStore(chatStore);
 
-  if (!cookieAuth) {
+  if (!cookieAuth && !localAppToken) {
     sessionRenewal = createSessionRenewal({
       api,
       storage,
@@ -143,10 +142,10 @@ export function CoreProvider({
   wsUrl = "ws://localhost:8080/ws",
   storage = defaultStorage,
   cookieAuth,
-  onLogin,
   onLogout,
   onSessionExpired,
   identity,
+  localAppToken,
   locale,
   resources,
   localeAdapter,
@@ -160,11 +159,11 @@ export function CoreProvider({
       initCore({
         apiBaseUrl,
         storage,
-        onLogin,
         onLogout,
         onSessionExpired,
         cookieAuth,
         identity,
+        localAppToken,
       }),
     [],
   );
@@ -198,16 +197,10 @@ export function CoreProvider({
   const tree = (
     <QueryProvider>
       <AuthInitializer
-        onLogin={onLogin}
         storage={storage}
         cookieAuth={cookieAuth}
         identity={identity}
       >
-        {/* Desktop's reporter owns both activity and runtime state so it must
-            be the only writer for that installation. */}
-        {identity?.platform !== "desktop" && (
-          <ClientUsageReporter storage={storage} identity={identity} />
-        )}
         <WSProvider
           wsUrl={wsUrl}
           authStore={authStore}

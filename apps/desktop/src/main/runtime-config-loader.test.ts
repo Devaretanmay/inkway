@@ -1,23 +1,12 @@
 // @vitest-environment node
-import { mkdtemp, writeFile } from "fs/promises";
-import { join } from "path";
-import { tmpdir } from "os";
 import { describe, expect, it } from "vitest";
 import { loadRuntimeConfig } from "./runtime-config-loader";
 
 describe("loadRuntimeConfig", () => {
-  it("uses dev env and ignores desktop.json during electron-vite dev", async () => {
-    const dir = await mkdtemp(join(tmpdir(), "inkway-desktop-config-"));
-    const configPath = join(dir, "desktop.json");
-    await writeFile(
-      configPath,
-      JSON.stringify({ schemaVersion: 1, apiUrl: "https://prod.example.com" }),
-    );
-
+  it("uses dev env in electron-vite development", async () => {
     await expect(
       loadRuntimeConfig({
         isDev: true,
-        configPath,
         env: {
           apiUrl: "http://localhost:8080",
           wsUrl: "ws://localhost:8080/ws",
@@ -35,57 +24,24 @@ describe("loadRuntimeConfig", () => {
     });
   });
 
-  it("uses cloud defaults when packaged config is absent", async () => {
-    const dir = await mkdtemp(join(tmpdir(), "inkway-desktop-config-"));
+  it("uses only loopback endpoints in packaged desktop regardless of environment", async () => {
     await expect(
       loadRuntimeConfig({
         isDev: false,
-        configPath: join(dir, "missing.json"),
-        env: {},
+        env: {
+          apiUrl: "https://api.example.com",
+          wsUrl: "wss://api.example.com/ws",
+          appUrl: "https://example.com",
+        },
       }),
     ).resolves.toEqual({
       ok: true,
       config: {
         schemaVersion: 1,
-        apiUrl: "https://api.multica.ai",
-        wsUrl: "wss://api.multica.ai/ws",
-        appUrl: "https://multica.ai",
+        apiUrl: "http://127.0.0.1:8080",
+        wsUrl: "ws://127.0.0.1:8080/ws",
+        appUrl: "http://127.0.0.1:8080",
       },
     });
-  });
-
-  it("parses a valid packaged desktop.json", async () => {
-    const dir = await mkdtemp(join(tmpdir(), "inkway-desktop-config-"));
-    const configPath = join(dir, "desktop.json");
-    await writeFile(
-      configPath,
-      JSON.stringify({ schemaVersion: 1, apiUrl: "https://api.example.com" }),
-    );
-
-    await expect(
-      loadRuntimeConfig({ isDev: false, configPath, env: {} }),
-    ).resolves.toEqual({
-      ok: true,
-      config: {
-        schemaVersion: 1,
-        apiUrl: "https://api.example.com",
-        wsUrl: "wss://api.example.com/ws",
-        appUrl: "https://example.com",
-      },
-    });
-  });
-
-  it("fails closed when packaged desktop.json is invalid", async () => {
-    const dir = await mkdtemp(join(tmpdir(), "inkway-desktop-config-"));
-    const configPath = join(dir, "desktop.json");
-    await writeFile(configPath, "{");
-
-    const result = await loadRuntimeConfig({ isDev: false, configPath, env: {} });
-
-    expect(result.ok).toBe(false);
-    if (!result.ok) {
-      expect(result.error.message).toContain(configPath);
-      expect(result.error.message).toContain("Invalid desktop runtime config JSON");
-    }
   });
 });

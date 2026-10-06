@@ -6,6 +6,8 @@ import (
 	"errors"
 	"log/slog"
 	"os/exec"
+	"strconv"
+	"strings"
 	"syscall"
 	"time"
 )
@@ -54,9 +56,48 @@ func signalProcessGroup(cmd *exec.Cmd, sig syscall.Signal) {
 	if cmd == nil || cmd.Process == nil {
 		return
 	}
+	// Some tools (OpenCode's shell runner among them) put their own commands in
+	// a new session/process group. Those descendants escape a negative-PID group
+	// signal and used to survive a cancelled run as orphans. Snapshot descendants
+	// while the runtime leader still exists, signal deepest children first, then
+	// signal its process group as usual.
+	for _, pid := range processDescendants(cmd.Process.Pid) {
+		_ = syscall.Kill(pid, sig)
+	}
 	if err := syscall.Kill(-cmd.Process.Pid, sig); err != nil {
 		_ = cmd.Process.Signal(sig)
 	}
+}
+
+func processDescendants(rootPID int) []int {
+	out, err := exec.Command("ps", "-axo", "pid=,ppid=").Output()
+	if err != nil {
+		return nil
+	}
+	children := make(map[int][]int)
+	for _, line := range strings.Split(string(out), "\n") {
+		fields := strings.Fields(line)
+		if len(fields) != 2 {
+			continue
+		}
+		pid, pidErr := strconv.Atoi(fields[0])
+		parent, parentErr := strconv.Atoi(fields[1])
+		if pidErr == nil && parentErr == nil && pid > 1 && parent > 1 {
+			children[parent] = append(children[parent], pid)
+		}
+	}
+	var descendants []int
+	queue := []int{rootPID}
+	for len(queue) > 0 {
+		parent := queue[0]
+		queue = queue[1:]
+		queue = append(queue, children[parent]...)
+		descendants = append(descendants, children[parent]...)
+	}
+	for left, right := 0, len(descendants)-1; left < right; left, right = left+1, right-1 {
+		descendants[left], descendants[right] = descendants[right], descendants[left]
+	}
+	return descendants
 }
 
 func waitProcessGroupGone(cmd *exec.Cmd, timeout time.Duration) bool {

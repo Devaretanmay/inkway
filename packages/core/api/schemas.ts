@@ -746,10 +746,6 @@ export interface AppConfigResponse {
   // (MUL-3254). Older servers omit the field; treat that as false.
   cdn_signed?: boolean;
   allow_signup: boolean;
-  google_client_id?: string;
-  posthog_key?: string;
-  posthog_host?: string;
-  analytics_environment?: string;
   daemon_server_url?: string;
   daemon_app_url?: string;
   workspace_creation_disabled?: boolean;
@@ -1024,10 +1020,6 @@ export const AppConfigSchema = z.object({
   cdn_domain: z.string().default(""),
   cdn_signed: BooleanWithDefaultSchema(false),
   allow_signup: BooleanWithDefaultSchema(true),
-  google_client_id: OptionalStringSchema,
-  posthog_key: OptionalStringSchema,
-  posthog_host: OptionalStringSchema,
-  analytics_environment: OptionalStringSchema,
   daemon_server_url: OptionalStringSchema,
   daemon_app_url: OptionalStringSchema,
   workspace_creation_disabled: BooleanWithDefaultSchema(false).optional(),
@@ -1044,7 +1036,6 @@ export const EMPTY_APP_CONFIG: AppConfigResponse = {
   cdn_domain: "",
   cdn_signed: false,
   allow_signup: true,
-  google_client_id: "",
   daemon_server_url: "",
   daemon_app_url: "",
   workspace_creation_disabled: false,

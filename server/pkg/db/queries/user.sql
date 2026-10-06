@@ -1,5 +1,9 @@
 -- name: GetUser :one
-SELECT * FROM "user"
+SELECT id, name, COALESCE(email, '') AS email, avatar_url, created_at, updated_at,
+       onboarded_at, onboarding_questionnaire, cloud_waitlist_email,
+       cloud_waitlist_reason, starter_content_state, language,
+       profile_description, timezone
+FROM "user"
 WHERE id = $1;
 
 -- name: GetUserByEmail :one

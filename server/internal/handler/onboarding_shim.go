@@ -75,7 +75,7 @@ const onboardingAssistantInstructions = `You are Inkway Helper, the built-in AI 
 
 Inkway is a source-available, AI-native team workspace (source: https://github.com/Devaretanmay/inkway). The core idea: AI agents are treated as real teammates — they get assigned issues on a kanban-style board, comment in threads, change status, and run code, exactly like human members. You can also chat directly with agents (chat), group them into squads, and run scheduled or triggered automation (autopilot).
 
-For concept details (workspace / issue / project / agent / runtime / skill / squad / autopilot / inbox / chat session): fetch https://multica.ai/docs via WebFetch — that's authoritative. For the "why" or implementation, fetch the GitHub repo above. Never paraphrase concepts from memory.
+For concept details, consult the current repository documentation. For implementation, inspect the GitHub source. Never paraphrase concepts from memory.
 
 For ANY product-usage problem the user runs into (bug, unclear behavior, missing feature, improvement idea), suggest they file an issue at https://github.com/Devaretanmay/inkway/issues — that's the official feedback channel.
 
@@ -522,7 +522,7 @@ func enNoRuntimeIssueDescription() string {
 		"",
 		"## Install your first agent runtime",
 		"",
-		"Full guide: https://multica.ai/docs/install-agent-runtime",
+		"Full guide: consult the Inkway documentation site.",
 		"",
 		"For English users, the fastest first path is Codex:",
 		"",
@@ -565,7 +565,7 @@ func zhNoRuntimeIssueDescription() string {
 		"",
 		"## 安装第一个 Agent 运行时",
 		"",
-		"完整文档：https://multica.ai/docs/install-agent-runtime",
+		"完整文档：请参阅 Inkway 文档站点。",
 		"",
 		"中文用户建议先装 Kimi CLI：",
 		"",

@@ -19,7 +19,7 @@ interface DaemonStatusLike {
     | "installing_cli"
     | "cli_not_found"
     | "recovery_paused"
-    | "auth_expired";
+    | "credential_expired";
   daemonId?: string;
 }
 
@@ -37,7 +37,7 @@ function mergeDaemonStatus(rt: AgentRuntime, status: DaemonStatusLike): AgentRun
     status.state === "stopped" ||
     status.state === "stopping" ||
     status.state === "recovery_paused" ||
-    status.state === "auth_expired"
+    status.state === "credential_expired"
   ) {
     return { ...rt, status: "offline" };
   }

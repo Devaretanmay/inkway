@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, type ReactNode } from "react";
-import { AlertCircle, Info, LogIn } from "lucide-react";
+import { AlertCircle, Info, RefreshCw } from "lucide-react";
 import { Button } from "@inkway/ui/components/ui/button";
 import { Switch } from "@inkway/ui/components/ui/switch";
 import { cn } from "@inkway/ui/lib/utils";
@@ -100,15 +100,15 @@ export function DaemonSettingsTab() {
       title={t(($) => $.desktop.daemon.title)}
     >
 
-      {status.state === "auth_expired" && (
+      {status.state === "credential_expired" && (
         <div className="mt-4 flex items-start gap-3 rounded-lg border border-destructive/40 bg-destructive/5 px-4 py-3">
           <AlertCircle className="mt-0.5 size-4 shrink-0 text-destructive" />
           <div className="min-w-0 flex-1">
             <p className="text-body font-medium text-destructive">
-              {t(($) => $.desktop.daemon.signin_expired)}
+              {t(($) => $.desktop.daemon.credential_expired)}
             </p>
             <p className="mt-0.5 text-body text-muted-foreground">
-              {t(($) => $.desktop.daemon.signin_expired_description)}
+              {t(($) => $.desktop.daemon.credential_expired_description)}
             </p>
           </div>
           <Button
@@ -117,8 +117,8 @@ export function DaemonSettingsTab() {
             onClick={handleReauth}
             disabled={reauthLoading}
           >
-            <LogIn className="size-3.5 mr-1.5" />
-            {t(($) => $.desktop.daemon.signin_again)}
+            <RefreshCw className="size-3.5 mr-1.5" />
+            {t(($) => $.desktop.daemon.reconnect_runtime)}
           </Button>
         </div>
       )}

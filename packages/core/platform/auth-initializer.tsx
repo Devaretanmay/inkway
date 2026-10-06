@@ -5,11 +5,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { getApi } from "../api";
 import { ApiError } from "../api/client";
 import { useAuthStore } from "../auth";
-import {
-  captureSignupSource,
-  identify as identifyAnalytics,
-  initAnalytics,
-} from "../analytics";
 import { configStore } from "../config";
 import { workspaceListOptions } from "../workspace/queries";
 import { createLogger } from "../logger";
@@ -31,13 +26,11 @@ const RECOVERY_RETRY_DELAYS_MS = [
 
 export function AuthInitializer({
   children,
-  onLogin,
   storage = defaultStorage,
   cookieAuth,
   identity,
 }: {
   children: ReactNode;
-  onLogin?: () => void;
   // No `onLogout`: every unauthenticated exit below delegates to the auth
   // store's own teardown, which is where the logout / session-expiry
   // callbacks live.
@@ -68,7 +61,6 @@ export function AuthInitializer({
         }
         configStore.getState().setAuthConfig({
           allowSignup: cfg.allow_signup,
-          googleClientId: cfg.google_client_id,
           // Old servers omit this field — treat that as "creation allowed"
           // (the managed-cloud default) rather than blocking the UI.
           workspaceCreationDisabled: cfg.workspace_creation_disabled === true,
@@ -106,14 +98,6 @@ export function AuthInitializer({
           .setCommentDeleteKeepRepliesSupported(
             cfg.comment_delete_keep_replies_supported === true,
           );
-        if (cfg.posthog_key) {
-          initAnalytics({
-            key: cfg.posthog_key,
-            host: cfg.posthog_host || "",
-            appVersion: identity?.version,
-            environment: cfg.analytics_environment,
-          });
-        }
         configLoadedRef.current = true;
         return true;
       })
@@ -126,10 +110,6 @@ export function AuthInitializer({
   }, [identity?.version]);
 
   useEffect(() => {
-    // Stamp attribution before anything else — the signup event (server-side)
-    // reads this cookie, so it has to be present before the user hits submit.
-    captureSignupSource();
-
     // Configuration is optional for startup, but an offline boot must still
     // self-heal once connectivity returns. Keep retries rate-limited at the
     // same 30-second ceiling as auth and accelerate them on `online`.
@@ -212,14 +192,12 @@ export function AuthInitializer({
     let retryTimer: ReturnType<typeof setTimeout> | undefined;
 
     const onAuthSuccess = (user: User) => {
-      onLogin?.();
       useAuthStore.setState({
         user,
         isLoading: false,
         status: "authenticated",
         expired: false,
       });
-      identifyAnalytics(user.id, { email: user.email, name: user.name });
       if (authRecoveryPendingRef.current) {
         authRecoveryPendingRef.current = false;
         // A network-not-ready boot can fail both auth and config requests;

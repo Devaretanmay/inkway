@@ -226,7 +226,7 @@ func fetchWorkspaces(ctx context.Context, cmd *cobra.Command) ([]workspaceSummar
 	serverURL := resolveServerURL(cmd)
 	token := resolveToken(cmd)
 	if token == "" {
-		return nil, fmt.Errorf("not authenticated: run 'inkway login' first%s", daemonPortOnlyContextHint())
+		return nil, fmt.Errorf("no runtime credential is configured%s", daemonPortOnlyContextHint())
 	}
 
 	client := cli.NewAPIClient(serverURL, "", token)

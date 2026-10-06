@@ -79,9 +79,6 @@ vi.mock("@inkway/ui/components/common/inkway-icon", () => ({
 vi.mock("@inkway/ui/components/ui/sonner", () => ({ Toaster: () => null }));
 vi.mock("@inkway/views/locales", () => ({ RESOURCES: { en: {} } }));
 
-vi.mock("./pages/login", () => ({
-  DesktopLoginPage: () => <div data-testid="login-page" />,
-}));
 vi.mock("./pages/auth-recovery", () => ({
   DesktopAuthRecoveryPage: ({
     isRetrying = false,
@@ -130,8 +127,8 @@ vi.mock("./hooks/use-tab-selection-shortcut", () => ({
 vi.mock("./platform/daemon-ipc-bridge", () => ({
   useDaemonIPCBridge: () => {},
 }));
-vi.mock("./platform/daemon-login-sync", () => ({
-  syncDaemonOnLogin: vi.fn(),
+vi.mock("./platform/daemon-local-sync", () => ({
+  syncDaemonForLocalApp: vi.fn(),
 }));
 vi.mock("./platform/i18n-adapter", () => ({
   createDesktopLocaleAdapter: () => ({
@@ -140,15 +137,8 @@ vi.mock("./platform/i18n-adapter", () => ({
     persist: vi.fn(),
   }),
 }));
-vi.mock("./platform/client-usage-reporter", () => ({
-  DesktopClientUsageReporter: () => null,
-}));
 vi.mock("./platform/diagnostic-route-reporter", () => ({
   DiagnosticRouteReporter: () => null,
-}));
-vi.mock("./freeze-flush", () => ({ flushFreezeBreadcrumb: vi.fn() }));
-vi.mock("./platform/auth-session-bridge", () => ({
-  DesktopAuthSessionBridge: () => null,
 }));
 vi.mock("./platform/session-teardown", () => ({
   tearDownOnLogout: vi.fn(),
@@ -181,7 +171,6 @@ beforeEach(() => {
       onCloseActiveTab: () => () => {},
       onInviteOpen: () => () => {},
       onSystemLocaleChanged: () => () => {},
-      reportAuthSession: vi.fn(),
       runtimeConfig: {
         config: { apiUrl: "http://localhost", wsUrl: "ws://localhost" },
         ok: true,

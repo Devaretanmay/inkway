@@ -9,10 +9,6 @@ import { RESOURCES } from "@inkway/views/locales";
 import { getRequestLocale } from "@/lib/request-locale";
 import { HTML_LANG } from "@/lib/html-lang";
 import { SITE_TITLE, TITLE_TEMPLATE } from "@/platform/document-title";
-import {
-  resolveBrowserApiBaseUrl,
-  resolveBrowserWsUrl,
-} from "@/config/runtime-urls";
 import "./globals.css";
 
 // Inter is the Latin UI face. next/font produces a hashed family (`__Inter_xxx`)
@@ -121,8 +117,6 @@ export default async function RootLayout({
 }) {
   const locale = await getRequestLocale();
   const resources = { [locale]: RESOURCES[locale] };
-  const apiBaseUrl = resolveBrowserApiBaseUrl(process.env);
-  const wsUrl = resolveBrowserWsUrl(process.env);
 
   return (
     <html
@@ -153,8 +147,6 @@ export default async function RootLayout({
           <WebProviders
             locale={locale}
             resources={resources}
-            apiBaseUrl={apiBaseUrl}
-            wsUrl={wsUrl}
           >
             {children}
           </WebProviders>

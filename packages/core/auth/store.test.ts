@@ -80,23 +80,12 @@ describe("authStore", () => {
     expect(store.getState().expired).toBe(true);
   });
 
-  // Desktop's deep link writes the token, then verifies it. A rejected token
-  // never leaves "unauthenticated", so an idempotence guard placed before the
-  // credential teardown would return with the invalid token still in storage,
-  // to be replayed at the next launch. The old 401 handler always removed it.
-  it("drops a rejected token even when there was no session to end", async () => {
+  it("drops a rejected local app token even when no identity loaded", () => {
     const storage = makeStorage();
-    const api = {
-      setToken: vi.fn(),
-      getMe: vi.fn().mockRejectedValue(new Error("unauthorized")),
-    } as unknown as ApiClient;
+    const api = makeApi();
     const store = createAuthStore({ api, storage });
     store.setState({ user: null, status: "unauthenticated", isLoading: false });
-
-    await expect(
-      store.getState().loginWithToken("stale-deep-link-token"),
-    ).rejects.toThrow();
-    // Stands in for the api client's 401 hook, which fires inside getMe.
+    storage.setItem("inkway_token", "stale-local-app-token");
     store.getState().sessionExpired();
 
     expect(storage.snapshot().inkway_token).toBeUndefined();
@@ -171,19 +160,13 @@ describe("authStore", () => {
     expect(onLogout).toHaveBeenCalledOnce();
   });
 
-  it("clears the expired notice once the user signs back in", async () => {
-    const storage = makeStorage();
-    const api = {
-      setToken: vi.fn(),
-      getMe: vi.fn().mockResolvedValue(fakeUser),
-    } as unknown as ApiClient;
-    const store = createAuthStore({ api, storage });
-
+  it("clears the expired notice once local identity recovers", () => {
+    const store = createAuthStore({ api: makeApi(), storage: makeStorage() });
     store.setState({ user: fakeUser, status: "authenticated", isLoading: false });
     store.getState().sessionExpired();
     expect(store.getState().expired).toBe(true);
 
-    await store.getState().loginWithToken("fresh-token");
+    store.getState().setUser(fakeUser);
 
     expect(store.getState().status).toBe("authenticated");
     expect(store.getState().expired).toBe(false);

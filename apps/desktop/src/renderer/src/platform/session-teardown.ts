@@ -15,12 +15,11 @@
  * PAT and restarts the daemon whenever the user id changes.
  *
  * Side effects arrive as injected callbacks — the same shape as
- * `daemon-login-sync` — so the difference between the two paths is testable
+ * `daemon-local-sync` — so the difference between the two paths is testable
  * without an Electron window.
  */
 export interface SessionTeardown {
   /** Report the account transition to the main process. */
-  reportAuthSession: (userId: string | null) => void;
   /** Desktop tab layout, which can name workspaces and issues. */
   resetTabs: () => void;
   /** Any pre-workspace overlay left open (invite, onboarding, …). */
@@ -44,7 +43,6 @@ export interface SessionTeardown {
 export async function tearDownOnLogout(t: SessionTeardown): Promise<void> {
   // Report synchronously before the async daemon cleanup, so a rapidly closed
   // main window cannot leave authenticated issue renderers behind.
-  t.reportAuthSession(null);
   t.resetTabs();
   t.closeOverlay();
   t.resetWelcome();
@@ -72,7 +70,6 @@ export async function tearDownOnLogout(t: SessionTeardown): Promise<void> {
  * work, so a UI credential expiring must not take it down.
  */
 export function tearDownOnSessionExpiry(t: SessionTeardown): void {
-  t.reportAuthSession(null);
   t.resetTabs();
   t.closeOverlay();
   t.resetWelcome();

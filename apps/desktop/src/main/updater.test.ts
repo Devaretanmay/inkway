@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { BrowserWindow, WebContents } from "electron";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -175,47 +175,29 @@ describe("setupAutoUpdater", () => {
     rmSync(ctx.userDataPath, { recursive: true, force: true });
   });
 
-  it("enables automatic background updates by default", async () => {
+  it("keeps update checks manual by default", async () => {
     setupAutoUpdater(() => null);
 
     await expect(invokeIpc("updater:get-preferences")).resolves.toEqual({
-      automaticUpdates: true,
+      automaticUpdates: false,
     });
 
-    await vi.advanceTimersByTimeAsync(5_000);
-    expect(ctx.checkForUpdates).toHaveBeenCalledTimes(1);
-  });
-
-  it("skips startup and periodic checks when automatic updates are disabled", async () => {
-    writeFileSync(
-      updaterPreferencesPath(ctx.userDataPath),
-      JSON.stringify({ automaticUpdates: false }),
-    );
-    setupAutoUpdater(() => null);
-
-    // Let the async preference load settle before advancing timers; otherwise
-    // the in-flight readFile can resolve after afterEach() removes the temp
-    // dir, default back to enabled=true, and fire a background check into the
-    // next test's freshly-cleared mock (flake on slow CI).
-    await invokeIpc("updater:get-preferences");
-
     await vi.advanceTimersByTimeAsync(60 * 60 * 1000 + 5_000);
-
     expect(ctx.checkForUpdates).not.toHaveBeenCalled();
   });
 
-  it("persists the automatic update preference and stops future background checks", async () => {
+  it("does not restore background checks from an old enabled preference", async () => {
+    writeFileSync(updaterPreferencesPath(ctx.userDataPath), JSON.stringify({ automaticUpdates: true }));
     setupAutoUpdater(() => null);
+    await invokeIpc("updater:get-preferences");
+    await vi.advanceTimersByTimeAsync(60 * 60 * 1000 + 5_000);
+    expect(ctx.checkForUpdates).not.toHaveBeenCalled();
+    await expect(invokeIpc("updater:get-preferences")).resolves.toEqual({ automaticUpdates: false });
+  });
 
-    await expect(
-      invokeIpc("updater:set-automatic-updates", false),
-    ).resolves.toEqual({ automaticUpdates: false });
-    expect(
-      JSON.parse(
-        readFileSync(updaterPreferencesPath(ctx.userDataPath), "utf-8"),
-      ),
-    ).toEqual({ automaticUpdates: false });
-
+  it("does not enable automatic checks when old renderer asks", async () => {
+    setupAutoUpdater(() => null);
+    await expect(invokeIpc("updater:set-automatic-updates", true)).resolves.toEqual({ automaticUpdates: false });
     await vi.advanceTimersByTimeAsync(60 * 60 * 1000 + 5_000);
     expect(ctx.checkForUpdates).not.toHaveBeenCalled();
   });

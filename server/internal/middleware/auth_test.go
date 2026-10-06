@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/Devaretanmay/inkway/server/internal/auth"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -78,6 +78,42 @@ func TestAuth_MissingHeader(t *testing.T) {
 	}
 	if body := w.Body.String(); body != `{"error":"missing authorization"}`+"\n" {
 		t.Fatalf("unexpected body: %s", body)
+	}
+}
+
+func TestAuth_LocalAppTokenAuthenticatesOnlyTheInternalOwner(t *testing.T) {
+	t.Setenv("INKWAY_LOCAL_MODE", "true")
+	t.Setenv("INKWAY_LOCAL_APP_TOKEN", "local-test-capability")
+	handler := authMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if got := r.Header.Get("X-User-ID"); got != "00000000-0000-4000-8000-000000000001" {
+			t.Fatalf("local owner id = %q", got)
+		}
+		if got := r.Header.Get("X-User-Email"); got != "" {
+			t.Fatalf("unexpected account email = %q", got)
+		}
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	request := httptest.NewRequest("GET", "/api/me", nil)
+	request.Header.Set("Authorization", "Bearer local-test-capability")
+	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, request)
+	if response.Code != http.StatusNoContent {
+		t.Fatalf("local capability status = %d: %s", response.Code, response.Body.String())
+	}
+}
+
+func TestAuth_LocalModeRejectsAccountJWT(t *testing.T) {
+	t.Setenv("INKWAY_LOCAL_MODE", "true")
+	t.Setenv("INKWAY_LOCAL_APP_TOKEN", "local-test-capability")
+	handler := authMiddleware(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {
+		t.Fatal("local mode must not accept account JWTs")
+	}))
+	request := httptest.NewRequest("GET", "/api/me", nil)
+	request.Header.Set("Authorization", "Bearer eyJaccount-session")
+	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, request)
+	if response.Code != http.StatusUnauthorized {
+		t.Fatalf("account JWT status = %d", response.Code)
 	}
 }
 

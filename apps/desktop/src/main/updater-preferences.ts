@@ -3,7 +3,7 @@ import { dirname, join } from "node:path";
 import type { UpdaterPreferences } from "../shared/updater-types";
 
 export const DEFAULT_UPDATER_PREFERENCES: UpdaterPreferences = {
-  automaticUpdates: true,
+  automaticUpdates: false,
 };
 
 export function updaterPreferencesPath(userDataPath: string): string {

@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { CoreProvider } from "@inkway/core/platform";
 import { pickLocale, type SupportedLocale } from "@inkway/core/i18n";
@@ -12,7 +12,6 @@ import { setCurrentWorkspace } from "@inkway/core/platform";
 import { ThemeProvider } from "@inkway/ui/components/common/theme-provider";
 import { InkwayIcon } from "@inkway/ui/components/common/inkway-icon";
 import { Toaster } from "@inkway/ui/components/ui/sonner";
-import { DesktopLoginPage } from "./pages/login";
 import { DesktopAuthRecoveryPage } from "./pages/auth-recovery";
 import { DesktopShell } from "./components/desktop-layout";
 import { UpdateNotification } from "./components/update-notification";
@@ -22,14 +21,10 @@ import { useWindowOverlayStore } from "./stores/window-overlay-store";
 import { useOpenSettingsShortcut } from "./hooks/use-open-settings-shortcut";
 import { useTabSelectionShortcut } from "./hooks/use-tab-selection-shortcut";
 import { useDaemonIPCBridge } from "./platform/daemon-ipc-bridge";
-import { syncDaemonOnLogin } from "./platform/daemon-login-sync";
+import { syncDaemonForLocalApp } from "./platform/daemon-local-sync";
 import { createDesktopLocaleAdapter } from "./platform/i18n-adapter";
-import { captureEvent } from "@inkway/core/analytics";
 import { RESOURCES } from "@inkway/views/locales";
-import { DesktopClientUsageReporter } from "./platform/client-usage-reporter";
 import { DiagnosticRouteReporter } from "./platform/diagnostic-route-reporter";
-import { flushFreezeBreadcrumb } from "./freeze-flush";
-import { DesktopAuthSessionBridge } from "./platform/auth-session-bridge";
 import {
   tearDownOnLogout,
   tearDownOnSessionExpiry,
@@ -52,10 +47,10 @@ const HTML_LANG: Record<SupportedLocale, string> = {
 
 /**
  * Cmd/Ctrl+W: close the active tab. When the last real tab is closed
- * (or no tabs/workspace exist — e.g. login page), close the window.
+ * (or no tabs/workspace exist — for example during startup recovery), close the window.
  *
- * Mounted at the App root so every renderer state — including login,
- * loading, onboarding, and runtime-config errors — has a working Cmd+W
+ * Mounted at the App root so every renderer state — including loading,
+ * onboarding, and runtime-config errors — has a working Cmd+W
  * handler. Without this, states outside the tab shell would swallow the
  * shortcut and do nothing.
  */
@@ -101,7 +96,7 @@ function IssueWindowContent() {
     );
   }
 
-  return user ? <IssueWindow context={context} /> : <DesktopLoginPage />;
+  return user ? <IssueWindow context={context} /> : <LocalServiceRecoveryPage />;
 }
 
 function AppContent() {
@@ -109,15 +104,6 @@ function AppContent() {
   const isLoading = useAuthStore((s) => s.isLoading);
   const authStatus = useAuthStore((s) => s.status);
   const qc = useQueryClient();
-
-  // Deep-link login runs loginWithToken → syncToken → listWorkspaces →
-  // setQueryData sequentially. loginWithToken sets user+isLoading=false
-  // as soon as getMe resolves, which would cause DesktopShell to mount
-  // before the workspace list is hydrated and briefly see `!workspace`.
-  // This local flag keeps the loading screen up until the whole chain
-  // finishes, so IndexRedirect gets a definitive workspace state on
-  // first render.
-  const [bootstrapping, setBootstrapping] = useState(false);
 
   const runtimeConfig = window.desktopAPI.runtimeConfig.ok
     ? window.desktopAPI.runtimeConfig.config
@@ -130,68 +116,30 @@ function AppContent() {
     window.daemonAPI.setTargetApiUrl(runtimeConfig.apiUrl);
   }, [runtimeConfig]);
 
-  // Listen for invite IDs delivered via deep link (inkway://invite/<id>).
-  // We open the overlay regardless of login state — if the user isn't logged
-  // in, InvitePage's queries will fail and render the "not found" state,
-  // which is acceptable; the expected pre-flight happens in the web app
-  // (login + next=/invite/... dance) before the deep link is ever dispatched.
+  // Start the bundled CLI daemon with the local backend capability. This is
+  // installation startup, not account login; the token comes from Electron's
+  // runtime configuration and is never read from browser storage.
   useEffect(() => {
-    return window.desktopAPI.onInviteOpen((invitationId) => {
-      useWindowOverlayStore.getState().open({ type: "invite", invitationId });
-    });
-  }, []);
-
-  // Listen for auth token delivered via deep link (inkway://auth/callback?token=...).
-  // daemonAPI.syncToken is handled separately by the [user] effect below, which
-  // fires whenever a user logs in (deep link, session restore, account switch).
-  useEffect(() => {
-    return window.desktopAPI.onAuthToken(async (token) => {
-      setBootstrapping(true);
-      try {
-        await useAuthStore.getState().loginWithToken(token);
-        // Seed React Query cache with the workspace list so the index-route
-        // redirect (routes.tsx `IndexRedirect`) can resolve the initial
-        // destination without a second fetch. Workspace side-effects
-        // (setCurrentWorkspace, persist namespace) are synced later by
-        // WorkspaceRouteLayout when the URL resolves.
-        const wsList = await api.listWorkspaces();
-        qc.setQueryData(workspaceKeys.list(), wsList);
-      } catch {
-        // Token invalid or expired — user stays on login page
-      } finally {
-        setBootstrapping(false);
-      }
-    });
-  }, [qc]);
-
-  // Sync token and start the daemon whenever the user logs in. The ordering
-  // inside syncDaemonOnLogin is load-bearing — see that module.
-  useEffect(() => {
-    if (!user || !runtimeConfig) return;
-    const token = localStorage.getItem("inkway_token");
-    if (!token) return;
-    const userId = user.id;
+    if (!runtimeConfig || !runtimeConfig.localAppToken) return;
+    const { apiUrl, localAppToken } = runtimeConfig;
     (async () => {
       try {
-        await syncDaemonOnLogin(
+        await syncDaemonForLocalApp(
           window.daemonAPI,
-          runtimeConfig.apiUrl,
-          token,
-          userId,
+          apiUrl,
+          localAppToken,
         );
       } catch (err) {
-        console.error("Failed to sync daemon on login", err);
+        console.error("Failed to sync the local daemon identity", err);
       }
     })();
-  }, [user, runtimeConfig]);
+  }, [runtimeConfig]);
 
-  // When a user who started the session with zero workspaces creates their
+  // When the local owner starts with zero workspaces and creates their
   // first one, restart the daemon so it picks up the new workspace
   // immediately (otherwise workspaceSyncLoop's next 30s tick would be the
   // earliest pickup point). Specifically scoped to "started empty" because
-  // account switches (user A logout → user B login) should not trigger a
-  // daemon restart here — daemon-manager already restarts on user change
-  // via syncToken.
+  // daemon sync already restarts when the local owner token changes.
   const {
     workspaces,
     ready: workspaceListReady,
@@ -295,9 +243,9 @@ function AppContent() {
     }
   }, [workspaces, workspaceListReady]);
 
-  // null = undecided (pre-login or list hasn't settled yet)
-  // true  = session started with zero workspaces; next transition to >=1 triggers restart
-  // false = session started with >=1 workspace, OR we've already restarted; skip
+  // null = undecided (identity or workspace list hasn't settled yet)
+  // true  = local startup had zero workspaces; first workspace triggers restart
+  // false = workspace exists, or restart has already happened
   const sessionStartedEmptyRef = useRef<boolean | null>(null);
   useEffect(() => {
     if (!user) {
@@ -318,7 +266,7 @@ function AppContent() {
   if (authStatus === "recovering") {
     return <DesktopAuthRecoveryPage />;
   }
-  if (isLoading || bootstrapping) {
+  if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
         <InkwayIcon className="size-6 animate-pulse" />
@@ -337,7 +285,20 @@ function AppContent() {
     );
   }
 
-  return user ? <DesktopShell /> : <DesktopLoginPage />;
+  return user ? <DesktopShell /> : <LocalServiceRecoveryPage />;
+}
+
+function LocalServiceRecoveryPage() {
+  return (
+    <div className="flex h-screen items-center justify-center bg-background p-8 text-foreground">
+      <div className="max-w-xl rounded-lg border bg-card p-6 shadow-sm">
+        <h1 className="text-title font-semibold">Inkway could not open its local workspace</h1>
+        <p className="mt-3 text-body text-muted-foreground">
+          Restart Inkway to reconnect to its private local database and server.
+        </p>
+      </div>
+    </div>
+  );
 }
 
 function BlockingRuntimeConfigError({ message }: { message: string }) {
@@ -356,12 +317,8 @@ function BlockingRuntimeConfigError({ message }: { message: string }) {
   );
 }
 
-// Binds the teardown steps to this renderer's real stores and IPC. Which of
-// them each path runs — and why logout stops the daemon while an expiry
-// leaves it running — lives in platform/session-teardown.
+// Binds local identity teardown steps to this renderer's stores and IPC.
 const sessionTeardown: SessionTeardown = {
-  reportAuthSession: (userId) =>
-    window.desktopAPI.reportAuthSession?.(userId),
   resetTabs: () => useTabStore.getState().reset(),
   closeOverlay: () => useWindowOverlayStore.getState().close(),
   resetWelcome: () => useWelcomeStore.getState().reset(),
@@ -392,21 +349,6 @@ export default function App() {
   // Fixed browser-style tab selection is also owned by main so it remains
   // available while focus sits inside editors, inputs, menus, or dialogs.
   useTabSelectionShortcut();
-
-  // Flush a freeze/crash breadcrumb the main process parked from a previous
-  // session. A true hang or process death can't report itself when it happens
-  // (the renderer is blocked or gone), so the main process persists it and we
-  // emit it here on the next boot. The in-thread, recoverable freeze tier is
-  // handled separately by the shared watchdog in CoreProvider.
-  useEffect(
-    () =>
-      flushFreezeBreadcrumb({
-        getLastFreeze: () => window.desktopAPI.getLastFreeze(),
-        ackFreeze: (ts) => window.desktopAPI.ackFreeze(ts),
-        capture: captureEvent,
-      }),
-    [],
-  );
 
   // Stable identity reference so downstream effects (WS reconnect) don't
   // tear down on every parent render.
@@ -466,17 +408,12 @@ export default function App() {
             windowContext.kind === "main" ? handleSessionExpired : undefined
           }
           identity={identity}
+          localAppToken={runtimeConfigResult.config.localAppToken}
           locale={locale}
           resources={resources}
           localeAdapter={localeAdapter}
         >
-          <DesktopAuthSessionBridge />
           {windowContext.kind === "main" && <DiagnosticRouteReporter />}
-          {windowContext.kind === "main" && (
-            <DesktopClientUsageReporter
-              apiUrl={runtimeConfigResult.config.apiUrl}
-            />
-          )}
           {windowContext.kind === "issue" ? (
             <IssueWindowContent />
           ) : (

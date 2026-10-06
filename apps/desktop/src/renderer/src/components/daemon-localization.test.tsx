@@ -55,9 +55,7 @@ describe("Desktop daemon localization with real zh-Hans resources", () => {
     renderInSimplifiedChinese(<DaemonSettingsTab />);
 
     expect(
-      await screen.findByText(
-        "登录时自动启动。",
-      ),
+      await screen.findByText("打开 Inkway 时自动启动。"),
     ).toBeInTheDocument();
     const command = screen.getByText("inkway daemon stop");
     expect(command.closest("p")).toHaveTextContent(/inkway daemon stop。$/);

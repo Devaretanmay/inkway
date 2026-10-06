@@ -41,6 +41,12 @@ function run(command, args, { shell = false, env = process.env } = {}) {
 
 const node = process.execPath;
 run(node, [join(here, "bundle-cli.mjs")]);
+if (process.platform !== "darwin") {
+  console.error("[dev:desktop] the bundled local database runtime is currently supported on macOS only");
+  process.exit(1);
+}
+run(node, [join(here, "bundle-backend.mjs"), "--target-platform", process.platform, "--target-arch", process.arch]);
+run(node, [join(here, "bundle-postgres.mjs")]);
 run(node, [join(here, "brand-dev-electron.mjs")]);
 
 const isWin = process.platform === "win32";

@@ -56,10 +56,6 @@ func TestGetConfigIncludesRuntimeAuthConfig(t *testing.T) {
 	testHandler.Storage = &mockStorage{}
 	defer func() { testHandler.Storage = origStorage }()
 
-	t.Setenv("ALLOW_SIGNUP", "false")
-	t.Setenv("GOOGLE_CLIENT_ID", "google-client-id")
-	t.Setenv("POSTHOG_API_KEY", "phc_test")
-	t.Setenv("POSTHOG_HOST", "https://eu.i.posthog.com")
 	t.Setenv("INKWAY_DAEMON_SERVER_URL", "")
 	t.Setenv("INKWAY_PUBLIC_URL", "https://api.example.com/")
 	t.Setenv("INKWAY_APP_URL", "https://app.example.com/")
@@ -79,21 +75,6 @@ func TestGetConfigIncludesRuntimeAuthConfig(t *testing.T) {
 
 	if cfg.CdnDomain != "cdn.example.com" {
 		t.Fatalf("cdn_domain: want cdn.example.com, got %q", cfg.CdnDomain)
-	}
-	if cfg.AllowSignup {
-		t.Fatalf("allow_signup: want false, got true")
-	}
-	if cfg.GoogleClientID != "google-client-id" {
-		t.Fatalf("google_client_id: want google-client-id, got %q", cfg.GoogleClientID)
-	}
-	if cfg.PosthogKey != "phc_test" {
-		t.Fatalf("posthog_key: want phc_test, got %q", cfg.PosthogKey)
-	}
-	if cfg.PosthogHost != "https://eu.i.posthog.com" {
-		t.Fatalf("posthog_host: want https://eu.i.posthog.com, got %q", cfg.PosthogHost)
-	}
-	if cfg.AnalyticsEnvironment != "dev" {
-		t.Fatalf("analytics_environment: want dev, got %q", cfg.AnalyticsEnvironment)
 	}
 	if cfg.WorkspaceCreationDisabled {
 		t.Fatalf("workspace_creation_disabled: want false by default, got true")
@@ -207,118 +188,6 @@ func TestGetConfigUsesFrontendOriginForSameOriginDaemonSetup(t *testing.T) {
 	}
 }
 
-func TestGetConfigOmitsOfficialCloudDaemonSetup(t *testing.T) {
-	t.Setenv("INKWAY_PUBLIC_URL", "https://api.multica.ai")
-	t.Setenv("INKWAY_APP_URL", "")
-	t.Setenv("FRONTEND_ORIGIN", "https://multica.ai")
-
-	req := httptest.NewRequest(http.MethodGet, "/api/config", nil)
-	w := httptest.NewRecorder()
-
-	testHandler.GetConfig(w, req)
-	if w.Code != http.StatusOK {
-		t.Fatalf("GetConfig: expected 200, got %d: %s", w.Code, w.Body.String())
-	}
-
-	var cfg AppConfig
-	if err := json.Unmarshal(w.Body.Bytes(), &cfg); err != nil {
-		t.Fatalf("decode config: %v", err)
-	}
-	if cfg.DaemonServerURL != "" {
-		t.Fatalf("daemon_server_url: want omitted for cloud, got %q", cfg.DaemonServerURL)
-	}
-	if cfg.DaemonAppURL != "" {
-		t.Fatalf("daemon_app_url: want omitted for cloud, got %q", cfg.DaemonAppURL)
-	}
-}
-
-// TestGetConfigOmitsCloudDaemonSetupWithoutPublicURL reproduces the production
-// regression behind the broken "Add a computer" command: the official cloud
-// frontend is multica.ai, but the deployment does not set INKWAY_PUBLIC_URL to
-// the api host. Previously this fell through to the same-origin branch and
-// emitted daemon_server_url=https://multica.ai, which the dialog turned into
-// `inkway setup self-host --server-url https://multica.ai` — pointing the
-// daemon's backend at the frontend (no /health, no WebSocket proxy). The
-// official cloud must be recognised by its frontend host alone so the daemon
-// setup URLs are omitted and the dialog falls back to `inkway setup`.
-func TestGetConfigOmitsCloudDaemonSetupWithoutPublicURL(t *testing.T) {
-	t.Setenv("INKWAY_PUBLIC_URL", "")
-	t.Setenv("INKWAY_APP_URL", "")
-	t.Setenv("FRONTEND_ORIGIN", "https://multica.ai")
-
-	req := httptest.NewRequest(http.MethodGet, "/api/config", nil)
-	w := httptest.NewRecorder()
-
-	testHandler.GetConfig(w, req)
-	if w.Code != http.StatusOK {
-		t.Fatalf("GetConfig: expected 200, got %d: %s", w.Code, w.Body.String())
-	}
-
-	var cfg AppConfig
-	if err := json.Unmarshal(w.Body.Bytes(), &cfg); err != nil {
-		t.Fatalf("decode config: %v", err)
-	}
-	if cfg.DaemonServerURL != "" {
-		t.Fatalf("daemon_server_url: want omitted for official cloud, got %q", cfg.DaemonServerURL)
-	}
-	if cfg.DaemonAppURL != "" {
-		t.Fatalf("daemon_app_url: want omitted for official cloud, got %q", cfg.DaemonAppURL)
-	}
-}
-
-// TestGetConfigOmitsCloudDaemonSetupForConfiguredAppURL covers the official
-// cloud frontend when it is configured through INKWAY_APP_URL.
-func TestGetConfigOmitsCloudDaemonSetupForConfiguredAppURL(t *testing.T) {
-	t.Setenv("INKWAY_PUBLIC_URL", "")
-	t.Setenv("INKWAY_APP_URL", "https://multica.ai")
-	t.Setenv("FRONTEND_ORIGIN", "")
-
-	req := httptest.NewRequest(http.MethodGet, "/api/config", nil)
-	w := httptest.NewRecorder()
-
-	testHandler.GetConfig(w, req)
-	if w.Code != http.StatusOK {
-		t.Fatalf("GetConfig: expected 200, got %d: %s", w.Code, w.Body.String())
-	}
-
-	var cfg AppConfig
-	if err := json.Unmarshal(w.Body.Bytes(), &cfg); err != nil {
-		t.Fatalf("decode config: %v", err)
-	}
-	if cfg.DaemonServerURL != "" {
-		t.Fatalf("daemon_server_url: want omitted for official cloud, got %q", cfg.DaemonServerURL)
-	}
-	if cfg.DaemonAppURL != "" {
-		t.Fatalf("daemon_app_url: want omitted for official cloud, got %q", cfg.DaemonAppURL)
-	}
-}
-
-func TestURLHostEqualsCanonicalizesCommonHostForms(t *testing.T) {
-	tests := []struct {
-		name string
-		raw  string
-		want bool
-	}{
-		{name: "full URL", raw: "https://api.multica.ai", want: true},
-		{name: "bare host", raw: "api.multica.ai", want: true},
-		{name: "host port", raw: "api.multica.ai:8080", want: true},
-		{name: "trailing dot", raw: "https://api.multica.ai.", want: true},
-		{name: "different host", raw: "https://evil.example", want: false},
-		{name: "empty", raw: "", want: false},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := urlHostEquals(tt.raw, "api.multica.ai"); got != tt.want {
-				t.Fatalf("urlHostEquals(%q): want %v, got %v", tt.raw, tt.want, got)
-			}
-		})
-	}
-}
-
-// TestGetConfigExposesWorkspaceCreationDisabled verifies that the self-host
-// gate added by #3433 surfaces to the frontend through /api/config so the UI
-// can hide every "Create workspace" affordance.
 func TestGetConfigExposesWorkspaceCreationDisabled(t *testing.T) {
 	origStorage := testHandler.Storage
 	testHandler.Storage = &mockStorage{}
@@ -385,37 +254,6 @@ func TestGetConfigExposesServerVersion(t *testing.T) {
 // suppressed on the managed cloud (frontend host multica.ai) even when the
 // binary is stamped, while a self-hosted frontend origin still reports it. The
 // managed cloud is continuously deployed, so its users don't need the row.
-func TestGetConfigOmitsServerVersionOnOfficialCloud(t *testing.T) {
-	origCfg := testHandler.cfg
-	defer func() { testHandler.cfg = origCfg }()
-	testHandler.cfg.ServerVersion = "1.2.3"
-
-	req := httptest.NewRequest(http.MethodGet, "/api/config", nil)
-
-	// Official cloud: frontend host multica.ai -> version omitted.
-	t.Setenv("INKWAY_APP_URL", "https://multica.ai")
-	t.Setenv("FRONTEND_ORIGIN", "")
-	w := httptest.NewRecorder()
-	testHandler.GetConfig(w, req)
-	var cfg AppConfig
-	if err := json.Unmarshal(w.Body.Bytes(), &cfg); err != nil {
-		t.Fatalf("decode config: %v", err)
-	}
-	if cfg.ServerVersion != "" {
-		t.Fatalf("server_version: want omitted on official cloud, got %q", cfg.ServerVersion)
-	}
-
-	// Self-hosted: operator's own frontend origin -> version reported.
-	t.Setenv("INKWAY_APP_URL", "https://inkway.self-hosted.example")
-	w = httptest.NewRecorder()
-	testHandler.GetConfig(w, req)
-	if err := json.Unmarshal(w.Body.Bytes(), &cfg); err != nil {
-		t.Fatalf("decode config: %v", err)
-	}
-	if cfg.ServerVersion != "1.2.3" {
-		t.Fatalf("server_version: want 1.2.3 on self-hosted, got %q", cfg.ServerVersion)
-	}
-}
 
 func TestGetConfigExposesFrontendFeatureFlags(t *testing.T) {
 	h := &Handler{}

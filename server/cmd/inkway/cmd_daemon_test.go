@@ -214,23 +214,23 @@ func TestPrintDaemonStatusOmitsVersionWhenMissing(t *testing.T) {
 }
 
 // TestRequireDaemonAuth pins the fail-fast contract for `daemon start`: a
-// user who never ran `inkway login` must get an immediate, actionable error
+// user with no local runtime credential must get an immediate, actionable error
 // from the parent process instead of a 45s health poll against a child that
 // already died with "not authenticated".
 func TestRequireDaemonAuth(t *testing.T) {
-	t.Run("not logged in", func(t *testing.T) {
+	t.Run("no runtime credential", func(t *testing.T) {
 		t.Setenv("HOME", t.TempDir())
 		err := requireDaemonAuth("")
-		if err == nil || !strings.Contains(err.Error(), "inkway login") {
-			t.Fatalf("requireDaemonAuth() = %v, want error mentioning 'inkway login'", err)
+		if err == nil || !strings.Contains(err.Error(), "runtime credential") {
+			t.Fatalf("requireDaemonAuth() = %v, want error mentioning 'local runtime credential'", err)
 		}
 	})
 
-	t.Run("not logged in with profile", func(t *testing.T) {
+	t.Run("no runtime credential with profile", func(t *testing.T) {
 		t.Setenv("HOME", t.TempDir())
 		err := requireDaemonAuth("staging")
-		if err == nil || !strings.Contains(err.Error(), "inkway login --profile staging") {
-			t.Fatalf("requireDaemonAuth(staging) = %v, want error mentioning profile login hint", err)
+		if err == nil || !strings.Contains(err.Error(), "runtime credential") {
+			t.Fatalf("requireDaemonAuth(staging) = %v, want missing-credential error", err)
 		}
 	})
 
@@ -265,8 +265,8 @@ func TestDaemonStartBackgroundUnauthenticatedFailsFast(t *testing.T) {
 	err := runDaemonStart(cmd, nil)
 	elapsed := time.Since(start)
 
-	if err == nil || !strings.Contains(err.Error(), "inkway login --profile authtest-fail-fast") {
-		t.Fatalf("runDaemonStart() = %v, want not-logged-in error with login hint", err)
+	if err == nil || !strings.Contains(err.Error(), "runtime credential") {
+		t.Fatalf("runDaemonStart() = %v, want missing-credential error", err)
 	}
 	if elapsed > 10*time.Second {
 		t.Fatalf("runDaemonStart took %s, want fail-fast before the readiness wait", elapsed)
@@ -337,13 +337,13 @@ func TestDaemonStartupFailureError(t *testing.T) {
 	t.Run("token rejected", func(t *testing.T) {
 		t.Parallel()
 		logPath := writeLog(t, "daemon.log", `18:29:58.416 INF authenticated component=daemon
-18:29:58.425 WRN auth token rejected by server — run 'inkway login' to re-authenticate component=daemon error="POST /api/tokens/current/renew returned 401: {\"error\":\"invalid token\"}"
+18:29:58.425 WRN auth token rejected by server — run 'local runtime credential' to re-authenticate component=daemon error="POST /api/tokens/current/renew returned 401: {\"error\":\"invalid token\"}"
 list workspaces: GET /api/workspaces returned 401: {"error":"invalid token"}
 `)
 		err := daemonStartupFailureError(daemonStartupLogs{logPath: logPath}, nil, "", "http://localhost:8080")
 		msg := err.Error()
-		if !strings.Contains(msg, "rejected your login token") || !strings.Contains(msg, "inkway login") {
-			t.Fatalf("error = %q, want token-rejected reason with login hint", msg)
+		if !strings.Contains(msg, "local runtime credential was rejected") || !strings.Contains(msg, "Reopen Inkway") {
+			t.Fatalf("error = %q, want local-credential recovery guidance", msg)
 		}
 		if strings.Contains(msg, "component=daemon") {
 			t.Fatalf("error = %q, want no raw log lines for a classified failure", msg)
@@ -354,8 +354,8 @@ list workspaces: GET /api/workspaces returned 401: {"error":"invalid token"}
 		t.Parallel()
 		logPath := writeLog(t, "daemon.log", "WRN auth token rejected by server error=\"returned 401\"\n")
 		err := daemonStartupFailureError(daemonStartupLogs{logPath: logPath}, nil, "staging", "http://localhost:8080")
-		if !strings.Contains(err.Error(), "inkway login --profile staging") {
-			t.Fatalf("error = %q, want profile-scoped login hint", err)
+		if !strings.Contains(err.Error(), "runtime credential") {
+			t.Fatalf("error = %q, want local-credential recovery guidance", err)
 		}
 	})
 
@@ -454,7 +454,7 @@ func TestDaemonStartBackgroundReportsEarlyChildExit(t *testing.T) {
 }
 
 // TestDaemonRestartUnauthenticatedFailsBeforeStopping pins the ordering that
-// makes `daemon restart` safe when the user is not logged in: the auth check
+// makes `daemon restart` safe when the user is no runtime credential: the auth check
 // must run BEFORE the stop phase. Otherwise restart kills the running daemon
 // and only then discovers it cannot start a replacement, leaving the user
 // with no daemon at all.
@@ -462,14 +462,17 @@ func TestDaemonRestartUnauthenticatedFailsBeforeStopping(t *testing.T) {
 	t.Setenv("HOME", t.TempDir())
 
 	const profile = "restart-authtest"
+	if err := cli.SaveCLIConfigForProfile(cli.CLIConfig{ServerURL: "http://127.0.0.1:8080"}, profile); err != nil {
+		t.Fatalf("SaveCLIConfigForProfile: %v", err)
+	}
 
 	// Fake running daemon on the profile's health port. Any shutdown attempt
 	// means restart touched the daemon before checking auth.
 	stopped := fakeRunningDaemon(t, profile)
 
 	err := runDaemonRestart(newRestartTestCmd(t, profile), nil)
-	if err == nil || !strings.Contains(err.Error(), "inkway login --profile restart-authtest") {
-		t.Fatalf("runDaemonRestart() = %v, want not-logged-in error with login hint", err)
+	if err == nil || !strings.Contains(err.Error(), "runtime credential") {
+		t.Fatalf("runDaemonRestart() = %v, want missing-credential error", err)
 	}
 	select {
 	case <-stopped:
@@ -539,11 +542,11 @@ func TestDaemonRestartRejectedTokenFailsBeforeStopping(t *testing.T) {
 	stopped := fakeRunningDaemon(t, profile)
 
 	err := runDaemonRestart(newRestartTestCmd(t, profile), nil)
-	if err == nil || !strings.Contains(err.Error(), "rejected your login token") {
+	if err == nil || !strings.Contains(err.Error(), "rejected the local runtime credential") {
 		t.Fatalf("runDaemonRestart() = %v, want token-rejected error", err)
 	}
-	if !strings.Contains(err.Error(), "inkway login --profile restart-401test") {
-		t.Fatalf("runDaemonRestart() = %v, want profile login hint", err)
+	if !strings.Contains(err.Error(), "Reopen Inkway") {
+		t.Fatalf("runDaemonRestart() = %v, want local-credential recovery guidance", err)
 	}
 	select {
 	case <-stopped:

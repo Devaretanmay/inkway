@@ -90,11 +90,6 @@ detached_feedback AS (
     SET workspace_id = NULL
     WHERE feedback.workspace_id = $1
 ),
-detached_client_usage AS (
-    UPDATE client_usage_daily
-    SET workspace_id = NULL
-    WHERE client_usage_daily.workspace_id = $1
-),
 deleted_share_links AS (
     DELETE FROM workspace_share_link
     WHERE workspace_share_link.workspace_id = $1

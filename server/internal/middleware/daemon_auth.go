@@ -2,15 +2,17 @@ package middleware
 
 import (
 	"context"
+	"crypto/subtle"
 	"errors"
 	"log/slog"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/Devaretanmay/inkway/server/internal/auth"
 	db "github.com/Devaretanmay/inkway/server/pkg/db/generated"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 // Daemon context keys.
@@ -28,6 +30,7 @@ const (
 	DaemonAuthPathPAT         = "pat"
 	DaemonAuthPathCloudPAT    = "cloud_pat"
 	DaemonAuthPathJWT         = "jwt"
+	DaemonAuthPathLocal       = "local_capability"
 )
 
 // DaemonWorkspaceIDFromContext returns the workspace ID set by DaemonAuth middleware.
@@ -108,6 +111,17 @@ func DaemonAuth(queries *db.Queries, patCache *auth.PATCache, daemonCache *auth.
 			if tokenString == authHeader {
 				slog.Debug("daemon_auth: invalid format", "path", r.URL.Path)
 				writeError(w, http.StatusUnauthorized, "invalid authorization format")
+				return
+			}
+
+			// Electron's installation capability also authorizes the local
+			// daemon. It is accepted only by an explicitly local server and is
+			// bound to the singleton local owner; it is never a user session.
+			if localToken := os.Getenv("INKWAY_LOCAL_APP_TOKEN"); localToken != "" && strings.EqualFold(strings.TrimSpace(os.Getenv("INKWAY_LOCAL_MODE")), "true") && subtle.ConstantTimeCompare([]byte(tokenString), []byte(localToken)) == 1 {
+				r.Header.Set("X-User-ID", "00000000-0000-4000-8000-000000000001")
+				r.Header.Del("X-User-Email")
+				ctx := context.WithValue(r.Context(), ctxKeyDaemonAuthPath, DaemonAuthPathLocal)
+				next.ServeHTTP(w, r.WithContext(ctx))
 				return
 			}
 

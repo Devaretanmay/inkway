@@ -180,8 +180,8 @@ func taskScopedAuthToken(task Task) (string, error) {
 func taskInkwayEnvironment(task Task, agentName, token, configRoot, workspacesRoot, serverURL string, healthPort, slot int, tempDir string) map[string]string {
 	return map[string]string{
 		"INKWAY_TOKEN":        token,
-		cli.TaskConfigRootEnv:  configRoot,
-		TaskWorkspacesRootEnv:  workspacesRoot,
+		cli.TaskConfigRootEnv: configRoot,
+		TaskWorkspacesRootEnv: workspacesRoot,
 		"INKWAY_SERVER_URL":   serverURL,
 		"INKWAY_DAEMON_PORT":  strconv.Itoa(healthPort),
 		"INKWAY_WORKSPACE_ID": task.WorkspaceID,
@@ -189,9 +189,9 @@ func taskInkwayEnvironment(task Task, agentName, token, configRoot, workspacesRo
 		"INKWAY_AGENT_ID":     task.AgentID,
 		"INKWAY_TASK_ID":      task.ID,
 		"INKWAY_TASK_SLOT":    strconv.Itoa(slot),
-		"TMPDIR":               tempDir,
-		"TMP":                  tempDir,
-		"TEMP":                 tempDir,
+		"TMPDIR":              tempDir,
+		"TMP":                 tempDir,
+		"TEMP":                tempDir,
 	}
 }
 
@@ -386,11 +386,11 @@ type repoCacheBackend interface {
 
 // Daemon is the local agent runtime that polls for and executes tasks.
 type Daemon struct {
-	cfg                     Config
-	client                  *Client
-	repoCache               repoCacheBackend
-	skillCache              *SkillBundleCache
-	logger                  *slog.Logger
+	cfg               Config
+	client            *Client
+	repoCache         repoCacheBackend
+	skillCache        *SkillBundleCache
+	logger            *slog.Logger
 	inkBridge         *ink.Bridge
 	inkTerminalEvents atomic.Uint64
 	inkSnapshotMu     sync.Mutex
@@ -723,7 +723,7 @@ func New(cfg Config, logger *slog.Logger) *Daemon {
 		repoCache:                   repocache.New(cacheRoot, logger),
 		skillCache:                  NewSkillBundleCache(skillCacheRoot),
 		logger:                      logger,
-		inkBridge:             ink.New(logger),
+		inkBridge:                   ink.New(logger),
 		terminalReports:             newTerminalReportStore(cfg),
 		terminalReportWakeup:        make(chan struct{}, 1),
 		terminalReportNow:           time.Now,
@@ -2238,15 +2238,11 @@ func (d *Daemon) resolveAuth() error {
 		return fmt.Errorf("load CLI config: %w", err)
 	}
 	if cfg.Token == "" {
-		loginHint := "'inkway login'"
-		if d.cfg.Profile != "" {
-			loginHint = fmt.Sprintf("'inkway login --profile %s'", d.cfg.Profile)
-		}
-		d.logger.Warn("not authenticated — run " + loginHint + " to authenticate, then restart the daemon")
-		return fmt.Errorf("not authenticated: run %s first", loginHint)
+		d.logger.Warn("no local runtime credential is configured; reopen Inkway to restore the daemon connection")
+		return fmt.Errorf("no local runtime credential is configured")
 	}
 	d.client.SetToken(cfg.Token)
-	d.logger.Info("authenticated")
+	d.logger.Info("local runtime credential loaded")
 	d.logger.Debug("auth token loaded", "profile", d.cfg.Profile, "token_len", len(cfg.Token))
 	return nil
 }
@@ -4023,15 +4019,9 @@ func (d *Daemon) ensureRepoReady(ctx context.Context, workspaceID, repoURL strin
 // not push the token out of the renewal window.
 const DefaultTokenRenewalInterval = 3 * 24 * time.Hour
 
-// preflightAuth runs the two auth-sensitive startup steps in their
-// required order: a synchronous PAT renewal first, then the initial
-// workspace sync. The order matters — running tryRenewToken before any
-// other API call is what surfaces a user-actionable "run inkway login"
-// WARN when the PAT is already revoked or expired. If we let the
-// workspace sync go first, its 401 would short-circuit Run before the
-// renewal loop's first tick ever fires, and the operator would see only
-// a generic auth failure in the workspace-sync log with no hint that
-// re-login is the fix.
+// preflightAuth renews the daemon's local runtime credential before the
+// initial workspace sync, so a rejected credential has one clear recovery
+// message instead of a generic sync failure.
 //
 // The renewal is best-effort: tryRenewToken logs and returns, never
 // propagating errors. preflightAuth's exit status is driven entirely by
@@ -4041,7 +4031,9 @@ const DefaultTokenRenewalInterval = 3 * 24 * time.Hour
 // before creating their first workspace, and workspaceSyncLoop will
 // register runtimes once one appears.
 func (d *Daemon) preflightAuth(ctx context.Context) error {
-	d.tryRenewToken(ctx)
+	if !isLocalAppCapability(d.client.Token()) {
+		d.tryRenewToken(ctx)
+	}
 	err := d.syncWorkspacesFromAPI(ctx, false)
 	if d.startupMayProceedWithoutRuntimes(err) {
 		d.logger.Warn("starting with no runtimes registered: an automatic DSH runtime profile install is still running; " +
@@ -4105,8 +4097,8 @@ func (d *Daemon) registerAfterDshProfileInstall(ctx context.Context) {
 //
 // The server is authoritative on the renewal threshold (it sees expires_at;
 // we don't), so this loop is intentionally dumb: call, log, sleep, repeat.
-// On 401 we surface a clear "re-login required" warning because the daemon
-// has no way to recover automatically — but we keep the loop running so the
+// On 401 we surface a local credential recovery warning because the daemon
+// cannot mint a replacement itself — but we keep the loop running so the
 // user sees the same warning on every cycle until they fix it, rather than
 // silently exiting and forcing them to read scrollback to find the cause.
 func (d *Daemon) tokenRenewalLoop(ctx context.Context) {
@@ -4128,17 +4120,16 @@ func (d *Daemon) tokenRenewalLoop(ctx context.Context) {
 // handle them. Failures are debug-level except for 401, which gets a
 // user-actionable warning.
 func (d *Daemon) tryRenewToken(ctx context.Context) {
+	if isLocalAppCapability(d.client.Token()) {
+		return
+	}
 	reqCtx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 
 	resp, err := d.client.RenewToken(reqCtx)
 	if err != nil {
 		if isUnauthorizedError(err) {
-			loginHint := "'inkway login'"
-			if d.cfg.Profile != "" {
-				loginHint = fmt.Sprintf("'inkway login --profile %s'", d.cfg.Profile)
-			}
-			d.logger.Warn("auth token rejected by server — run "+loginHint+" to re-authenticate, then restart the daemon", "error", err)
+			d.logger.Warn("local runtime credential rejected by server; reopen Inkway to refresh the daemon credential", "error", err)
 			return
 		}
 		d.logger.Debug("token renewal failed; will retry on next cycle", "error", err)
@@ -4149,6 +4140,10 @@ func (d *Daemon) tryRenewToken(ctx context.Context) {
 	} else {
 		d.logger.Debug("auth token not yet eligible for renewal", "expires_at", resp.ExpiresAt)
 	}
+}
+
+func isLocalAppCapability(token string) bool {
+	return strings.HasPrefix(token, "inkway_local_")
 }
 
 // workspaceSyncLoop reconciles the user's workspace membership set. Daemons

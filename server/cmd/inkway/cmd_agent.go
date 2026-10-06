@@ -288,11 +288,6 @@ func newAPIClient(cmd *cobra.Command) (*cli.APIClient, error) {
 	return client, nil
 }
 
-const (
-	defaultCloudServerURL = "https://api.multica.ai"
-	defaultCloudAppURL    = "https://multica.ai"
-)
-
 func tryResolveServerURL(cmd *cobra.Command) string {
 	if val := tryResolveExplicitServerURL(cmd); val != "" {
 		return val
@@ -303,23 +298,28 @@ func tryResolveServerURL(cmd *cobra.Command) string {
 	return tryResolveProfileServerURL(cmd)
 }
 
-// tryResolveHumanServerURL is reserved for a human/local command after it has
-// passed requireHumanLocalCommand. Unlike the general resolver, a stale
-// INKWAY_DAEMON_PORT in a host/container environment must not hide the human
-// profile that login is explicitly meant to update.
-func tryResolveHumanServerURL(cmd *cobra.Command) string {
-	if val := tryResolveExplicitServerURL(cmd); val != "" {
-		return val
-	}
-	return tryResolveProfileServerURL(cmd)
-}
-
 func tryResolveExplicitServerURL(cmd *cobra.Command) string {
 	val := cli.FlagOrEnv(cmd, "server-url", "INKWAY_SERVER_URL", "")
 	if val == "" {
 		return ""
 	}
 	return normalizeAPIBaseURL(val)
+}
+
+// resolveToken supplies the local daemon/CLI credential. The desktop app
+// writes its launch-scoped capability into INKWAY_TOKEN for managed agent
+// subprocesses; interactive commands may use their explicitly configured
+// profile token.
+func resolveToken(cmd *cobra.Command) string {
+	if value := strings.TrimSpace(os.Getenv("INKWAY_TOKEN")); value != "" {
+		return value
+	}
+	if inDaemonManagedExecutionContext() {
+		return ""
+	}
+	profile := resolveProfile(cmd)
+	cfg, _ := cli.LoadCLIConfigForProfile(profile)
+	return cfg.Token
 }
 
 func tryResolveProfileServerURL(cmd *cobra.Command) string {
@@ -341,23 +341,7 @@ func resolveServerURL(cmd *cobra.Command) string {
 }
 
 func missingServerConfigMessage() string {
-	return fmt.Sprintf("No server configured. Run 'inkway setup' first%s.", daemonPortOnlyContextHint())
-}
-
-func resolveHumanServerURL(cmd *cobra.Command) string {
-	if val := tryResolveHumanServerURL(cmd); val != "" {
-		return val
-	}
-	fmt.Fprintln(os.Stderr, "No server configured. Run 'inkway setup' first.")
-	os.Exit(1)
-	return "" // unreachable
-}
-
-func resolveLoginTokenServerURL(cmd *cobra.Command) string {
-	if val := tryResolveHumanServerURL(cmd); val != "" {
-		return val
-	}
-	return defaultCloudServerURL
+	return fmt.Sprintf("No server configured. Set --server-url, INKWAY_SERVER_URL, or the profile server_url with 'inkway config set server_url <url>'%s.", daemonPortOnlyContextHint())
 }
 
 func normalizeAPIBaseURL(raw string) string {

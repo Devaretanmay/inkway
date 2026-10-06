@@ -15,6 +15,14 @@ Local tools such as Claude Code, Codex, and OpenCode use their own sign-in and d
 
 Ink is built into Inkway. Inks are verified local decisions learned by the Ink engine; they serve only after the evidence supports a local decision.
 
+## Download Inkway Alpha
+
+macOS Apple Silicon builds are available from [GitHub Releases](https://github.com/Devaretanmay/inkway/releases).
+
+Inkway is currently ad-hoc signed and not Apple-notarized, so macOS may require one manual approval on first launch.
+
+See [Install Inkway on macOS](docs/install-macos.md) for the exact steps and checksum verification.
+
 ## Develop Inkway
 
 Requirements: macOS or Linux, Docker with Compose, Go (version in `server/go.mod`), Node.js 22+, and pnpm 10.28.2.

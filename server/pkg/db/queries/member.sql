@@ -31,7 +31,7 @@ DELETE FROM member WHERE id = $1;
 
 -- name: ListMembersWithUser :many
 SELECT m.id, m.workspace_id, m.user_id, m.role, m.created_at,
-       u.name as user_name, u.email as user_email, u.avatar_url as user_avatar_url
+       u.name as user_name, COALESCE(u.email, '') as user_email, u.avatar_url as user_avatar_url
 FROM member m
 JOIN "user" u ON u.id = m.user_id
 WHERE m.workspace_id = $1

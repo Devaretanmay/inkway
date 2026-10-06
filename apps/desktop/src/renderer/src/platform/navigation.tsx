@@ -4,7 +4,6 @@ import {
   type LinkClickIntent,
   type NavigationAdapter,
 } from "@inkway/views/navigation";
-import { useAuthStore } from "@inkway/core/auth";
 import { isReservedSlug } from "@inkway/core/paths";
 import {
   useTabStore,
@@ -188,7 +187,7 @@ export function DesktopNavigationProvider({
     () => ({
       push: (path: string) => {
         if (path === "/login") {
-          useAuthStore.getState().logout();
+          useTabStore.getState().navigateActiveSession("/issues");
           return;
         }
         if (tryRouteToOverlay(path)) return;

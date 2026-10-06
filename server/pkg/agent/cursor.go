@@ -252,6 +252,14 @@ func (b *cursorBackend) Execute(ctx context.Context, prompt string, opts ExecOpt
 				})
 
 			case "result":
+				// A cancelled Cursor process can race shutdown: killing its
+				// background tools may let the CLI emit a success result while its
+				// stdout is closing. Caller cancellation wins when it happened
+				// before we observed this terminal event; otherwise shutdown can
+				// turn an interrupted run into a false completion.
+				if runCtx.Err() != nil {
+					break scanLoop
+				}
 				resultSeen = true
 				// Publish the decided outcome BEFORE cleanup. Close() can block
 				// on the tracker lock behind a tool watchdog Interrupt already in

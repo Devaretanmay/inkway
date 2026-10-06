@@ -4,6 +4,7 @@ import {
   readFile,
   writeFile,
   mkdir,
+  chmod,
   rm,
   open,
   stat,
@@ -51,7 +52,6 @@ import {
 } from "./daemon-os";
 import {
   classifyAuthProbe,
-  isAuthStatusError,
   type AuthProbeResult,
 } from "./daemon-auth-probe";
 
@@ -108,11 +108,9 @@ let externalDaemonObserved = false;
 const recoveryPolicy = new DaemonRecoveryPolicy();
 const lifecycleOperations = new DaemonOperationGate();
 
-// Auth-probe state for the current start attempt. When a start fails to reach
-// "running", we probe the daemon's token once (after AUTH_PROBE_GRACE_MS) to
-// decide whether the cause is an expired/invalid login. `authExpired` is sticky
-// until the next start attempt or a successful /health, so the UI keeps showing
-// the re-login prompt instead of flapping back to "starting". See #3512.
+// Credential-probe state for the current start attempt. When a start fails to
+// reach "running", probe its local runtime credential once after the grace
+// period so the UI can offer recovery instead of looping in Starting.
 let startingSince: number | null = null;
 let authProbeDone = false;
 let authExpired = false;
@@ -122,24 +120,6 @@ let authExpired = false;
 // may try to write concurrently; chaining them avoids interleaved writes
 // corrupting the JSON.
 let configWriteChain: Promise<void> = Promise.resolve();
-
-async function readProfileUserId(profile: string): Promise<string | null> {
-  try {
-    const raw = await readFile(profileUserIdPath(profile), "utf-8");
-    const trimmed = raw.trim();
-    return trimmed || null;
-  } catch {
-    return null;
-  }
-}
-
-async function writeProfileUserId(
-  profile: string,
-  userId: string,
-): Promise<void> {
-  await mkdir(profileDir(profile), { recursive: true });
-  await writeFile(profileUserIdPath(profile), userId, "utf-8");
-}
 
 async function removeProfileUserId(profile: string): Promise<void> {
   try {
@@ -251,12 +231,15 @@ async function writeProfileConfig(
   cfg: Record<string, unknown>,
 ): Promise<void> {
   const op = async () => {
-    await mkdir(profileDir(profile), { recursive: true });
+    const dir = profileDir(profile);
+    await mkdir(dir, { recursive: true, mode: 0o700 });
+    await chmod(dir, 0o700);
     await writeFile(
       profileConfigPath(profile),
       JSON.stringify(cfg, null, 2),
-      "utf-8",
+      { encoding: "utf-8", mode: 0o600 },
     );
+    await chmod(profileConfigPath(profile), 0o600);
   };
   const next = configWriteChain.catch(() => {}).then(op);
   configWriteChain = next.catch(() => {});
@@ -276,7 +259,7 @@ async function resolveActiveProfile(): Promise<ActiveProfile | null> {
   const target = targetApiBaseUrl;
   if (!target) return null;
 
-  const name = deriveProfileName(target);
+  const name = deriveProfileName(target, process.env.DESKTOP_APP_SUFFIX ?? "inkway");
   const cfg = await readProfileConfig(name);
 
   if (cfg.server_url !== target) {
@@ -346,7 +329,7 @@ async function fetchHealth(): Promise<DaemonStatus> {
       Date.now() - startingSince >= AUTH_PROBE_GRACE_MS
     ) {
       authProbeDone = true;
-      if ((await probeTokenValidity(active.name)) === "auth_expired") {
+      if ((await probeTokenValidity(active.name)) === "credential_expired") {
         authExpired = true;
       }
     }
@@ -354,7 +337,7 @@ async function fetchHealth(): Promise<DaemonStatus> {
     // currentState flips away from "starting") until the next start attempt or
     // a successful /health clears the flag.
     if (authExpired) {
-      return { state: "auth_expired", profile: active.name };
+      return { state: "credential_expired", profile: active.name };
     }
     // The daemon binds /health before preflight finishes and self-reports
     // "starting" until it's ready. Trust that over our own currentState, so a
@@ -421,7 +404,7 @@ async function fetchHealth(): Promise<DaemonStatus> {
 
 function findCliOnPath(): string | null {
   const candidates =
-    process.platform === "win32" ? ["inkway.exe", "multica.exe"] : ["inkway", "multica"];
+    process.platform === "win32" ? ["inkway.exe"] : ["inkway"];
   const paths = (process.env["PATH"] ?? "").split(
     process.platform === "win32" ? ";" : ":",
   );
@@ -643,60 +626,9 @@ async function ensureRunningDaemonVersionMatches(): Promise<
   }
 }
 
-/**
- * Exchange the user's JWT for a long-lived PAT via POST /api/tokens. The
- * daemon needs a PAT (or `mul_` / `mdt_` token) because JWTs expire in 30
- * days and signatures are tied to a specific backend instance.
- */
-async function mintPat(jwt: string): Promise<string> {
-  if (!targetApiBaseUrl) {
-    throw new Error("mint PAT: target API URL not set");
-  }
-  const url = `${targetApiBaseUrl.replace(/\/+$/, "")}/api/tokens`;
-  const res = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${jwt}`,
-    },
-    // Omit expires_in_days → server treats as null → non-expiring PAT.
-    body: JSON.stringify({ name: "Inkway Desktop" }),
-  });
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    // Attach the status so callers can tell a genuine auth rejection (401 — the
-    // session token is dead) apart from a transient failure (5xx, etc.) without
-    // string-matching the message.
-    throw Object.assign(
-      new Error(`mint PAT failed: ${res.status} ${res.statusText} ${body}`),
-      { status: res.status },
-    );
-  }
-  const data = (await res.json()) as { token?: unknown };
-  if (typeof data.token !== "string" || !data.token.startsWith("mul_")) {
-    throw new Error("mint PAT: response missing token");
-  }
-  return data.token;
-}
-
-/**
- * Ensure the active profile's config.json has a usable token for the daemon.
- *
- * - Input from the renderer is the user's JWT (from localStorage) plus the
- *   current user's id, so we can detect session changes.
- * - If the profile already has a cached PAT (`mul_...`) AND the sidecar user
- *   id matches the caller, reuse it — minting fresh on every launch would
- *   accumulate garbage in the user's tokens page.
- * - On user mismatch (or first run) call POST /api/tokens with the JWT to
- *   mint a fresh PAT, overwriting any stale cached PAT. This is the critical
- *   path: without it, a previous user's PAT would be used by a new session.
- * - If the caller happens to pass a PAT directly, write it through.
- * - Reports a user mismatch to the caller; the IPC boundary owns the gated
- *   restart so internal callers such as reauthenticate never re-enter it.
- */
+/** Store Electron's loopback capability for the local CLI daemon. */
 async function syncToken(
   tokenFromRenderer: string,
-  userId: string,
 ): Promise<{ active: ActiveProfile; userChanged: boolean }> {
   const active = await ensureActiveProfile();
   if (!active) {
@@ -705,64 +637,19 @@ async function syncToken(
     // reaching this branch is a real error rather than a normal startup race.
     throw new Error("daemon profile is not resolved yet; token sync skipped");
   }
+  const apiUrl = targetApiBaseUrl ? new URL(targetApiBaseUrl) : null;
+  if (!apiUrl || !["127.0.0.1", "localhost", "::1"].includes(apiUrl.hostname)) {
+    throw new Error("Inkway daemon credentials may only target the local backend");
+  }
+  if (!/^inkway_local_[A-Za-z0-9_-]{40,}$/.test(tokenFromRenderer)) {
+    throw new Error("local backend capability is missing or invalid");
+  }
   const config = await readProfileConfig(active.name);
-  const previousUserId = await readProfileUserId(active.name);
-  const userChanged = Boolean(previousUserId) && previousUserId !== userId;
-  const sameUserWithCachedPat =
-    !userChanged &&
-    previousUserId === userId &&
-    typeof config.token === "string" &&
-    config.token.startsWith("mul_");
-
-  let finalToken: string;
-  if (tokenFromRenderer.startsWith("mul_")) {
-    finalToken = tokenFromRenderer;
-  } else if (sameUserWithCachedPat) {
-    finalToken = config.token as string;
-  } else {
-    try {
-      finalToken = await mintPat(tokenFromRenderer);
-      console.log(
-        `[daemon] minted PAT for profile "${active.name}" (user_changed=${userChanged})`,
-      );
-    } catch (err) {
-      console.error("[daemon] failed to mint PAT:", err);
-      throw err;
-    }
-  }
-
-  config.token = finalToken;
-  if (targetApiBaseUrl) config.server_url = targetApiBaseUrl;
+  config.token = tokenFromRenderer;
+  config.server_url = apiUrl.origin;
   await writeProfileConfig(active.name, config);
-  await writeProfileUserId(active.name, userId);
 
-  return { active, userChanged };
-}
-
-async function restartDaemonAfterUserSwitch(
-  active: ActiveProfile,
-): Promise<void> {
-  // If we just rotated credentials onto a running daemon, restart it so the
-  // in-memory token in the Go process matches the new config.
-  const existing = await fetchHealthAtPort(active.port);
-  if (daemonStatusAlive(existing?.status)) {
-    // Restart whether it's "running" or still "starting" — a booting daemon
-    // already loaded the old token at startup, so it must be restarted to
-    // pick up the rotated credentials.
-    console.log(
-      "[daemon] user switched — restarting daemon with new credentials",
-    );
-    // Credential rotation is a one-shot login intent, not poll-driven
-    // maintenance: wait for bootstrap/recovery instead of dropping it.
-    const restarted = await lifecycleOperations.runForeground(() =>
-      restartDaemon(),
-    );
-    if (!restarted.success) {
-      console.warn(
-        `[daemon] restart-on-user-switch failed: ${restarted.error ?? "unknown error"}`,
-      );
-    }
-  }
+  return { active, userChanged: false };
 }
 
 async function loadPrefs(): Promise<DaemonPrefs> {
@@ -798,37 +685,21 @@ async function clearToken(): Promise<void> {
 
 // Result of a user-initiated daemon re-authentication. The distinction matters:
 // only `session_invalid` justifies signing the user out of the whole app; a
-// `transient` failure must keep them logged in so they can retry.
+// Local recovery failure is retryable without an account login.
 export type ReauthResult =
   | { ok: true }
-  | { ok: false; reason: "session_invalid" }
   | { ok: false; reason: "transient"; message: string };
 
 function errorMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
 }
 
-/**
- * Recover the local daemon from the "auth_expired" state. Drops the stale
- * cached PAT, mints a fresh one from the current session token, and restarts
- * the daemon so it loads the new credential.
- *
- * Failures are classified rather than collapsed: a 401 from the mint means the
- * session token itself is dead (`session_invalid` → the renderer drives a full
- * re-login); anything else — mint 5xx, a network blip, a config write error, a
- * restart hiccup — is `transient`, leaving the user signed in so they can retry.
- * This mirrors the conservative classification the startup probe already uses.
- */
-async function reauthenticate(
-  token: string,
-  userId: string,
-): Promise<ReauthResult> {
+/** Restart the local daemon with Electron's current loopback capability. */
+async function reauthenticate(token: string): Promise<ReauthResult> {
   try {
     await clearToken();
-    // syncToken mints a fresh PAT because clearToken just removed any cache.
-    await syncToken(token, userId);
+    await syncToken(token);
   } catch (err) {
-    if (isAuthStatusError(err)) return { ok: false, reason: "session_invalid" };
     return { ok: false, reason: "transient", message: errorMessage(err) };
   }
   const restart = await restartDaemon();
@@ -985,17 +856,41 @@ async function startDaemon(
   ) {
     return { success: false, error: "Daemon recovery was superseded" };
   }
-  const existing = await fetchHealthAtPort(active.port);
+  let existing = await fetchHealthAtPort(active.port);
   if (daemonStatusAlive(existing?.status)) {
-    // A daemon is already up ("running") or booting ("starting") on this port —
-    // don't spawn a second one (the CLI rejects that as "already running").
-    // Let polling track it through to "running".
-    externalDaemonObserved = isDaemonExternallyManaged(
-      existing?.os,
-      normalizeHostOS(process.platform),
-    );
-    scheduleStatusRefresh();
-    return { success: true };
+    // The local backend chooses an ephemeral port on each desktop launch.
+    // A daemon left from the prior launch can still be healthy while pointing
+    // at the now-dead port. Stop that app-managed daemon before treating it as
+    // ready; otherwise runtimes appear offline and queued issues never claim.
+    if (
+      targetApiBaseUrl &&
+      existing?.server_url &&
+      !urlsMatch(existing.server_url, targetApiBaseUrl)
+    ) {
+      if (isDaemonExternallyManaged(existing.os, normalizeHostOS(process.platform))) {
+        return {
+          success: false,
+          error: "A runtime owned by another host is still connected to a different local service",
+        };
+      }
+      console.log(`[daemon] stopping stale local runtime bound to ${existing.server_url}`);
+      const stopped = await stopDaemon();
+      if (!stopped.success) return stopped;
+      existing = await fetchHealthAtPort(active.port);
+      if (daemonStatusAlive(existing?.status)) {
+        return { success: false, error: "The previous local runtime did not stop cleanly" };
+      }
+    } else {
+      // A daemon is already up ("running") or booting ("starting") on this port —
+      // don't spawn a second one (the CLI rejects that as "already running").
+      // Let polling track it through to "running".
+      externalDaemonObserved = isDaemonExternallyManaged(
+        existing?.os,
+        normalizeHostOS(process.platform),
+      );
+      scheduleStatusRefresh();
+      return { success: true };
+    }
   }
   if (
     recoveryProfile &&
@@ -1408,11 +1303,8 @@ export function setupDaemonManager(
   ipcMain.handle("daemon:get-host-name", () => hostname());
   ipcMain.handle(
     "daemon:sync-token",
-    async (_event, token: string, userId: string) => {
-      const result = await syncToken(token, userId);
-      if (result.userChanged) {
-        await restartDaemonAfterUserSwitch(result.active);
-      }
+    async (_event, token: string) => {
+      await syncToken(token);
     },
   );
   ipcMain.handle("daemon:clear-token", () => {
@@ -1421,10 +1313,10 @@ export function setupDaemonManager(
   });
   ipcMain.handle(
     "daemon:reauthenticate",
-    async (_event, token: string, userId: string): Promise<ReauthResult> => {
+    async (_event, token: string): Promise<ReauthResult> => {
       setDesiredDaemonRunning(true, true);
       return lifecycleOperations.runForeground(() =>
-        reauthenticate(token, userId),
+        reauthenticate(token),
       );
     },
   );

@@ -1926,7 +1926,7 @@ func TestCreateWorktreeInstallsCoAuthoredByHook(t *testing.T) {
 		t.Fatalf("git log failed: %v", err)
 	}
 	commitMsg := string(out)
-	expectedTrailer := "Co-authored-by: inkway-agent <github@multica.ai>"
+	expectedTrailer := coAuthoredByTrailer
 	if !strings.Contains(commitMsg, expectedTrailer) {
 		t.Errorf("commit message missing Co-authored-by trailer.\ngot:\n%s", commitMsg)
 	}
@@ -1958,7 +1958,7 @@ func TestCoAuthoredByHookIdempotent(t *testing.T) {
 	}
 
 	// Commit with the trailer already in the message.
-	trailer := "Co-authored-by: inkway-agent <github@multica.ai>"
+	trailer := coAuthoredByTrailer
 	if err := os.WriteFile(filepath.Join(result.Path, "test.txt"), []byte("hello\n"), 0o644); err != nil {
 		t.Fatalf("write test file: %v", err)
 	}
@@ -2045,7 +2045,7 @@ func TestCreateWorktreeRemovesCoAuthoredByHookWhenDisabled(t *testing.T) {
 		t.Fatalf("git log failed: %v", err)
 	}
 	commitMsg := string(out)
-	if strings.Contains(commitMsg, "Co-authored-by: inkway-agent") {
+	if strings.Contains(commitMsg, coAuthoredByTrailer) {
 		t.Errorf("commit unexpectedly carries the Co-authored-by trailer with setting disabled.\ngot:\n%s", commitMsg)
 	}
 }
@@ -2083,7 +2083,7 @@ case "$COMMIT_SOURCE" in
   merge|squash) exit 0 ;;
 esac
 
-TRAILER="Co-authored-by: inkway-agent <github@multica.ai>"
+TRAILER="Co-authored-by: Inkway Agent <inkway-agent@inkway.local>"
 
 # Don't add if already present.
 if grep -qF "$TRAILER" "$COMMIT_MSG_FILE"; then
@@ -2131,7 +2131,7 @@ git interpret-trailers --in-place --trailer "$TRAILER" "$COMMIT_MSG_FILE"
 	if err != nil {
 		t.Fatalf("git log failed: %v", err)
 	}
-	if commitMsg := string(out); strings.Contains(commitMsg, "Co-authored-by: inkway-agent") {
+	if commitMsg := string(out); strings.Contains(commitMsg, coAuthoredByTrailer) {
 		t.Errorf("commit unexpectedly carries the Co-authored-by trailer after legacy hook removal.\ngot:\n%s", commitMsg)
 	}
 }
@@ -2398,7 +2398,7 @@ func TestCoAuthoredByStateStopsTrailerInExistingCheckout(t *testing.T) {
 		return string(out)
 	}
 
-	if msg := commit("a.txt", "enabled commit"); !strings.Contains(msg, "Co-authored-by: inkway-agent") {
+	if msg := commit("a.txt", "enabled commit"); !strings.Contains(msg, coAuthoredByTrailer) {
 		t.Fatalf("precondition: commit made with the setting on lacks the trailer.\ngot:\n%s", msg)
 	}
 
@@ -2408,10 +2408,10 @@ func TestCoAuthoredByStateStopsTrailerInExistingCheckout(t *testing.T) {
 		t.Fatalf("WriteCoAuthoredByState(false) failed: %v", err)
 	}
 
-	if msg := commit("b.txt", "disabled commit"); strings.Contains(msg, "Co-authored-by: inkway-agent") {
+	if msg := commit("b.txt", "disabled commit"); strings.Contains(msg, coAuthoredByTrailer) {
 		t.Errorf("commit in the existing checkout still carries the trailer after the toggle was turned off.\ngot:\n%s", msg)
 	}
-	if msg := commit("c.txt", "disabled commit, no-verify", "--no-verify"); strings.Contains(msg, "Co-authored-by: inkway-agent") {
+	if msg := commit("c.txt", "disabled commit, no-verify", "--no-verify"); strings.Contains(msg, coAuthoredByTrailer) {
 		t.Errorf("--no-verify commit still carries the trailer after the toggle was turned off.\ngot:\n%s", msg)
 	}
 
@@ -2419,7 +2419,7 @@ func TestCoAuthoredByStateStopsTrailerInExistingCheckout(t *testing.T) {
 	if err := cache.WriteCoAuthoredByState("ws-1", true); err != nil {
 		t.Fatalf("WriteCoAuthoredByState(true) failed: %v", err)
 	}
-	if msg := commit("d.txt", "re-enabled commit"); !strings.Contains(msg, "Co-authored-by: inkway-agent") {
+	if msg := commit("d.txt", "re-enabled commit"); !strings.Contains(msg, coAuthoredByTrailer) {
 		t.Errorf("commit missing the trailer after the toggle was turned back on.\ngot:\n%s", msg)
 	}
 }
@@ -2624,7 +2624,7 @@ func TestReconcileCoAuthoredByHooksUpgradesReleasedHookInPlace(t *testing.T) {
 	if !strings.Contains(string(hook), filepath.ToSlash(cache.CoAuthoredByStatePath("ws-1"))) {
 		t.Fatalf("hook was not upgraded to read the state file.\ngot:\n%s", hook)
 	}
-	if msg := commitInWorktree(t, worktreePath, "a.txt", "still enabled"); !strings.Contains(msg, "Co-authored-by: inkway-agent") {
+	if msg := commitInWorktree(t, worktreePath, "a.txt", "still enabled"); !strings.Contains(msg, coAuthoredByTrailer) {
 		t.Errorf("upgraded hook dropped the trailer while the setting is on.\ngot:\n%s", msg)
 	}
 

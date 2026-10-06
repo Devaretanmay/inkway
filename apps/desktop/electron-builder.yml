@@ -5,6 +5,11 @@ directories:
 files:
   - "!**/.vscode/*"
   - "!src/*"
+  # Build tooling (packaging, bundling, release scripts) runs from the
+  # checkout at build time and must not ship inside app.asar: bundling it
+  # would invalidate release bytes on every release-script edit without
+  # changing the product. afterPack hooks resolve these from disk.
+  - "!scripts/**"
   - "!electron.vite.config.*"
   - "!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}"
   - "!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}"
@@ -34,13 +39,11 @@ extraResources:
     to: NOTICE
   - from: resources/ink
     to: ink
+  - from: resources/server
+    to: server
+  - from: resources/postgres
+    to: postgres
 afterPack: scripts/verify-ink-package.cjs
-protocols:
-  - name: Inkway
-    schemes:
-      - inkway
-      - multica
-      - issuway
 asarUnpack:
   - resources/**
 mac:
@@ -50,16 +53,28 @@ mac:
     - zip
   # Hardcoded name avoids the `@inkway/desktop-*` subdirectory that
   # `${name}` produces for scoped package names.
-  # Naming scheme: inkway-desktop-<version>-<platform>-<arch>.<ext>
-  # so the filename alone surfaces kind, version, platform, and CPU arch.
-  artifactName: inkway-desktop-${version}-mac-${arch}.${ext}
+  # Zero-cost alpha naming: Inkway-<version>-mac-<arch>.<ext>
+  # so the filename alone surfaces product, version, platform, and CPU arch.
+  # The bundle itself stays Inkway.app. Linux/Windows keep their
+  # inkway-desktop-* scheme so existing updater feeds are unaffected.
+  artifactName: Inkway-${version}-mac-${arch}.${ext}
   # Notarize via notarytool. Requires APPLE_ID + APPLE_APP_SPECIFIC_PASSWORD
   # + APPLE_TEAM_ID env vars at package time. Non-mac contributors are
   # unaffected because `pnpm package` already requires the Developer ID
   # signing cert — notarization is a strict superset.
   notarize: true
 dmg:
-  artifactName: inkway-desktop-${version}-mac-${arch}.${ext}
+  artifactName: Inkway-${version}-mac-${arch}.${ext}
+  # Explicit staging size: the bundled app is ~3.6 GB / ~18k files (Ink model +
+  # runtime, PostgreSQL, backend). dmgbuild's default (content bytes + 128 MB)
+  # leaves too little HFS+ metadata headroom, ditto then hits a full volume on
+  # the last file, and dmgbuild ignores ditto's exit code — producing a
+  # "successful" DMG with silently dropped files (first seen as a missing
+  # Electron Framework binary failing codesign --verify --deep --strict).
+  # 8 GB stages comfortably; only the staging image uses it, the shipped
+  # compressed DMG stays ~2.5 GB. Release hosts need ~15 GB free (see release
+  # workflow). Re-verify any size change with scripts/make-alpha-release.mjs.
+  size: 8g
 linux:
   # Override the Linux executable name to avoid leaking the scoped npm
   # package name (`@inkway/desktop`) into the installed binary, the

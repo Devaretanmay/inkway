@@ -71,9 +71,6 @@ import type {
   UpdateSkillRequest,
   SetAgentSkillsRequest,
   SetAgentRuntimeSkillEnabledRequest,
-  PersonalAccessToken,
-  CreatePersonalAccessTokenRequest,
-  CreatePersonalAccessTokenResponse,
   RuntimeUsage,
   IssueUsageSummary,
   RuntimeHourlyActivity,
@@ -508,24 +505,6 @@ export interface ApiClientOptions {
    * per window.
    */
   getToken?: () => string | null;
-}
-
-export interface ClientRuntimeSnapshot {
-  probe_result: "success" | "error";
-  runtime_count?: number;
-  provider_summary?: Record<string, number>;
-  online_count?: number;
-  offline_count?: number;
-}
-
-export interface ClientUsageRequest {
-  install_id: string;
-  runtime?: ClientRuntimeSnapshot;
-}
-
-export interface LoginResponse {
-  token: string;
-  user: User;
 }
 
 function parseSearchIndexResponse<T>(raw: unknown, schema: ZodType, endpoint: string): T {
@@ -971,32 +950,6 @@ export class ApiClient {
       return undefined as T;
     }
     return res.json() as Promise<T>;
-  }
-
-  // Auth
-  async sendCode(email: string): Promise<void> {
-    await this.fetch("/auth/send-code", {
-      method: "POST",
-      body: JSON.stringify({ email }),
-    });
-  }
-
-  async verifyCode(email: string, code: string): Promise<LoginResponse> {
-    return this.fetch("/auth/verify-code", {
-      method: "POST",
-      body: JSON.stringify({ email, code }),
-    });
-  }
-
-  async googleLogin(code: string, redirectUri: string): Promise<LoginResponse> {
-    return this.fetch("/auth/google", {
-      method: "POST",
-      body: JSON.stringify({ code, redirect_uri: redirectUri }),
-    });
-  }
-
-  async logout(): Promise<void> {
-    await this.fetch("/auth/logout", { method: "POST" });
   }
 
   async issueCliToken(): Promise<{ token: string }> {
@@ -1538,13 +1491,6 @@ export class ApiClient {
     });
     return parseWithFallback(raw, CreateFeedbackResponseSchema, EMPTY_CREATE_FEEDBACK_RESPONSE, {
       endpoint: "POST /api/feedback",
-    });
-  }
-
-  async upsertClientUsage(data: ClientUsageRequest): Promise<void> {
-    await this.fetch("/api/client-usage", {
-      method: "POST",
-      body: JSON.stringify(data),
     });
   }
 
@@ -3597,22 +3543,6 @@ export class ApiClient {
 			method: "DELETE",
 		});
 	}
-
-  // Personal Access Tokens
-  async listPersonalAccessTokens(): Promise<PersonalAccessToken[]> {
-    return this.fetch("/api/tokens");
-  }
-
-  async createPersonalAccessToken(data: CreatePersonalAccessTokenRequest): Promise<CreatePersonalAccessTokenResponse> {
-    return this.fetch("/api/tokens", {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
-  }
-
-  async revokePersonalAccessToken(id: string): Promise<void> {
-    await this.fetch(`/api/tokens/${id}`, { method: "DELETE" });
-  }
 
   // File Upload & Attachments
   async uploadFile(

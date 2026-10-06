@@ -2,11 +2,9 @@ package handler
 
 import (
 	"net/http"
-	"net/url"
 	"os"
 	"strings"
 
-	"github.com/Devaretanmay/inkway/server/internal/analytics"
 	"github.com/Devaretanmay/inkway/server/internal/featureflags"
 )
 
@@ -20,11 +18,6 @@ type AppConfig struct {
 	// API endpoint or a freshly signed download_url instead (MUL-3254).
 	// Omitted when false so older clients see the previous shape.
 	CdnSigned bool `json:"cdn_signed,omitempty"`
-	// Public auth config consumed by the web app at runtime so self-hosted
-	// deployments do not need to rebuild the frontend image when operators
-	// toggle signup or wire Google OAuth.
-	AllowSignup    bool   `json:"allow_signup"`
-	GoogleClientID string `json:"google_client_id,omitempty"`
 	// WorkspaceCreationDisabled mirrors the server-side
 	// DISABLE_WORKSPACE_CREATION env var so the UI can hide every
 	// "Create workspace" affordance on self-hosted instances. Omitted
@@ -45,15 +38,6 @@ type AppConfig struct {
 	// false so the managed-cloud response keeps its previous shape; the UI
 	// defaults absent to false (hidden).
 	VCSIntegrationAvailable bool `json:"vcs_integration_available,omitempty"`
-
-	// PostHog public config for the frontend. The key is the same Project
-	// API Key the backend uses; returning it here (instead of baking it
-	// into the frontend bundle via NEXT_PUBLIC_*) means self-hosted
-	// instances — whose server returns an empty key — automatically
-	// disable frontend event shipping too.
-	PosthogKey           string `json:"posthog_key"`
-	PosthogHost          string `json:"posthog_host"`
-	AnalyticsEnvironment string `json:"analytics_environment"`
 
 	// FeatureFlags exposes only frontend-safe boolean decisions. Do not dump
 	// raw rules here: /api/config is public and may be called anonymously.
@@ -114,8 +98,6 @@ func (h *Handler) GetConfig(w http.ResponseWriter, r *http.Request) {
 		AgentConversationStartersSupported: true,
 		IssueCreatePropertiesSupported:     true,
 		CommentDeleteKeepRepliesSupported:  true,
-		AllowSignup:                        os.Getenv("ALLOW_SIGNUP") != "false",
-		GoogleClientID:                     os.Getenv("GOOGLE_CLIENT_ID"),
 		WorkspaceCreationDisabled:          os.Getenv("DISABLE_WORKSPACE_CREATION") == "true",
 	}
 	if h.Storage != nil {
@@ -125,22 +107,11 @@ func (h *Handler) GetConfig(w http.ResponseWriter, r *http.Request) {
 	config.DaemonServerURL, config.DaemonAppURL = daemonSetupURLsFromEnv()
 	config.VCSIntegrationAvailable = h.cfg.VCSIntegrationEnabled
 	config.FeatureFlags = featureflags.EvaluateFrontendPublicFlags(r.Context(), h.FeatureFlags)
-	// Only surface the build version on self-hosted deployments. The managed
-	// cloud is continuously deployed and its users can't choose the build, so
-	// the Help popover's version row would just be noise there (MUL-4108).
-	if !isOfficialCloudDeployment() {
-		config.ServerVersion = h.cfg.ServerVersion
-	}
+	config.ServerVersion = h.cfg.ServerVersion
 
 	// Re-read from env on every request so operators can rotate keys via
 	// secret refresh without a server restart.
 	if v := os.Getenv("ANALYTICS_DISABLED"); v != "true" && v != "1" {
-		config.PosthogKey = os.Getenv("POSTHOG_API_KEY")
-		config.PosthogHost = os.Getenv("POSTHOG_HOST")
-		config.AnalyticsEnvironment = analytics.EnvironmentFromEnv()
-		if config.PosthogHost == "" && config.PosthogKey != "" {
-			config.PosthogHost = "https://us.i.posthog.com"
-		}
 	}
 
 	writeJSON(w, http.StatusOK, config)
@@ -159,9 +130,6 @@ func daemonSetupURLsFromEnv() (string, string) {
 	if serverURL == "" {
 		serverURL = appURL
 	}
-	if isOfficialCloudDaemonConfig(appURL) {
-		return "", ""
-	}
 	return serverURL, appURL
 }
 
@@ -179,52 +147,4 @@ func resolveFrontendAppURL() string {
 
 func normalizePublicURL(raw string) string {
 	return strings.TrimRight(strings.TrimSpace(raw), "/")
-}
-
-// isOfficialCloudDaemonConfig reports whether this deployment is the official
-// Inkway Cloud, identified by its frontend host alone (multica.ai). The
-// daemon setup for the managed cloud is always
-// `inkway setup` (which hardcodes api.multica.ai), so the per-deployment URLs
-// must be omitted from /api/config even when INKWAY_PUBLIC_URL is unset or
-// misconfigured. Previously this also required serverURL==api.multica.ai, so a
-// cloud deployment that forgot INKWAY_PUBLIC_URL fell through and emitted a
-// `setup self-host --server-url https://multica.ai` command — pointing the
-// daemon's backend at the frontend (no /health, no WebSocket proxy).
-func isOfficialCloudDaemonConfig(appURL string) bool {
-	return urlHostEquals(appURL, "multica.ai")
-}
-
-// isOfficialCloudDeployment reports whether this server is the official Inkway
-// Cloud, reusing the same frontend-host signal as the daemon setup (multica.ai).
-// Managed-cloud-only behavior — such as suppressing the Help popover's
-// server-version row, which only matters to self-hosted operators — is gated on
-// this.
-func isOfficialCloudDeployment() bool {
-	return isOfficialCloudDaemonConfig(resolveFrontendAppURL())
-}
-
-func urlHostEquals(raw, want string) bool {
-	host := canonicalURLHost(raw)
-	if host == "" {
-		return false
-	}
-	want = strings.TrimSuffix(strings.ToLower(strings.TrimSpace(want)), ".")
-	return host == want
-}
-
-func canonicalURLHost(raw string) string {
-	raw = strings.TrimSpace(raw)
-	u, err := url.Parse(raw)
-	if err != nil {
-		return ""
-	}
-	host := u.Hostname()
-	if host == "" && !strings.Contains(raw, "://") {
-		u, err = url.Parse("https://" + raw)
-		if err != nil {
-			return ""
-		}
-		host = u.Hostname()
-	}
-	return strings.TrimSuffix(strings.ToLower(host), ".")
 }

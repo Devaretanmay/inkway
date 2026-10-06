@@ -6,7 +6,6 @@ import {
   RotateCw,
   Activity,
   ScrollText,
-  LogIn,
   Info,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -144,7 +143,7 @@ export function DaemonRuntimeActions() {
   const isStopped =
     status.state === "stopped" || status.state === "recovery_paused";
   const isCliMissing = status.state === "cli_not_found";
-  const isAuthExpired = status.state === "auth_expired";
+  const isAuthExpired = status.state === "credential_expired";
   const isTransitioning =
     status.state === "starting" || status.state === "stopping";
   const isInstalling = status.state === "installing_cli";
@@ -215,15 +214,15 @@ export function DaemonRuntimeActions() {
           <>
             <span className="inline-flex items-center gap-1.5 text-caption text-destructive">
               <AlertCircle className="size-3.5 shrink-0" />
-              {t(($) => $.desktop.daemon.signin_expired)}
+              {t(($) => $.desktop.daemon.credential_expired)}
             </span>
             <Button size="sm" onClick={handleReauth} disabled={actionLoading}>
               {actionLoading ? (
                 <Activity className="size-3.5 mr-1.5 animate-pulse" />
               ) : (
-                <LogIn className="size-3.5 mr-1.5" />
+                <RotateCw className="size-3.5 mr-1.5" />
               )}
-              {t(($) => $.desktop.daemon.signin_again)}
+              {t(($) => $.desktop.daemon.reconnect_runtime)}
             </Button>
           </>
         )}

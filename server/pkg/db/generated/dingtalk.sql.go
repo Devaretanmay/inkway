@@ -357,7 +357,7 @@ ORDER BY bound_at DESC, id ASC
 `
 
 type ListDingTalkUserBindingsForMemberParams struct {
-	WorkspaceID   pgtype.UUID `json:"workspace_id"`
+	WorkspaceID  pgtype.UUID `json:"workspace_id"`
 	InkwayUserID pgtype.UUID `json:"inkway_user_id"`
 }
 

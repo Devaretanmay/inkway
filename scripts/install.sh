@@ -1,13 +1,10 @@
 #!/usr/bin/env bash
-# Inkway installer — installs the CLI and optionally provisions a self-host server.
+# Inkway installer — installs the Inkway CLI used by local coding tools.
 #
 # Install / upgrade CLI only:
 #   curl -fsSL https://raw.githubusercontent.com/inkway-ai/inkway/main/scripts/install.sh | bash
 #
-# Install CLI + provision self-host server:
-#   curl -fsSL https://raw.githubusercontent.com/inkway-ai/inkway/main/scripts/install.sh | bash -s -- --with-server
-#
-# After installation, run `inkway setup` to configure your environment.
+# The Inkway desktop app manages its local server and CLI configuration.
 #
 set -euo pipefail
 
@@ -45,25 +42,6 @@ warn()  { printf "${BOLD}${YELLOW}⚠ %s${RESET}\n" "$*" >&2; }
 fail()  { printf "${BOLD}${RED}✗ %s${RESET}\n" "$*" >&2; exit 1; }
 
 command_exists() { command -v "$1" >/dev/null 2>&1; }
-
-running_in_ssh_session() {
-  [ -n "${SSH_CONNECTION:-}" ] || [ -n "${SSH_CLIENT:-}" ] || [ -n "${SSH_TTY:-}" ]
-}
-
-print_remote_server_token_hint() {
-  if ! running_in_ssh_session; then
-    return
-  fi
-
-  printf "  ${BOLD}Looks like a remote/SSH session.${RESET} Browser login may not be able to call back to this machine's localhost.\n"
-  printf "  Token login is usually simpler here:\n"
-  printf "     1. On your local computer, open ${CYAN}https://multica.ai/settings?tab=tokens${RESET}\n"
-  printf "        and create a token under ${BOLD}Settings > API Tokens${RESET}.\n"
-  printf "     2. On this server, run:\n"
-  printf "        ${CYAN}inkway login --token <YOUR_TOKEN>${RESET}\n"
-  printf "        ${CYAN}inkway daemon start${RESET}\n"
-  printf "\n"
-}
 
 # Host port Docker Compose actually published for a service.
 #
@@ -436,14 +414,7 @@ run_default() {
   printf "${BOLD}${GREEN}  ✓ Inkway CLI is ready!${RESET}\n"
   printf "${BOLD}${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}\n"
   printf "\n"
-  printf "  ${BOLD}Next: configure your environment${RESET}\n"
-  printf "\n"
-  printf "     ${CYAN}inkway setup${RESET}                # Connect to Inkway Cloud (multica.ai)\n"
-  printf "     ${CYAN}inkway setup self-host${RESET}       # Connect to a self-hosted server\n"
-  printf "\n"
-  print_remote_server_token_hint
-  printf "  ${BOLD}Self-hosting?${RESET} Install the server first:\n"
-  printf "     curl -fsSL https://raw.githubusercontent.com/inkway-ai/inkway/main/scripts/install.sh | bash -s -- --with-server\n"
+  printf "  Open Inkway Desktop to connect this local CLI and manage agents.\n"
   printf "\n"
 }
 
@@ -472,10 +443,7 @@ run_with_server() {
   printf "\n"
   printf "  ${BOLD}Next: configure your CLI to connect${RESET}\n"
   printf "\n"
-  printf "     ${CYAN}inkway setup self-host${RESET}   # Configure + authenticate + start daemon\n"
-  printf "\n"
-  printf "  ${BOLD}Login:${RESET} configure ${CYAN}RESEND_API_KEY${RESET} in .env for email codes,\n"
-  printf "  or read the generated code from backend logs when Resend is unset.\n"
+  printf "  Local workspace identity is created automatically.\n"
   printf "\n"
   printf "  ${BOLD}To stop all services:${RESET}\n"
   printf "     curl -fsSL https://raw.githubusercontent.com/inkway-ai/inkway/main/scripts/install.sh | bash -s -- --stop\n"
@@ -535,7 +503,7 @@ main() {
         echo "  INKWAY_SELFHOST_REF  Git ref to check out for self-host assets"
         echo "                        (default: latest release tag, falling back to main)"
         echo ""
-        echo "After installation, run 'inkway setup' to configure your environment."
+        echo "Open Inkway Desktop to connect this local CLI."
         exit 0
         ;;
       *) warn "Unknown option: $1" ;;

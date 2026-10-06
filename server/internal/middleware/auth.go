@@ -2,17 +2,19 @@ package middleware
 
 import (
 	"context"
+	"crypto/subtle"
 	"errors"
 	"log/slog"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
-	"github.com/golang-jwt/jwt/v5"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/Devaretanmay/inkway/server/internal/auth"
 	"github.com/Devaretanmay/inkway/server/internal/util"
 	db "github.com/Devaretanmay/inkway/server/pkg/db/generated"
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func uuidToString(u pgtype.UUID) string { return util.UUIDToString(u) }
@@ -84,6 +86,18 @@ func Auth(queries *db.Queries, patCache *auth.PATCache, cloudPAT *auth.CloudPATV
 			r.Header.Del("X-Task-ID")
 
 			tokenString, fromCookie := extractToken(r)
+			if localToken := os.Getenv("INKWAY_LOCAL_APP_TOKEN"); localToken != "" && strings.EqualFold(strings.TrimSpace(os.Getenv("INKWAY_LOCAL_MODE")), "true") && subtle.ConstantTimeCompare([]byte(tokenString), []byte(localToken)) == 1 {
+				// Electron's per-launch capability identifies the one local owner;
+				// it never represents a user account or a JWT session.
+				r.Header.Set("X-User-ID", "00000000-0000-4000-8000-000000000001")
+				r.Header.Del("X-User-Email")
+				next.ServeHTTP(w, r)
+				return
+			}
+			if strings.EqualFold(strings.TrimSpace(os.Getenv("INKWAY_LOCAL_MODE")), "true") && strings.HasPrefix(tokenString, "eyJ") {
+				http.Error(w, `{"error":"account sessions are disabled in local Inkway"}`, http.StatusUnauthorized)
+				return
+			}
 			if tokenString == "" {
 				slog.Debug("auth: no token found", "path", r.URL.Path)
 				http.Error(w, `{"error":"missing authorization"}`, http.StatusUnauthorized)

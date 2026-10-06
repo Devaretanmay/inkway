@@ -24,6 +24,37 @@ jobs:
     outputs:
       tag_name: ${{ steps.release_meta.outputs.tag_name }}
       is_stable: ${{ steps.release_meta.outputs.is_stable }}
+    # The Go suite includes DB-backed packages (notably internal/handler,
+    # which fails closed without a database). Mirror ci.yml: provide the
+    # service and migrate the schema before running tests, or no tag build
+    # could ever pass verification.
+    services:
+      postgres:
+        image: pgvector/pgvector:pg17
+        env:
+          POSTGRES_DB: inkway
+          POSTGRES_USER: inkway
+          POSTGRES_PASSWORD: inkway
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U inkway -d inkway"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgres://inkway:inkway@localhost:5432/inkway?sslmode=disable
+      REDIS_TEST_URL: redis://localhost:6379/1
+      GOFLAGS: -count=1
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -62,6 +93,10 @@ jobs:
 
       - name: Record Go toolchain
         run: go version
+
+      - name: Run migrations for DB-backed tests
+        working-directory: server
+        run: go run ./cmd/migrate up
 
       - name: Verify Go test wrapper
         run: bash scripts/test-go.test.sh
@@ -460,3 +495,148 @@ jobs:
           # Windows signing later.
           CSC_IDENTITY_AUTO_DISCOVERY: "false"
         run: node scripts/package.mjs --${{ matrix.target }} --x64 --arm64 --publish always
+
+  # Zero-cost macOS alpha: ad-hoc signed Inkway.app + DMG + ZIP + SHA256SUMS +
+  # release-manifest.json, published to the GitHub Release. No Apple Developer
+  # Program membership, no Developer ID signing, no notarization, no paid CI.
+  # Runs on a self-hosted macOS arm64 runner because the real packaged build
+  # (pinned Ink runtime download + checksum verification, Go backend, bundled
+  # PostgreSQL, electron-builder DMG) is only proven on that host class.
+  # Every gate below fails the job before anything is uploaded: a partially
+  # validated alpha is never published.
+  desktop-mac-alpha:
+    needs: verify
+    runs-on: [self-hosted, macOS, ARM64]
+    concurrency:
+      group: release-mac-alpha-${{ github.ref }}
+      cancel-in-progress: false
+    permissions:
+      contents: write
+    env:
+      # No Developer ID identity on the runner: electron-builder falls back
+      # to ad-hoc signing. APPLE_TEAM_ID must stay unset so notarization is
+      # skipped (package.mjs passes -c.mac.notarize=false in that case).
+      CSC_IDENTITY_AUTO_DISCOVERY: "false"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate tag name
+        shell: bash
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          if [[ ! "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::Release tags must look like vX.Y.Z or vX.Y.Z-suffix; got '$tag'."
+            exit 1
+          fi
+          if [[ "$tag" == *-dirty* ]]; then
+            echo "::error::Refusing to release from dirty tag '$tag'."
+            exit 1
+          fi
+          echo "TAG_NAME=$tag" >> "$GITHUB_ENV"
+          echo "VERSION=${tag#v}" >> "$GITHUB_ENV"
+
+      - name: Verify clean source tree
+        run: |
+          git diff --quiet && git diff --cached --quiet
+          git diff --check
+          node scripts/check-brand-hygiene.mjs
+
+      - name: Reject developer-local paths in production packaging files
+        run: |
+          if rg -n '../ink/.ink/models|/Users/[^/]+/' apps/desktop/scripts/fetch-ink-runtime.mjs apps/desktop/scripts/package-ink-runtime.mjs apps/desktop/scripts/ink-runtime.json apps/desktop/scripts/make-alpha-release.mjs; then
+            echo 'developer-local Ink paths found in production packaging files' >&2
+            exit 1
+          fi
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.26.x"
+          check-latest: true
+          cache-dependency-path: server/go.sum
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck (all workspaces except mobile)
+        run: pnpm typecheck
+
+      - name: Lint (all workspaces except mobile)
+        run: pnpm lint
+
+      - name: Desktop tests
+        run: pnpm --filter @inkway/desktop test
+
+      - name: Fetch and verify pinned Ink runtime
+        run: make ink-runtime
+
+      - name: Real Ink engine/model/lifecycle proof from staged runtime
+        working-directory: server
+        env:
+          INKWAY_INK_BUNDLE: ${{ github.workspace }}/apps/desktop/resources/ink
+        run: go test ./internal/ink -run '^TestBundledInk' -count=1 -v
+
+      # The bundled app is ~3.6 GB; the DMG stage needs room beyond it.
+      # make-alpha-release.mjs re-verifies everything below, but a full
+      # volume fails late, so assert headroom up front instead.
+      - name: Require staging headroom for the DMG volume
+        run: |
+          free_gb=$(df -g / | awk 'NR==2 {print $4}')
+          echo "free disk: ${free_gb} GiB"
+          if [ "$free_gb" -lt 15 ]; then
+            echo "::error::macOS alpha packaging needs >= 15 GiB free (app + DMG staging + output); have ${free_gb} GiB."
+            exit 1
+          fi
+
+      - name: Build Inkway.app + DMG + ZIP (macOS arm64, ad-hoc signed)
+        working-directory: apps/desktop
+        run: node scripts/package.mjs --mac --arm64 --publish never
+
+      - name: Verify artifacts, generate SHA256SUMS + release-manifest.json
+        working-directory: apps/desktop
+        run: node scripts/make-alpha-release.mjs --version "${{ env.VERSION }}"
+
+      - name: Publish DMG/ZIP/SHA256SUMS/manifest to the GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if ! gh release view "$TAG_NAME" >/dev/null 2>&1; then
+            gh release create "$TAG_NAME" \
+              --title "Inkway $VERSION" \
+              --notes-file "$GITHUB_WORKSPACE/.github/release-template.md" \
+              --prerelease
+          fi
+          # make-alpha-release.mjs splits artifacts >= 1500 MB into
+          # <name>.part-NN (GitHub caps release files below 2 GiB) and
+          # records everything in SHA256SUMS + release-manifest.json, so
+          # upload the whole dist set except the oversized originals: when
+          # parts exist the reassembly check in that script already proved
+          # they reconstruct the verified bytes.
+          upload=(
+            apps/desktop/dist/SHA256SUMS
+            apps/desktop/dist/release-manifest.json
+          )
+          if compgen -G "apps/desktop/dist/Inkway-$VERSION-mac-arm64.dmg.part-*" > /dev/null; then
+            upload+=(apps/desktop/dist/Inkway-"$VERSION"-mac-arm64.dmg.part-*)
+          else
+            upload+=(apps/desktop/dist/Inkway-"$VERSION"-mac-arm64.dmg)
+          fi
+          if compgen -G "apps/desktop/dist/Inkway-$VERSION-mac-arm64.zip.part-*" > /dev/null; then
+            upload+=(apps/desktop/dist/Inkway-"$VERSION"-mac-arm64.zip.part-*)
+          else
+            upload+=(apps/desktop/dist/Inkway-"$VERSION"-mac-arm64.zip)
+          fi
+          # shellcheck disable=SC2086
+          gh release upload "$TAG_NAME" ${upload[@]} --clobber

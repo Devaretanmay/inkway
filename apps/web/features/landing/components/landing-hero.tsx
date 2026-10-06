@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Download } from "lucide-react";
-import { useAuthStore } from "@inkway/core/auth";
 import { docsHrefForLocale, useLocale } from "../i18n";
 import { useDashboardCtaHref } from "../utils/use-dashboard-cta";
 import { HERO_PROVIDERS } from "./provider-marks";
@@ -11,7 +10,6 @@ import { heroButtonClassName } from "./shared";
 
 export function LandingHero() {
   const { t, locale } = useLocale();
-  const user = useAuthStore((s) => s.user);
   const ctaHref = useDashboardCtaHref();
 
   return (
@@ -36,7 +34,7 @@ export function LandingHero() {
 
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
               <Link href={ctaHref} className={heroButtonClassName("solid")}>
-                {user ? t.header.dashboard : t.hero.cta}
+                {t.hero.downloadDesktop}
               </Link>
               <Link
                 href="/download"

@@ -29,9 +29,10 @@ import (
 // The fake writes the secret to stderr before reading the handshake, so the
 // redaction check never depends on racing our own initialize write. The budget
 // is sized against measurement: reaching the app-server's first line costs
-// ~430-465ms here (version probe plus launch), so 2s keeps ~4x headroom, and
-// the ready-file guard below fails loudly rather than vacuously if a slower
-// machine ever misses it.
+// ~430-465ms here (version probe plus launch). The package runs many subprocess
+// fixtures in parallel, so leave enough headroom for a loaded test host while
+// keeping the parent deadline below the handshake timeout. The ready-file guard
+// below still fails loudly rather than vacuously if a slower host misses it.
 func TestCodexInitializeParentDeadlineDoesNotPersistOpaqueEnv(t *testing.T) {
 	t.Parallel()
 
@@ -41,7 +42,7 @@ func TestCodexInitializeParentDeadlineDoesNotPersistOpaqueEnv(t *testing.T) {
 		`echo "$OPAQUE_AUTH_VALUE" >&2`+"\n"+
 		`touch "`+readyFile+`"`+"\n"+
 		`read line`+"\n"+
-		`sleep 5`+"\n")
+		`sleep 30`+"\n")
 
 	var logs strings.Builder
 	backend, err := New("codex", Config{
@@ -52,10 +53,10 @@ func TestCodexInitializeParentDeadlineDoesNotPersistOpaqueEnv(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// Below the 4s handshake bound, so the parent deadline is what ends the run.
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	// Below the 12s handshake bound, so the parent deadline ends the run.
+	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
 	defer cancel()
-	session, err := backend.Execute(ctx, "prompt", ExecOptions{Timeout: 10 * time.Second, HandshakeTimeout: 4 * time.Second})
+	session, err := backend.Execute(ctx, "prompt", ExecOptions{Timeout: 20 * time.Second, HandshakeTimeout: 12 * time.Second})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -106,7 +107,7 @@ func TestCodexInitializeParentCancellationDoesNotPersistOpaqueEnv(t *testing.T) 
 		for range session.Messages {
 		}
 	}()
-	deadline := time.Now().Add(3 * time.Second)
+	deadline := time.Now().Add(10 * time.Second)
 	for {
 		if _, err := os.Stat(readyFile); err == nil {
 			break

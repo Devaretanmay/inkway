@@ -63,7 +63,7 @@ func isTaskNotFoundError(err error) bool {
 }
 
 // isUnauthorizedError returns true if the error is a 401 from the server.
-// Used by the token-renewal loop to surface a clear "re-login required"
+// Used by the token-renewal loop to surface a clear local-credential recovery
 // message instead of a generic transport-level retry.
 func isUnauthorizedError(err error) bool {
 	var reqErr *requestError

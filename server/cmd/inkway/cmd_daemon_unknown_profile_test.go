@@ -121,7 +121,7 @@ func TestRequireKnownProfile(t *testing.T) {
 		}
 	})
 
-	t.Run("login hint quotes an awkward profile name", func(t *testing.T) {
+	t.Run("profile guidance quotes an awkward profile name", func(t *testing.T) {
 		mkProfiles(t)
 
 		err := requireKnownProfile("my profile")
@@ -134,7 +134,7 @@ func TestRequireKnownProfile(t *testing.T) {
 		}
 	})
 
-	t.Run("no profiles root yet points at login", func(t *testing.T) {
+	t.Run("no profiles root yet explains profile creation", func(t *testing.T) {
 		mkProfiles(t)
 
 		err := requireKnownProfile("staging")
@@ -145,7 +145,7 @@ func TestRequireKnownProfile(t *testing.T) {
 		if len(unknown.Known) != 0 {
 			t.Fatalf("Known = %v, want empty", unknown.Known)
 		}
-		if !strings.Contains(unknown.Error(), "inkway login --profile staging") {
+		if !strings.Contains(unknown.Error(), "inkway --profile staging config set server_url") {
 			t.Fatalf("error message %q should tell the user how to create it", unknown.Error())
 		}
 	})
@@ -284,9 +284,9 @@ func TestDaemonStartAcceptsUnknownProfile(t *testing.T) {
 	if errors.As(err, &unknown) {
 		t.Fatal("daemon start must not reject an unknown profile; it is how new profiles are created")
 	}
-	// It fails for the pre-existing reason instead: nobody is logged in.
-	if err == nil || !strings.Contains(err.Error(), "not logged in") {
-		t.Fatalf("runDaemonBackground = %v, want the not-logged-in error", err)
+	// It fails because no server credential is configured for the new profile.
+	if err == nil || !strings.Contains(err.Error(), "no runtime credential is configured") {
+		t.Fatalf("runDaemonBackground = %v, want the missing-credential error", err)
 	}
 }
 

@@ -20,6 +20,7 @@ import (
 	"github.com/Devaretanmay/inkway/server/internal/analytics"
 	"github.com/Devaretanmay/inkway/server/internal/auth"
 	"github.com/Devaretanmay/inkway/server/internal/events"
+	"github.com/Devaretanmay/inkway/server/internal/localidentity"
 	"github.com/Devaretanmay/inkway/server/internal/realtime"
 	db "github.com/Devaretanmay/inkway/server/pkg/db/generated"
 )
@@ -279,153 +280,24 @@ func TestConfigRouteIsPublic(t *testing.T) {
 	readJSON(t, resp, &result)
 }
 
-// ---- Auth ----
-
-func TestSendCodeAndVerify(t *testing.T) {
-	const email = "integration-sendcode@multica.ai"
-	ctx := context.Background()
-
-	t.Cleanup(func() {
-		testPool.Exec(ctx, `DELETE FROM verification_code WHERE email = $1`, email)
-		var userID string
-		err := testPool.QueryRow(ctx, `SELECT id FROM "user" WHERE email = $1`, email).Scan(&userID)
-		if err == nil {
-			rows, queryErr := testPool.Query(ctx, `
-				SELECT w.id FROM workspace w JOIN member m ON m.workspace_id = w.id WHERE m.user_id = $1
-			`, userID)
-			if queryErr == nil {
-				defer rows.Close()
-				for rows.Next() {
-					var wsID string
-					if rows.Scan(&wsID) == nil {
-						testPool.Exec(ctx, `DELETE FROM workspace WHERE id = $1`, wsID)
-					}
-				}
-			}
+func TestAccountAuthenticationRoutesAreNotRegistered(t *testing.T) {
+	for _, path := range []string{
+		"/auth/send-code",
+		"/auth/verify-code",
+		"/auth/google",
+		"/auth/logout",
+		"/auth/callback",
+		"/api/auth/refresh",
+		"/api/tokens",
+	} {
+		resp, err := http.Post(testServer.URL+path, "application/json", strings.NewReader("{}"))
+		if err != nil {
+			t.Fatalf("request to %s failed: %v", path, err)
 		}
-		testPool.Exec(ctx, `DELETE FROM "user" WHERE email = $1`, email)
-	})
-
-	// Step 1: Send code
-	body, _ := json.Marshal(map[string]string{"email": email})
-	resp, err := http.Post(testServer.URL+"/auth/send-code", "application/json", bytes.NewReader(body))
-	if err != nil {
-		t.Fatalf("send-code failed: %v", err)
-	}
-	if resp.StatusCode != 200 {
-		t.Fatalf("send-code: expected 200, got %d", resp.StatusCode)
-	}
-	resp.Body.Close()
-
-	// Read code from DB
-	var code string
-	err = testPool.QueryRow(ctx, `SELECT code FROM verification_code WHERE email = $1 ORDER BY created_at DESC LIMIT 1`, email).Scan(&code)
-	if err != nil {
-		t.Fatalf("failed to read code from DB: %v", err)
-	}
-
-	// Step 2: Verify code
-	body, _ = json.Marshal(map[string]string{"email": email, "code": code})
-	resp, err = http.Post(testServer.URL+"/auth/verify-code", "application/json", bytes.NewReader(body))
-	if err != nil {
-		t.Fatalf("verify-code failed: %v", err)
-	}
-	if resp.StatusCode != 200 {
-		respBody, _ := io.ReadAll(resp.Body)
 		resp.Body.Close()
-		t.Fatalf("verify-code: expected 200, got %d: %s", resp.StatusCode, respBody)
-	}
-
-	var loginResp struct {
-		Token string `json:"token"`
-		User  struct {
-			Email string `json:"email"`
-		} `json:"user"`
-	}
-	readJSON(t, resp, &loginResp)
-
-	if loginResp.Token == "" {
-		t.Fatal("expected non-empty token")
-	}
-	if loginResp.User.Email != email {
-		t.Fatalf("expected email '%s', got '%s'", email, loginResp.User.Email)
-	}
-
-	// Verify the token works with /api/me
-	req, _ := http.NewRequest("GET", testServer.URL+"/api/me", nil)
-	req.Header.Set("Authorization", "Bearer "+loginResp.Token)
-	meResp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		t.Fatalf("getMe failed: %v", err)
-	}
-	if meResp.StatusCode != 200 {
-		t.Fatalf("getMe: expected 200, got %d", meResp.StatusCode)
-	}
-	meResp.Body.Close()
-}
-
-func TestVerifyCodeNewUserHasNoWorkspace(t *testing.T) {
-	const email = "new-integration-verify@multica.ai"
-	ctx := context.Background()
-
-	t.Cleanup(func() {
-		testPool.Exec(ctx, `DELETE FROM verification_code WHERE email = $1`, email)
-		testPool.Exec(ctx, `DELETE FROM "user" WHERE email = $1`, email)
-	})
-
-	testPool.Exec(ctx, `DELETE FROM "user" WHERE email = $1`, email)
-
-	// Send code
-	body, _ := json.Marshal(map[string]string{"email": email})
-	resp, err := http.Post(testServer.URL+"/auth/send-code", "application/json", bytes.NewReader(body))
-	if err != nil {
-		t.Fatalf("send-code failed: %v", err)
-	}
-	resp.Body.Close()
-
-	// Read code from DB
-	var code string
-	err = testPool.QueryRow(ctx, `SELECT code FROM verification_code WHERE email = $1 ORDER BY created_at DESC LIMIT 1`, email).Scan(&code)
-	if err != nil {
-		t.Fatalf("failed to read code from DB: %v", err)
-	}
-
-	// Verify code
-	body, _ = json.Marshal(map[string]string{"email": email, "code": code})
-	resp, err = http.Post(testServer.URL+"/auth/verify-code", "application/json", bytes.NewReader(body))
-	if err != nil {
-		t.Fatalf("verify-code failed: %v", err)
-	}
-	if resp.StatusCode != http.StatusOK {
-		t.Fatalf("verify-code: expected 200, got %d", resp.StatusCode)
-	}
-
-	var loginResp struct {
-		Token string `json:"token"`
-	}
-	readJSON(t, resp, &loginResp)
-
-	// New users should have no workspaces (/workspaces/new creates one)
-	req, _ := http.NewRequest("GET", testServer.URL+"/api/workspaces", nil)
-	req.Header.Set("Authorization", "Bearer "+loginResp.Token)
-	workspacesResp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		t.Fatalf("listWorkspaces failed: %v", err)
-	}
-	defer workspacesResp.Body.Close()
-
-	if workspacesResp.StatusCode != http.StatusOK {
-		t.Fatalf("expected 200, got %d", workspacesResp.StatusCode)
-	}
-
-	var workspaces []struct {
-		Name string `json:"name"`
-		Slug string `json:"slug"`
-	}
-	readJSON(t, workspacesResp, &workspaces)
-
-	if len(workspaces) != 0 {
-		t.Fatalf("expected 0 workspaces for new user, got %d", len(workspaces))
+		if resp.StatusCode != http.StatusNotFound {
+			t.Errorf("%s: expected 404 for removed route, got %d", path, resp.StatusCode)
+		}
 	}
 }
 
@@ -1560,6 +1432,71 @@ func readWSMessageOfType(t *testing.T, conn *websocket.Conn, wantType string) ma
 		}
 		if wsMsg["type"] != "activity:created" {
 			t.Fatalf("expected type '%s', got '%s'", wantType, wsMsg["type"])
+		}
+	}
+}
+
+// TestLocalDesktopWorkspaceRouteSurface pins the local-mode route boundary:
+// account/invitation/workspace-administration flows are absent, while the
+// reads the packaged renderer needs (workspace, members for local role
+// resolution) stay registered. Requests carry the per-launch local app token
+// so they pass the auth middleware and actually exercise routing: without it
+// every /api/* path returns 401 whether the route exists or not.
+//
+// Absent operations assert 404-or-405 because chi answers 405 when the path
+// prefix matches a different method; both prove the operation is unavailable.
+func TestLocalDesktopDoesNotRegisterWorkspaceAdministrationRoutes(t *testing.T) {
+	t.Setenv("INKWAY_LOCAL_MODE", "true")
+	t.Setenv("INKWAY_LOCAL_APP_TOKEN", "test-local-app-token")
+	t.Setenv("CORS_ALLOWED_ORIGINS", "")
+	t.Setenv("DISABLE_WORKSPACE_CREATION", "true")
+
+	ctx := context.Background()
+	if err := localidentity.Ensure(ctx, testPool); err != nil {
+		t.Fatalf("seed local identity: %v", err)
+	}
+	t.Cleanup(func() {
+		testPool.Exec(ctx, `DELETE FROM member WHERE workspace_id = '00000000-0000-4000-8000-000000000002' AND user_id = '00000000-0000-4000-8000-000000000001'`)
+		testPool.Exec(ctx, `DELETE FROM workspace WHERE id = '00000000-0000-4000-8000-000000000002'`)
+		testPool.Exec(ctx, `DELETE FROM "user" WHERE id = '00000000-0000-4000-8000-000000000001'`)
+	})
+
+	router := NewRouter(testPool, realtime.NewHub(), events.New(), analytics.NoopClient{}, nil)
+	localServer := httptest.NewServer(router)
+	defer localServer.Close()
+
+	do := func(method, path string) int {
+		t.Helper()
+		req, err := http.NewRequest(method, localServer.URL+path, strings.NewReader("{}"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		req.Header.Set("Authorization", "Bearer test-local-app-token")
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			t.Fatalf("%s %s failed: %v", method, path, err)
+		}
+		defer resp.Body.Close()
+		return resp.StatusCode
+	}
+
+	// Deliberately exposed local reads.
+	if got := do(http.MethodGet, "/api/workspaces/00000000-0000-4000-8000-000000000002/members"); got != http.StatusOK {
+		t.Errorf("GET members returned %d, want 200 (local role-resolution read is registered)", got)
+	}
+
+	// Absent administration operations: creation, invitation, leave, deletion.
+	for _, request := range []struct {
+		method string
+		path   string
+	}{
+		{http.MethodPost, "/api/workspaces/"},
+		{http.MethodPost, "/api/workspaces/00000000-0000-4000-8000-000000000002/members"},
+		{http.MethodPost, "/api/workspaces/00000000-0000-4000-8000-000000000002/leave"},
+		{http.MethodDelete, "/api/workspaces/00000000-0000-4000-8000-000000000002"},
+	} {
+		if got := do(request.method, request.path); got != http.StatusNotFound && got != http.StatusMethodNotAllowed {
+			t.Errorf("%s %s returned %d, want 404 or 405 (operation is not registered)", request.method, request.path, got)
 		}
 	}
 }

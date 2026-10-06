@@ -11,7 +11,7 @@ export type DaemonState =
   // The daemon can't start because the server rejected its credentials (the
   // cached PAT expired / was revoked, or the session token is dead). Without
   // this, an auth failure silently sticks at "starting" forever — see #3512.
-  | "auth_expired";
+  | "credential_expired";
 
 export interface DaemonStatus {
   state: DaemonState;
@@ -60,7 +60,7 @@ export const DAEMON_STATE_COLORS: Record<DaemonState, string> = {
   installing_cli: "bg-sky-500 animate-pulse",
   cli_not_found: "bg-red-500",
   recovery_paused: "bg-amber-500",
-  auth_expired: "bg-red-500",
+  credential_expired: "bg-red-500",
 };
 
 export function formatUptime(uptime?: string): string {
@@ -116,7 +116,7 @@ export function daemonStateDescription(state: DaemonState, runtimeCount: number)
       return "Setup failed · couldn't download the runtime. Check your network.";
     case "recovery_paused":
       return "Automatic recovery paused after repeated failures · start manually to retry.";
-    case "auth_expired":
-      return "Sign-in expired · sign in again to bring this device back online.";
+    case "credential_expired":
+      return "Local runtime credential unavailable · reconnect Inkway to restore run intake.";
   }
 }

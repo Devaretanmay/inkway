@@ -9,7 +9,6 @@ import {
   CreditCard,
   FolderGit2,
   Keyboard,
-  KeyRound,
   Laptop,
   ListPlus,
   Lock,
@@ -42,7 +41,6 @@ import { AppLink, useNavigation } from "../../navigation";
 import { WorkspaceAvatar } from "../../workspace/workspace-avatar";
 import { AccountTab } from "./account-tab";
 import { PreferencesTab } from "./preferences-tab";
-import { TokensTab } from "./tokens-tab";
 import { WorkspaceTab } from "./workspace-tab";
 import { MembersTab } from "./members-tab";
 import { CodeTab } from "./code-tab";
@@ -183,7 +181,6 @@ export function SettingsPage({ extraDeviceTabs = [] }: SettingsPageProps = {}) {
                   }),
                 ]
               : []),
-            entry("tokens", t(($) => $.page.tabs.tokens), KeyRound, <TokensTab />, { navHidden: true }),
           ],
         },
       ],

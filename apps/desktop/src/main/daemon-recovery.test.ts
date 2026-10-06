@@ -50,7 +50,7 @@ describe("DaemonRecoveryPolicy", () => {
     { state: "stopping" as const },
     { state: "installing_cli" as const },
     { state: "cli_not_found" as const },
-    { state: "auth_expired" as const },
+    { state: "credential_expired" as const },
     { state: "recovery_paused" as const },
   ])("does not recover when ineligible: %o", (override) => {
     const policy = new DaemonRecoveryPolicy();
@@ -151,7 +151,7 @@ describe("DaemonRecoveryPolicy", () => {
 });
 
 describe("recovery orchestration guards", () => {
-  const profile = { name: "desktop-api.multica.ai", port: 19_999 };
+  const profile = { name: "desktop-api.example.test", port: 19_999 };
 
   it("allows first-start recovery for a Desktop-owned profile", () => {
     expect(

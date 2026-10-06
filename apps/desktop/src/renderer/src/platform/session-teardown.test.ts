@@ -11,7 +11,6 @@ function makeTeardown(
   overrides: Partial<SessionTeardown> = {},
 ): SessionTeardown {
   return {
-    reportAuthSession: vi.fn(),
     resetTabs: vi.fn(),
     closeOverlay: vi.fn(),
     resetWelcome: vi.fn(),
@@ -30,7 +29,6 @@ describe("tearDownOnLogout", () => {
     const t = makeTeardown();
     await tearDownOnLogout(t);
 
-    expect(t.reportAuthSession).toHaveBeenCalledWith(null);
     expect(t.resetTabs).toHaveBeenCalledOnce();
     expect(t.closeOverlay).toHaveBeenCalledOnce();
     expect(t.resetWelcome).toHaveBeenCalledOnce();
@@ -79,7 +77,6 @@ describe("tearDownOnSessionExpiry", () => {
     const t = makeTeardown();
     tearDownOnSessionExpiry(t);
 
-    expect(t.reportAuthSession).toHaveBeenCalledWith(null);
     expect(t.resetTabs).toHaveBeenCalledOnce();
     expect(t.closeOverlay).toHaveBeenCalledOnce();
     expect(t.resetWelcome).toHaveBeenCalledOnce();

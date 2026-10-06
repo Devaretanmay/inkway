@@ -1,13 +1,12 @@
 import { create } from "zustand";
 import type { User, StorageAdapter } from "../types";
-import { identify as identifyAnalytics, resetAnalytics } from "../analytics";
+import { resetAnalytics } from "../analytics";
 import type { ApiClient } from "../api/client";
 import { setCurrentWorkspace } from "../platform/workspace-storage";
 
 export interface AuthStoreOptions {
   api: ApiClient;
   storage: StorageAdapter;
-  onLogin?: () => void;
   onLogout?: () => void;
   /**
    * Cleanup for a session the server ended, as opposed to one the user did.
@@ -39,10 +38,6 @@ export interface AuthState {
   expired: boolean;
 
   retryAuthentication: () => void;
-  sendCode: (email: string) => Promise<void>;
-  verifyCode: (email: string, code: string) => Promise<User>;
-  loginWithGoogle: (code: string, redirectUri: string) => Promise<User>;
-  loginWithToken: (token: string) => Promise<User>;
   logout: () => void;
   sessionExpired: () => void;
   setUser: (user: User) => void;
@@ -50,7 +45,7 @@ export interface AuthState {
 }
 
 export function createAuthStore(options: AuthStoreOptions) {
-  const { api, storage, onLogin, onLogout, onSessionExpired, cookieAuth } =
+  const { api, storage, onLogout, onSessionExpired, cookieAuth } =
     options;
 
   return create<AuthState>((set, get) => ({
@@ -68,50 +63,7 @@ export function createAuthStore(options: AuthStoreOptions) {
       }));
     },
 
-    sendCode: async (email: string) => {
-      await api.sendCode(email);
-    },
-
-    verifyCode: async (email: string, code: string) => {
-      const { token, user } = await api.verifyCode(email, code);
-      if (!cookieAuth) {
-        // Token mode: persist for Electron / legacy.
-        storage.setItem("inkway_token", token);
-        api.setToken(token);
-      }
-      onLogin?.();
-      identifyAnalytics(user.id, { email: user.email, name: user.name });
-      set({ user, isLoading: false, status: "authenticated", expired: false });
-      return user;
-    },
-
-    loginWithGoogle: async (code: string, redirectUri: string) => {
-      const { token, user } = await api.googleLogin(code, redirectUri);
-      if (!cookieAuth) {
-        storage.setItem("inkway_token", token);
-        api.setToken(token);
-      }
-      onLogin?.();
-      identifyAnalytics(user.id, { email: user.email, name: user.name });
-      set({ user, isLoading: false, status: "authenticated", expired: false });
-      return user;
-    },
-
-    loginWithToken: async (token: string) => {
-      storage.setItem("inkway_token", token);
-      api.setToken(token);
-      const user = await api.getMe();
-      onLogin?.();
-      identifyAnalytics(user.id, { email: user.email, name: user.name });
-      set({ user, isLoading: false, status: "authenticated", expired: false });
-      return user;
-    },
-
     logout: () => {
-      if (cookieAuth) {
-        // Clear server-side HttpOnly cookie.
-        api.logout().catch(() => {});
-      }
       storage.removeItem("inkway_token");
       api.setToken(null);
       setCurrentWorkspace(null, null);

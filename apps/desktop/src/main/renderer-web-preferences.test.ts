@@ -9,13 +9,8 @@ describe("createRendererWebPreferences", () => {
     expect(createRendererWebPreferences(PRELOAD, "en").sandbox).toBe(true);
   });
 
-  it("keeps webSecurity off only until the privileged-protocol migration lands", () => {
-    // Pinned deliberately: webSecurity must not come back on by accident.
-    // Restoring it requires moving the renderer off the opaque file:// origin
-    // onto a custom privileged protocol (so CORS preflights carry a real
-    // Origin), plus server-side CORS coordination. Any change to this
-    // expectation should be that migration, in its own PR.
-    expect(createRendererWebPreferences(PRELOAD, "en").webSecurity).toBe(false);
+  it("keeps Chromium web security enabled", () => {
+    expect(createRendererWebPreferences(PRELOAD, "en").webSecurity).toBe(true);
   });
 
   it("leaves contextIsolation and nodeIntegration at Electron's secure defaults", () => {

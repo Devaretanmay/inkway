@@ -310,73 +310,6 @@ describe("mobile sheet dismissal", () => {
   });
 });
 
-describe("workspace-switcher unread dot", () => {
-  beforeEach(() => {
-    summary.current = [];
-    workspaces.current = [];
-  });
-
-  // The aggregate switcher dot is the only `.ring-sidebar` span in the tree
-  // (DraftDot is null when there's no draft, and there are no invitations).
-  const dot = (container: HTMLElement) => container.querySelector("span.bg-brand.ring-sidebar");
-
-  it("shows a dot when another workspace has unread inbox items", () => {
-    summary.current = [{ workspace_id: "ws-2", count: 3 }];
-    const { container } = render(<AppSidebar />);
-    expect(dot(container)).not.toBeNull();
-  });
-
-  it("does not show a dot when only the active workspace has unread", () => {
-    // Active workspace is ws-1 (see useCurrentWorkspace mock).
-    summary.current = [{ workspace_id: "ws-1", count: 3 }];
-    const { container } = render(<AppSidebar />);
-    expect(dot(container)).toBeNull();
-  });
-
-  it("does not show a dot when no workspace has unread", () => {
-    summary.current = [];
-    const { container } = render(<AppSidebar />);
-    expect(dot(container)).toBeNull();
-  });
-});
-
-describe("workspace-switcher dropdown per-workspace dot", () => {
-  beforeEach(() => {
-    summary.current = [];
-    // Active workspace is ws-1 (see useCurrentWorkspace mock); "Other" is ws-2.
-    workspaces.current = [
-      { id: "ws-1", name: "Active WS", slug: "active", avatar_url: null },
-      { id: "ws-2", name: "Other WS", slug: "other", avatar_url: null },
-    ];
-  });
-
-  // Row dots are brand dots WITHOUT the aggregate avatar dot's `ring-sidebar`.
-  const rowDots = (container: HTMLElement) =>
-    container.querySelectorAll("span.bg-brand:not(.ring-sidebar)");
-
-  it("dots the specific other workspace that has unread", () => {
-    summary.current = [{ workspace_id: "ws-2", count: 3 }];
-    const { container } = render(<AppSidebar />);
-    // Exactly one row dot, sitting right after the "Other WS" name; the active
-    // row shows the check, not a dot.
-    expect(rowDots(container)).toHaveLength(1);
-    expect(screen.getByText("Other WS").nextElementSibling?.className).toContain("bg-brand");
-    expect(screen.getByText("Active WS").nextElementSibling?.className ?? "").not.toContain("bg-brand");
-  });
-
-  it("does not dot a workspace whose unread count is zero", () => {
-    summary.current = [{ workspace_id: "ws-2", count: 0 }];
-    const { container } = render(<AppSidebar />);
-    expect(rowDots(container)).toHaveLength(0);
-  });
-
-  it("never dots the active workspace even when it has unread", () => {
-    summary.current = [{ workspace_id: "ws-1", count: 5 }];
-    const { container } = render(<AppSidebar />);
-    expect(rowDots(container)).toHaveLength(0);
-  });
-});
-
 describe("navigation item presentation", () => {
   it("keeps Inks and Settings styled like the other nav items", () => {
     const { container } = render(<AppSidebar />);
@@ -428,41 +361,5 @@ describe("Inkway alpha primary nav", () => {
       ?.querySelector("number-flow-react") as (HTMLElement & { animated?: boolean }) | null;
 
     expect(inboxBadge?.animated).toBe(false);
-  });
-});
-
-describe("Pending invitation self-heal", () => {
-  beforeEach(() => {
-    invitationApi.accept.mockReset();
-    invitationApi.decline.mockReset();
-    invitationApi.invalidateQueries.mockClear();
-    invitationApi.mutations.length = 0;
-    invitationApi.accept.mockRejectedValue(new Error("invitation is not pending"));
-    invitationApi.decline.mockRejectedValue(new Error("invitation is not pending"));
-    navigation.current.pathname = "/acme/issues";
-    workspaces.current = [];
-  });
-
-  // "invitation is not pending" means the row on screen was concluded from
-  // another surface. Both mutations must invalidate the pending list on
-  // failure so the stale row drops instead of surviving until restart.
-  it("invalidates the pending-invitations list when accept or decline fails", async () => {
-    render(<AppSidebar />);
-    expect(invitationApi.mutations).toHaveLength(2);
-
-    for (const options of invitationApi.mutations as Array<{
-      mutationFn: (id: string) => Promise<unknown>;
-      onError?: (...args: unknown[]) => unknown;
-      onSettled?: (...args: unknown[]) => unknown;
-    }>) {
-      const settle = options.onError ?? options.onSettled;
-      expect(settle).toBeTypeOf("function");
-      invitationApi.invalidateQueries.mockClear();
-      await expect(options.mutationFn("inv-1")).rejects.toThrow("invitation is not pending");
-      await settle!(new Error("invitation is not pending"), "inv-1", undefined, undefined);
-      expect(invitationApi.invalidateQueries).toHaveBeenCalledWith({ queryKey: ["invitations"] });
-    }
-    expect(invitationApi.accept).toHaveBeenCalledTimes(1);
-    expect(invitationApi.decline).toHaveBeenCalledTimes(1);
   });
 });

@@ -3,6 +3,8 @@ export interface RuntimeConfig {
   apiUrl: string;
   wsUrl: string;
   appUrl: string;
+  /** Per-launch bearer used only between this Electron instance and its local API. */
+  localAppToken?: string;
 }
 
 export interface RuntimeConfigError {
@@ -15,9 +17,9 @@ export type RuntimeConfigResult =
 
 export const DEFAULT_RUNTIME_CONFIG: RuntimeConfig = Object.freeze({
   schemaVersion: 1,
-  apiUrl: "https://api.multica.ai",
-  wsUrl: "wss://api.multica.ai/ws",
-  appUrl: "https://multica.ai",
+  apiUrl: "http://127.0.0.1:8080",
+  wsUrl: "ws://127.0.0.1:8080/ws",
+  appUrl: "http://127.0.0.1:8080",
 });
 
 const LOCAL_DEV_RUNTIME_CONFIG: RuntimeConfig = Object.freeze({
@@ -93,8 +95,7 @@ export function deriveWsUrl(apiUrl: string): string {
   return trimTrailingSlash(url.toString());
 }
 
-// Convention: api hosts are exposed at `api.<web-host>` (api.multica.ai →
-// multica.ai, api.test.multica.ai → test.multica.ai). Strip the leading
+// Convention: api hosts are exposed at `api.<web-host>`. Strip the leading
 // `api.` label so a single `apiUrl` configuration produces the right
 // shareable web URL. Hosts that don't match the convention (no leading
 // `api.` label, or short two-label hosts like `api.local`) fall through

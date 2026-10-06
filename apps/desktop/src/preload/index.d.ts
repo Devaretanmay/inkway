@@ -2,7 +2,6 @@ import { ElectronAPI } from "@electron-toolkit/preload";
 import type { RuntimeConfigResult } from "../shared/runtime-config";
 import type { NavigationGesture } from "../shared/navigation-gestures";
 import type { RendererRouteContextInput } from "../shared/renderer-route-context";
-import type { FreezeBreadcrumb } from "../shared/freeze-breadcrumb";
 import type {
   DesktopWindowContext,
   IssueWindowRequest,
@@ -32,19 +31,7 @@ interface DesktopAPI {
   runtimeConfig: RuntimeConfigResult;
   /** Main tabbed window or a dedicated issue-only window. */
   windowContext: DesktopWindowContext;
-  /** Read any freeze/crash breadcrumb from a previous session, so the renderer
-   *  can flush it to telemetry on boot. Null when nothing's pending. Reading
-   *  does not consume it — acknowledge with `ackFreeze`. */
-  getLastFreeze: () => FreezeBreadcrumb | null;
-  /** Retire the breadcrumb with this exact timestamp once its event has been
-   *  handed to analytics. Unacknowledged breadcrumbs are retried next boot. */
-  ackFreeze: (ts: number) => void;
   /** Report the resolved account identity so stale issue windows can close. */
-  reportAuthSession: (userId: string | null) => void;
-  /** Listen for auth token delivered via deep link. Returns an unsubscribe function. */
-  onAuthToken: (callback: (token: string) => void) => () => void;
-  /** Listen for invitation IDs delivered via deep link. Returns an unsubscribe function. */
-  onInviteOpen: (callback: (invitationId: string) => void) => () => void;
   /** Open a URL in the default browser. */
   openExternal: (url: string) => Promise<void>;
   /** Download a file by URL through Electron's native download system.
@@ -124,7 +111,6 @@ interface DesktopAPI {
 
 type DaemonReauthResult =
   | { ok: true }
-  | { ok: false; reason: "session_invalid" }
   | { ok: false; reason: "transient"; message: string };
 
 interface DaemonAPI {
@@ -136,11 +122,10 @@ interface DaemonAPI {
   getHostName: () => Promise<string>;
   onStatusChange: (callback: (status: DaemonStatus) => void) => () => void;
   setTargetApiUrl: (url: string) => Promise<void>;
-  syncToken: (token: string, userId: string) => Promise<void>;
+  syncToken: (token: string) => Promise<void>;
   clearToken: () => Promise<void>;
   reauthenticate: (
     token: string,
-    userId: string,
   ) => Promise<DaemonReauthResult>;
   isCliInstalled: () => Promise<boolean>;
   providerCredential: (request: { action: "status" | "set" | "delete" | "validate"; runtimeId: string; provider: "openai" | "anthropic" | "groq"; model?: string; value?: string }) => Promise<{ ok: boolean; message: string; present?: boolean }>;

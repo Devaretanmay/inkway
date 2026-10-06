@@ -46,7 +46,11 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, name, email, avatar_url, created_at, updated_at, onboarded_at, onboarding_questionnaire, cloud_waitlist_email, cloud_waitlist_reason, starter_content_state, language, profile_description, timezone FROM "user"
+SELECT id, name, COALESCE(email, '') AS email, avatar_url, created_at, updated_at,
+       onboarded_at, onboarding_questionnaire, cloud_waitlist_email,
+       cloud_waitlist_reason, starter_content_state, language,
+       profile_description, timezone
+FROM "user"
 WHERE id = $1
 `
 

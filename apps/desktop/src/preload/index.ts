@@ -1,7 +1,6 @@
 import { contextBridge, ipcRenderer } from "electron";
 import { electronAPI } from "@electron-toolkit/preload";
 import type { RuntimeConfigResult } from "../shared/runtime-config";
-import type { FreezeBreadcrumb } from "../shared/freeze-breadcrumb";
 import type {
   ManualUpdateCheckResult,
   UpdaterPreferences,
@@ -19,7 +18,6 @@ import {
   readDesktopWindowContext,
   type IssueWindowRequest,
 } from "../shared/issue-window";
-import { AUTH_SESSION_STATE_CHANNEL } from "../shared/auth-session";
 import type {
   DaemonStatus,
   LocalRuntimeProbe,
@@ -123,30 +121,6 @@ const desktopAPI = {
   /** Identifies whether this renderer owns the main tabbed window or a
    *  dedicated issue window, parsed from validated launch arguments. */
   windowContext,
-  /** Read any freeze/crash breadcrumb left by a previous session, so the
-   *  renderer can flush it to telemetry on boot. Returns null when there's
-   *  nothing pending (the normal case). Reading does not consume it — call
-   *  `ackFreeze` once the event is on the wire. */
-  getLastFreeze: (): FreezeBreadcrumb | null => {
-    try {
-      return ipcRenderer.sendSync("freeze:get-last") as FreezeBreadcrumb | null;
-    } catch {
-      return null;
-    }
-  },
-  /** Retire the breadcrumb with this exact timestamp after its event has been
-   *  handed to analytics. Anything left unacknowledged is retried next boot. */
-  ackFreeze: (ts: number) => ipcRenderer.send("freeze:ack", ts),
-  /** Report only the resolved user id (never a token) so main can close
-   *  dedicated issue windows that belong to an old account. */
-  reportAuthSession: (userId: string | null) =>
-    ipcRenderer.send(AUTH_SESSION_STATE_CHANNEL, userId),
-  /** Listen for auth token delivered via deep link */
-  onAuthToken: (callback: (token: string) => void) =>
-    subscribeToMainRendererChannel("auth:token", callback),
-  /** Listen for invitation IDs delivered via deep link */
-  onInviteOpen: (callback: (invitationId: string) => void) =>
-    subscribeToMainRendererChannel("invite:open", callback),
   /** Open a URL in the default browser */
   openExternal: (url: string) => ipcRenderer.invoke("shell:openExternal", url),
   /** Download a file by URL through Electron's native download system.
@@ -247,7 +221,6 @@ const desktopAPI = {
 
 type DaemonReauthResult =
   | { ok: true }
-  | { ok: false; reason: "session_invalid" }
   | { ok: false; reason: "transient"; message: string };
 
 const daemonAPI = {
@@ -270,15 +243,14 @@ const daemonAPI = {
   },
   setTargetApiUrl: (url: string): Promise<void> =>
     ipcRenderer.invoke("daemon:set-target-api-url", url),
-  syncToken: (token: string, userId: string): Promise<void> =>
-    ipcRenderer.invoke("daemon:sync-token", token, userId),
+  syncToken: (token: string): Promise<void> =>
+    ipcRenderer.invoke("daemon:sync-token", token),
   clearToken: (): Promise<void> =>
     ipcRenderer.invoke("daemon:clear-token"),
   reauthenticate: (
     token: string,
-    userId: string,
   ): Promise<DaemonReauthResult> =>
-    ipcRenderer.invoke("daemon:reauthenticate", token, userId),
+    ipcRenderer.invoke("daemon:reauthenticate", token),
   isCliInstalled: (): Promise<boolean> =>
     ipcRenderer.invoke("daemon:is-cli-installed"),
   providerCredential: (request: { action: "status" | "set" | "delete" | "validate"; runtimeId: string; provider: "openai" | "anthropic" | "groq"; model?: string; value?: string }): Promise<{ ok: boolean; message: string; present?: boolean }> =>

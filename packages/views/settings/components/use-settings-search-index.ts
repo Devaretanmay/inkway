@@ -107,11 +107,6 @@ export function useSettingsSearchIndex(
         title: t(($) => $.notifications.browser.label),
       },
       {
-        tab: "tokens",
-        title: t(($) => $.page.tabs.tokens),
-        description: t(($) => $.tokens.purpose),
-      },
-      {
         tab: "shortcuts",
         title: t(($) => $.page.tabs.shortcuts),
         description: t(($) => $.shortcuts.description),

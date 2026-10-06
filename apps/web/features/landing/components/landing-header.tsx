@@ -5,7 +5,6 @@ import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { InkwayIcon } from "@inkway/ui/components/common/inkway-icon";
 import { cn } from "@inkway/ui/lib/utils";
-import { useAuthStore } from "@inkway/core/auth";
 import { docsHrefForLocale, useLocale } from "../i18n";
 import { useDashboardCtaHref } from "../utils/use-dashboard-cta";
 import { formatStarCount, useGithubStars } from "../utils/use-github-stars";
@@ -17,7 +16,6 @@ export function LandingHeader({
   variant?: "dark" | "light";
 }) {
   const { t, locale } = useLocale();
-  const user = useAuthStore((s) => s.user);
   const stars = useGithubStars();
   const starsLabel = stars != null ? formatStarCount(stars) : null;
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -28,7 +26,7 @@ export function LandingHeader({
     { href: "/changelog", label: t.header.changelog },
   ];
   const ctaHref = useDashboardCtaHref();
-  const ctaLabel = user ? t.header.dashboard : t.header.cta;
+  const ctaLabel = t.header.cta;
 
   return (
     <header

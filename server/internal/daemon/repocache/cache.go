@@ -2007,6 +2007,11 @@ func (c *Cache) reconcileHookAt(hooksDir, workspaceID string, enabled bool) erro
 	return nil
 }
 
+// coAuthoredByTrailer is the exact trailer the prepare-commit-msg hook
+// appends. Tests assert against this constant so a future rebrand cannot
+// drift the hook and its expectations apart again.
+const coAuthoredByTrailer = "Co-authored-by: Inkway Agent <inkway-agent@inkway.local>"
+
 // prepareCommitMsgHook builds the prepare-commit-msg hook script that appends
 // a Co-authored-by trailer for the Inkway Agent to every commit message.
 //
@@ -2047,7 +2052,7 @@ case "$COMMIT_SOURCE" in
   merge|squash) exit 0 ;;
 esac
 
-` + gate + `TRAILER="Co-authored-by: inkway-agent <github@multica.ai>"
+` + gate + `TRAILER="` + coAuthoredByTrailer + `"
 
 # Don't add if already present.
 if grep -qF "$TRAILER" "$COMMIT_MSG_FILE"; then

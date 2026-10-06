@@ -34,6 +34,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 const here = dirname(fileURLToPath(import.meta.url));
 const desktopRoot = resolve(here, "..");
 const bundleCliScript = resolve(here, "bundle-cli.mjs");
+const bundleBackendScript = resolve(here, "bundle-backend.mjs");
 
 const PLATFORM_CONFIG = {
   mac: {
@@ -472,6 +473,15 @@ function main() {
         cwd: desktopRoot,
       },
     );
+
+    console.log(`[package] bundling local Inkway backend → ${formatTarget(target)}`);
+    execFileSync("node", [bundleBackendScript, "--target-platform", PLATFORM_CONFIG[target.platform].runtimePlatform, "--target-arch", target.arch], {
+      stdio: "inherit",
+      cwd: desktopRoot,
+    });
+    if (target.platform === "mac") {
+      execFileSync("node", [resolve(here, "bundle-postgres.mjs")], { stdio: "inherit", cwd: desktopRoot });
+    }
 
     const builderArgs = builderArgsForTarget(target, parsed, version, {
       disableMacNotarize,

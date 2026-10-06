@@ -187,9 +187,6 @@ cleared_vcs_prs AS (
 ),
 cleared_vcs_connections AS (
     DELETE FROM vcs_connection WHERE workspace_id = $1
-),
-cleared_client_usage_workspace AS (
-    UPDATE client_usage_daily SET workspace_id = NULL WHERE workspace_id = $1
 )
 DELETE FROM workspace WHERE workspace.id = $1
 `

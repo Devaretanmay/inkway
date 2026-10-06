@@ -60,7 +60,7 @@ function safeArchiveListing(archive, expectedRoot) {
   return assertSafeArchiveEntries(names, expectedRoot);
 }
 
-export async function provisionInkRuntime({ targetPlatform = process.platform, targetArch = process.arch, inkwayVersion } = {}) {
+async function provisionInkRuntimeUnsafe({ targetPlatform = process.platform, targetArch = process.arch, inkwayVersion } = {}) {
   const pin = JSON.parse(readFileSync(pinPath, "utf8"));
   validateInkPin(pin, targetPlatform, targetArch);
   const file = join(cacheRoot, basename(new URL(pin.url).pathname));
@@ -154,17 +154,41 @@ export async function provisionInkRuntime({ targetPlatform = process.platform, t
   };
   verifyLinks(extracted);
   const stage = `${resourcesRoot}.stage`;
+  const backup = `${resourcesRoot}.backup-${process.pid}`;
   rmSync(stage, { recursive: true, force: true });
-  run("ditto", [runtime, stage]);
-  run("ditto", [join(extracted, "bridge"), join(stage, "bridge")]);
-  const appManifest = JSON.parse(readFileSync(join(stage, "compatibility.json"), "utf8"));
-  appManifest.inkway_version = inkwayVersion ?? "development";
-  writeFileSync(join(stage, "compatibility.json"), `${JSON.stringify(appManifest, null, 2)}\n`);
-  writeFileSync(join(stage, "release-manifest.json"), `${JSON.stringify(release, null, 2)}\n`);
-  rmSync(resourcesRoot, { recursive: true, force: true });
-  renameSync(stage, resourcesRoot);
+  rmSync(backup, { recursive: true, force: true });
+  // The verified extraction already lives on the same APFS volume as app
+  // resources. Move it into place instead of copying the multi-gigabyte model
+  // a second time; this keeps release builds viable on ordinary developer
+  // disks without changing the verified bytes.
+  if (existsSync(resourcesRoot)) renameSync(resourcesRoot, backup);
+  try {
+    renameSync(runtime, stage);
+    run("ditto", [join(extracted, "bridge"), join(stage, "bridge")]);
+    const appManifest = JSON.parse(readFileSync(join(stage, "compatibility.json"), "utf8"));
+    appManifest.inkway_version = inkwayVersion ?? "development";
+    writeFileSync(join(stage, "compatibility.json"), `${JSON.stringify(appManifest, null, 2)}\n`);
+    writeFileSync(join(stage, "release-manifest.json"), `${JSON.stringify(release, null, 2)}\n`);
+    renameSync(stage, resourcesRoot);
+    rmSync(backup, { recursive: true, force: true });
+  } catch (error) {
+    rmSync(stage, { recursive: true, force: true });
+    if (!existsSync(resourcesRoot) && existsSync(backup)) renameSync(backup, resourcesRoot);
+    throw error;
+  }
   rmSync(temp, { recursive: true, force: true });
   console.log(`[ink-runtime] verified artifact ${pin.artifact_version} ${pin.sha256} (${names.length} archive entries)`);
+}
+
+export async function provisionInkRuntime(options = {}) {
+  try {
+    await provisionInkRuntimeUnsafe(options);
+  } finally {
+    // Interrupted/failed packaging must not strand a second copy of the
+    // multi-gigabyte runtime in the checkout or cache.
+    rmSync(join(cacheRoot, `.extract-${process.pid}`), { recursive: true, force: true });
+    rmSync(`${resourcesRoot}.stage`, { recursive: true, force: true });
+  }
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

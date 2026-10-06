@@ -3,23 +3,16 @@ import { config } from "dotenv";
 import { resolve } from "path";
 import {
   resolveDevDocsUrl,
-  resolveDevRemoteApiUrl,
   resolveDocsUrl,
-  resolveRemoteApiUrl,
 } from "./config/runtime-urls";
 import { createMDX } from "fumadocs-mdx/next";
 
-// Load root .env so local next.config.ts rewrites see REMOTE_API_URL / DOCS_URL.
-// Production requests use proxy.ts runtime rewrites, which read process.env
-// when the Next.js server runs instead of baking these URLs at build time.
+// Load the docs endpoint only. The public site has no account or product API.
 config({ path: resolve(__dirname, "../../.env") });
 
 // `next dev` falls back to the conventional localhost upstreams; builds use
 // the strict resolvers so prebuilt images keep unset upstreams unproxied.
 const isDev = process.env.NODE_ENV === "development";
-const remoteApiUrl = isDev
-  ? resolveDevRemoteApiUrl(process.env)
-  : resolveRemoteApiUrl(process.env);
 const docsUrl = isDev
   ? resolveDevDocsUrl(process.env)
   : resolveDocsUrl(process.env);
@@ -61,34 +54,6 @@ const nextConfig: NextConfig = {
             {
               source: "/docs/:path*",
               destination: `${docsUrl}/docs/:path*`,
-            },
-          ]
-        : [],
-      afterFiles: remoteApiUrl
-        ? [
-            {
-              source: "/v1/:path*",
-              destination: `${remoteApiUrl}/v1/:path*`,
-            },
-            {
-              source: "/api/:path*",
-              destination: `${remoteApiUrl}/api/:path*`,
-            },
-            {
-              source: "/ws",
-              destination: `${remoteApiUrl}/ws`,
-            },
-            {
-              source: "/health",
-              destination: `${remoteApiUrl}/health`,
-            },
-            {
-              source: "/auth/:path*",
-              destination: `${remoteApiUrl}/auth/:path*`,
-            },
-            {
-              source: "/uploads/:path*",
-              destination: `${remoteApiUrl}/uploads/:path*`,
             },
           ]
         : [],

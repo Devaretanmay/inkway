@@ -1,10 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { AlertCircle, ArrowDownToLine, Check, Loader2 } from "lucide-react";
 import { Button } from "@inkway/ui/components/ui/button";
-import { Switch } from "@inkway/ui/components/ui/switch";
 import { useT } from "@inkway/views/i18n";
 import { SettingsCard, SettingsRow, SettingsTab } from "@inkway/views/settings";
-import { toast } from "sonner";
 
 type CheckState =
   | { status: "idle" }
@@ -16,48 +14,7 @@ type CheckState =
 export function UpdatesSettingsTab() {
   const { t } = useT("settings");
   const [state, setState] = useState<CheckState>({ status: "idle" });
-  const [automaticUpdates, setAutomaticUpdates] = useState(true);
-  const [preferencesReady, setPreferencesReady] = useState(false);
-  const [savingPreference, setSavingPreference] = useState(false);
   const currentVersion = window.desktopAPI.appInfo.version;
-
-  useEffect(() => {
-    let mounted = true;
-    void window.updater
-      .getPreferences()
-      .then((preferences) => {
-        if (mounted) setAutomaticUpdates(preferences.automaticUpdates);
-      })
-      .catch(() => {
-        // The main process falls back to enabled when preferences cannot be
-        // read. Keep the same safe default if IPC itself becomes unavailable.
-      })
-      .finally(() => {
-        if (mounted) setPreferencesReady(true);
-      });
-
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  const handleAutomaticUpdatesChange = useCallback(
-    async (enabled: boolean) => {
-      setSavingPreference(true);
-      try {
-        const preferences = await window.updater.setAutomaticUpdates(enabled);
-        setAutomaticUpdates(preferences.automaticUpdates);
-        toast.success(t(($) => $.auto_save.toast_saved), {
-          id: "settings-auto-save",
-        });
-      } catch {
-        toast.error(t(($) => $.desktop.updates.automatic_updates_save_failed));
-      } finally {
-        setSavingPreference(false);
-      }
-    },
-    [t],
-  );
 
   const handleCheck = useCallback(async () => {
     setState({ status: "checking" });
@@ -82,18 +39,6 @@ export function UpdatesSettingsTab() {
           <span className="font-mono text-caption text-muted-foreground">
             v{currentVersion}
           </span>
-        </SettingsRow>
-
-        <SettingsRow
-          label={t(($) => $.desktop.updates.automatic_updates_title)}
-          description={t(($) => $.desktop.updates.automatic_updates_description)}
-        >
-          <Switch
-            checked={automaticUpdates}
-            onCheckedChange={handleAutomaticUpdatesChange}
-            disabled={!preferencesReady || savingPreference}
-            aria-label={t(($) => $.desktop.updates.automatic_updates_title)}
-          />
         </SettingsRow>
 
         <SettingsRow

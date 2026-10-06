@@ -182,68 +182,12 @@ func TestLoadConfig_WSClaimPollIntervalPrecedence(t *testing.T) {
 	}
 }
 
-func TestLoadConfig_CompletedTaskTTLDefaultsBoundedOnOfficialCloud(t *testing.T) {
-	stageFakeAgent(t)
-	t.Setenv("HOME", t.TempDir())
-	t.Setenv("SHELL", filepath.Join(t.TempDir(), "missing-shell"))
-	t.Setenv("INKWAY_GC_COMPLETED_TASK_TTL", "")
-
-	overrides := Overrides{
-		ServerURL:      "https://" + officialCloudHost,
-		WorkspacesRoot: t.TempDir(),
-	}
-	cfg, err := LoadConfig(overrides)
-	if err != nil {
-		t.Fatalf("LoadConfig on official cloud: %v", err)
-	}
-	if cfg.GCCompletedTaskTTL != 14*24*time.Hour {
-		t.Fatalf("GCCompletedTaskTTL = %s, want 14d on official cloud", cfg.GCCompletedTaskTTL)
-	}
-
-	// An explicit 0 has to win on cloud too — otherwise the only way back to the
-	// previous retention behavior would be downgrading the daemon.
-	t.Setenv("INKWAY_GC_COMPLETED_TASK_TTL", "0")
-	cfg, err = LoadConfig(overrides)
-	if err != nil {
-		t.Fatalf("LoadConfig with cloud opt-out: %v", err)
-	}
-	if cfg.GCCompletedTaskTTL != 0 {
-		t.Fatalf("GCCompletedTaskTTL = %s, want an explicit 0 to disable the cloud default", cfg.GCCompletedTaskTTL)
-	}
-
-	t.Setenv("INKWAY_GC_COMPLETED_TASK_TTL", "36h")
-	cfg, err = LoadConfig(overrides)
-	if err != nil {
-		t.Fatalf("LoadConfig with cloud override: %v", err)
-	}
-	if cfg.GCCompletedTaskTTL != 36*time.Hour {
-		t.Fatalf("GCCompletedTaskTTL = %s, want the env override to win on cloud", cfg.GCCompletedTaskTTL)
-	}
-}
-
-func TestDefaultGCCompletedTaskTTLOnlyBoundsOfficialCloudHost(t *testing.T) {
+func TestCompletedTaskTTLIsDisabledForEveryHostByDefault(t *testing.T) {
 	t.Parallel()
-	cases := []struct {
-		name      string
-		serverURL string
-		want      time.Duration
-	}{
-		{"official cloud", "https://api.multica.ai", DefaultGCCompletedTaskTTLCloud},
-		{"official cloud with port and path", "https://API.Multica.AI:443/api", DefaultGCCompletedTaskTTLCloud},
-		// Staging and previews inherit the self-host value for the same reason
-		// officialCloudHost excludes them from the auto-update default.
-		{"staging", "https://api-staging.multica.ai", DefaultGCCompletedTaskTTLSelfHost},
-		{"self-host", "https://inkway.example.com", DefaultGCCompletedTaskTTLSelfHost},
-		{"localhost", "http://localhost:8080", DefaultGCCompletedTaskTTLSelfHost},
-		{"unparseable", "://nope", DefaultGCCompletedTaskTTLSelfHost},
-	}
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			t.Parallel()
-			if got := defaultGCCompletedTaskTTL(tc.serverURL); got != tc.want {
-				t.Fatalf("defaultGCCompletedTaskTTL(%q) = %s, want %s", tc.serverURL, got, tc.want)
-			}
-		})
+	for _, host := range []string{"http://127.0.0.1:40001", "https://inkway.example.test", "https://api.multica.ai"} {
+		if got := defaultGCCompletedTaskTTL(host); got != 0 {
+			t.Errorf("defaultGCCompletedTaskTTL(%q) = %s, want disabled", host, got)
+		}
 	}
 }
 
@@ -419,37 +363,6 @@ func TestResolveAgentsViaLoginShell_EmptyInput(t *testing.T) {
 // asserting against.
 func lookPathInPath(name string) (string, error) {
 	return exec.LookPath(name)
-}
-
-func TestIsOfficialCloudServer(t *testing.T) {
-	for _, tc := range []struct {
-		name string
-		url  string
-		want bool
-	}{
-		{"canonical cloud https", "https://api.multica.ai", true},
-		{"canonical cloud with trailing slash stripped", "https://api.multica.ai/", true},
-		{"canonical cloud case-insensitive", "https://API.Multica.AI", true},
-		{"cloud over plain http (unusual but match host)", "http://api.multica.ai", true},
-		{"localhost is self-host", "http://localhost:8080", false},
-		{"loopback ip is self-host", "http://127.0.0.1:8080", false},
-		{"lan ip is self-host", "http://192.168.0.28:8080", false},
-		{"third-party host is self-host", "https://inkway.example.com", false},
-		// Staging / preview / future subdomains deliberately follow the
-		// safer self-host default until explicitly opted in.
-		{"multica.ai apex is not the api host", "https://multica.ai", false},
-		{"staging subdomain is self-host", "https://staging.multica.ai", false},
-		{"preview subdomain is self-host", "https://api-preview.multica.ai", false},
-		// Malformed inputs must not falsely match.
-		{"empty string is self-host", "", false},
-		{"garbage string is self-host", "::not a url::", false},
-	} {
-		t.Run(tc.name, func(t *testing.T) {
-			if got := isOfficialCloudServer(tc.url); got != tc.want {
-				t.Errorf("isOfficialCloudServer(%q) = %v, want %v", tc.url, got, tc.want)
-			}
-		})
-	}
 }
 
 // stageFakeAgent writes an executable `claude` script into a temp dir and
@@ -1025,22 +938,17 @@ func TestLoadConfig_OpenCodeIdleWatchdog(t *testing.T) {
 	}
 }
 
-// TestLoadConfig_AutoUpdateDefault_CloudOn confirms the symmetric case: a
-// daemon pointed at Inkway's hosted cloud keeps the historical opt-in
-// auto-update default. We pass the WSS form of the URL to also exercise that
-// NormalizeServerBaseURL maps it through to the http host the detector
-// inspects.
-func TestLoadConfig_AutoUpdateDefault_CloudOn(t *testing.T) {
+func TestLoadConfig_AutoUpdateDefaultsOffForEveryHost(t *testing.T) {
 	stageFakeAgent(t)
-	cfg, err := LoadConfig(Overrides{
-		ServerURL:      "wss://api.multica.ai/ws",
-		WorkspacesRoot: t.TempDir(),
-	})
-	if err != nil {
-		t.Fatalf("LoadConfig: %v", err)
-	}
-	if !cfg.AutoUpdateEnabled {
-		t.Fatalf("AutoUpdateEnabled = false for Inkway Cloud server, want true")
+	t.Setenv("INKWAY_DAEMON_AUTO_UPDATE", "")
+	for _, serverURL := range []string{"http://127.0.0.1:40001", "https://inkway.example.test", "https://api.multica.ai"} {
+		cfg, err := LoadConfig(Overrides{ServerURL: serverURL, WorkspacesRoot: t.TempDir()})
+		if err != nil {
+			t.Fatalf("LoadConfig(%q): %v", serverURL, err)
+		}
+		if cfg.AutoUpdateEnabled {
+			t.Errorf("AutoUpdateEnabled = true for %s, want default off", serverURL)
+		}
 	}
 }
 
@@ -1078,9 +986,8 @@ func TestLoadConfig_AutoUpdateEnv_ForcesOffForCloud(t *testing.T) {
 	}
 }
 
-// TestLoadConfig_AutoUpdate_NoFlagWinsOverCloudDefault keeps the legacy CLI
-// flag working: --no-auto-update (translated into overrides.DisableAutoUpdate)
-// forces auto-update off even when the cloud default and env var would enable.
+// TestLoadConfig_AutoUpdate_NoFlagWinsOverEnv keeps the explicit CLI opt-out
+// working even when the environment opts in.
 func TestLoadConfig_AutoUpdate_NoFlagWinsOverCloudDefault(t *testing.T) {
 	stageFakeAgent(t)
 	t.Setenv("INKWAY_DAEMON_AUTO_UPDATE", "true")

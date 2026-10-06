@@ -85,14 +85,13 @@ function renderInitializer({
   cookieAuth?: boolean;
   platform?: "desktop" | "web";
 }) {
-  const onLogin = vi.fn();
   const onLogout = vi.fn();
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false, gcTime: Infinity } },
   });
   setApiInstance(api);
   registerAuthStore(
-    createAuthStore({ api, storage, cookieAuth, onLogin, onLogout }),
+    createAuthStore({ api, storage, cookieAuth, onLogout }),
   );
 
   const result = render(
@@ -100,7 +99,6 @@ function renderInitializer({
       <AuthInitializer
         cookieAuth={cookieAuth}
         identity={{ platform }}
-        onLogin={onLogin}
         storage={storage}
       >
         <div>child</div>
@@ -108,7 +106,7 @@ function renderInitializer({
     </QueryClientProvider>,
   );
 
-  return { ...result, onLogin, onLogout, queryClient };
+  return { ...result, onLogout, queryClient };
 }
 
 beforeEach(() => {

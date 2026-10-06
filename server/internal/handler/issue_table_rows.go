@@ -9,10 +9,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/Devaretanmay/inkway/server/internal/logger"
 	"github.com/Devaretanmay/inkway/server/internal/util"
 	db "github.com/Devaretanmay/inkway/server/pkg/db/generated"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type issueTableRowResponse struct {
@@ -96,11 +96,9 @@ func (sort resolvedIssueTableSort) cursorPredicate(w http.ResponseWriter, cursor
 			return "", false
 		}
 	case "timestamptz":
-		if _, err := time.Parse(time.RFC3339Nano, *cursor.SortValue); err != nil {
-			if _, postgresErr := time.Parse("2006-01-02 15:04:05.999999999Z07", *cursor.SortValue); postgresErr != nil {
-				writeError(w, http.StatusBadRequest, "invalid cursor")
-				return "", false
-			}
+		if !validTimestampCursor(*cursor.SortValue) {
+			writeError(w, http.StatusBadRequest, "invalid cursor")
+			return "", false
 		}
 	case "date":
 		if _, err := time.Parse("2006-01-02", *cursor.SortValue); err != nil {
@@ -125,6 +123,19 @@ func (sort resolvedIssueTableSort) cursorPredicate(w http.ResponseWriter, cursor
 		predicate = fmt.Sprintf("(%s IS NULL OR %s)", sort.expression, predicate)
 	}
 	return predicate, true
+}
+
+func validTimestampCursor(value string) bool {
+	for _, layout := range []string{
+		time.RFC3339Nano,
+		"2006-01-02 15:04:05.999999999Z07:00",
+		"2006-01-02 15:04:05.999999999Z07",
+	} {
+		if _, err := time.Parse(layout, value); err == nil {
+			return true
+		}
+	}
+	return false
 }
 
 func (h *Handler) issueTableOrderBy(

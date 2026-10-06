@@ -10,6 +10,44 @@ import (
 	db "github.com/Devaretanmay/inkway/server/pkg/db/generated"
 )
 
+func TestDaemonAuth_LocalAppCapability(t *testing.T) {
+	t.Setenv("INKWAY_LOCAL_MODE", "true")
+	t.Setenv("INKWAY_LOCAL_APP_TOKEN", "inkway_local_test_capability")
+	var gotUserID, gotPath string
+	handler := DaemonAuth(nil, nil, nil, nil)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotUserID = r.Header.Get("X-User-ID")
+		gotPath = DaemonAuthPathFromContext(r.Context())
+		w.WriteHeader(http.StatusOK)
+	}))
+
+	req := httptest.NewRequest("GET", "/api/daemon/workspaces", nil)
+	req.Header.Set("Authorization", "Bearer inkway_local_test_capability")
+	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, req)
+	if response.Code != http.StatusOK {
+		t.Fatalf("expected local capability to authenticate, got %d: %s", response.Code, response.Body.String())
+	}
+	if gotUserID != "00000000-0000-4000-8000-000000000001" || gotPath != DaemonAuthPathLocal {
+		t.Fatalf("unexpected local identity: user=%q path=%q", gotUserID, gotPath)
+	}
+}
+
+func TestDaemonAuth_LocalAppCapabilityFailsClosed(t *testing.T) {
+	t.Setenv("INKWAY_LOCAL_MODE", "true")
+	t.Setenv("INKWAY_LOCAL_APP_TOKEN", "inkway_local_expected")
+	handler := DaemonAuth(nil, nil, nil, nil)(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		t.Fatal("invalid local capability reached the handler")
+	}))
+
+	req := httptest.NewRequest("GET", "/api/daemon/workspaces", nil)
+	req.Header.Set("Authorization", "Bearer inkway_local_other")
+	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, req)
+	if response.Code != http.StatusUnauthorized {
+		t.Fatalf("expected invalid local capability to fail closed, got %d", response.Code)
+	}
+}
+
 // TestDaemonAuth_DaemonTokenCacheHit pins the daemon-token cache short-circuit:
 // when the cache holds an entry for an mdt_ token, DaemonAuth must skip the DB
 // lookup. nil queries would otherwise nil-deref on a miss.
@@ -323,7 +361,6 @@ func TestDaemonAuth_MCN_FleetUnreachable(t *testing.T) {
 		t.Fatalf("expected 503 when fleet is unavailable, got %d", w.Code)
 	}
 }
-
 
 // TestDaemonAuth_MCN_OwnerNotInLocalDB pins the new owner-existence
 // guard end-to-end through the middleware. Cloud verifies the token

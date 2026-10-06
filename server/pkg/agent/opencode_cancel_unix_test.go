@@ -60,6 +60,75 @@ func TestOpencodeCancellationEscalatesToSIGKILL(t *testing.T) {
 	runOpencodeCancellationTest(t, opencodeCancelFakeScript(true))
 }
 
+// OpenCode's shell runner can detach a tool into a new session. Process-group
+// signalling alone misses it, leaving sleep/tool children behind after cancel.
+func TestOpencodeCancellationKillsDetachedTool(t *testing.T) {
+	t.Parallel()
+
+	tempDir := t.TempDir()
+	pidFile := filepath.Join(tempDir, "pids")
+	readyFile := filepath.Join(tempDir, "detached-ready")
+	fakePath := filepath.Join(tempDir, "opencode")
+	writeTestExecutable(t, fakePath, []byte("#!/bin/sh\n"+
+		`OPENCODE_DETACHED_SLEEPER=1 OPENCODE_DETACHED_READY_FILE="$OPENCODE_DETACHED_READY_FILE" "$OPENCODE_HELPER" -test.run='^TestOpencodeDetachedSleeperHelper$' >/dev/null 2>&1 &
+child=$!
+printf '%s %s\n' "$$" "$child" > "$OPENCODE_PID_FILE"
+printf '{"type":"step_start","timestamp":1,"sessionID":"ses_fake","part":{"type":"step-start"}}\n'
+while true; do sleep 1; done
+`))
+	backend, err := New("opencode", Config{
+		ExecutablePath: fakePath,
+		Logger:         slog.Default(),
+		Env: map[string]string{
+			"OPENCODE_PID_FILE":            pidFile,
+			"OPENCODE_DETACHED_READY_FILE": readyFile,
+			"OPENCODE_HELPER":              os.Args[0],
+		},
+	})
+	if err != nil {
+		t.Fatalf("new opencode backend: %v", err)
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	session, err := backend.Execute(ctx, "prompt-ignored", ExecOptions{Cwd: tempDir})
+	if err != nil {
+		t.Fatalf("execute: %v", err)
+	}
+	go func() {
+		for range session.Messages {
+		}
+	}()
+	pids := waitForPids(t, pidFile)
+	waitForDetachedReady(t, readyFile)
+	cancel()
+	select {
+	case res := <-session.Result:
+		if res.Status != "aborted" {
+			t.Errorf("status = %q, want aborted", res.Status)
+		}
+	case <-time.After(10 * time.Second):
+		t.Fatal("Execute did not return after cancellation")
+	}
+	for _, pid := range pids {
+		waitProcessGone(t, pid)
+	}
+}
+
+func TestOpencodeDetachedSleeperHelper(t *testing.T) {
+	if os.Getenv("OPENCODE_DETACHED_SLEEPER") != "1" {
+		return
+	}
+	if _, err := syscall.Setsid(); err != nil {
+		t.Fatalf("detach helper process: %v", err)
+	}
+	if err := os.WriteFile(os.Getenv("OPENCODE_DETACHED_READY_FILE"), []byte("ready"), 0o600); err != nil {
+		t.Fatalf("write detached helper readiness: %v", err)
+	}
+	for {
+		time.Sleep(time.Hour)
+	}
+}
+
 func runOpencodeCancellationTest(t *testing.T, script string) {
 	t.Helper()
 
@@ -109,6 +178,18 @@ func runOpencodeCancellationTest(t *testing.T, script string) {
 	for _, pid := range pids {
 		waitProcessGone(t, pid)
 	}
+}
+
+func waitForDetachedReady(t *testing.T, path string) {
+	t.Helper()
+	deadline := time.Now().Add(5 * time.Second)
+	for time.Now().Before(deadline) {
+		if _, err := os.Stat(path); err == nil {
+			return
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	t.Fatalf("process helper never became ready: %s", path)
 }
 
 // waitForPids polls pidFile until it contains the space-separated pids the fake

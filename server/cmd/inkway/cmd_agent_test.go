@@ -2299,3 +2299,9 @@ func TestParseConversationStarters(t *testing.T) {
 		}
 	})
 }
+
+func testCmd() *cobra.Command {
+	cmd := &cobra.Command{}
+	cmd.PersistentFlags().String("profile", "", "")
+	return cmd
+}

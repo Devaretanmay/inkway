@@ -1,6 +1,6 @@
 # Inkway installer for Windows - one command to get started.
 #
-# Install CLI (default): connects to multica.ai
+# Install the CLI used by local Inkway coding tools.
 #   irm https://raw.githubusercontent.com/inkway-ai/inkway/main/scripts/install.ps1 | iex
 #
 # Self-host: starts a local Inkway server + installs CLI + configures
@@ -479,7 +479,7 @@ function Install-Server {
 
 
 # ---------------------------------------------------------------------------
-# Main: Default mode (cloud)
+# Main: Default mode (local CLI)
 # ---------------------------------------------------------------------------
 function Start-DefaultInstall {
     Write-Host ""
@@ -493,13 +493,7 @@ function Start-DefaultInstall {
     Write-Host "  [OK] Inkway CLI is ready!" -ForegroundColor Green
     Write-Host "  ============================================" -ForegroundColor Green
     Write-Host ""
-    Write-Host "  Next: configure your environment"
-    Write-Host ""
-    Write-Host "     inkway setup               " -NoNewline; Write-Host "# Connect to Inkway Cloud (multica.ai)" -ForegroundColor DarkGray
-    Write-Host "     inkway setup self-host      " -NoNewline; Write-Host "# Connect to a self-hosted server" -ForegroundColor DarkGray
-    Write-Host ""
-    Write-Host "  Self-hosting? Install the server first:"
-    Write-Host '     $env:INKWAY_MODE="with-server"; irm https://raw.githubusercontent.com/inkway-ai/inkway/main/scripts/install.ps1 | iex'
+    Write-Host "  Open Inkway Desktop to connect this local CLI."
     Write-Host ""
 }
 
@@ -527,10 +521,7 @@ function Start-LocalInstall {
     Write-Host ""
     Write-Host "  Next: configure your CLI to connect"
     Write-Host ""
-    Write-Host "     inkway setup self-host  " -NoNewline; Write-Host "# Configure + authenticate + start daemon" -ForegroundColor DarkGray
-    Write-Host ""
-    Write-Host "  Login: configure RESEND_API_KEY in .env for email codes,"
-    Write-Host "  or read the generated code from backend logs when Resend is unset."
+    Write-Host "  Local workspace identity is created automatically."
     Write-Host ""
     Write-Host "  To stop all services:"
     Write-Host '     $env:INKWAY_MODE="stop"; irm https://raw.githubusercontent.com/inkway-ai/inkway/main/scripts/install.ps1 | iex'

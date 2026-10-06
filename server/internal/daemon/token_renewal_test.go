@@ -89,6 +89,30 @@ func TestTryRenewToken_LogsRenewalOnSuccess(t *testing.T) {
 	}
 }
 
+func TestTryRenewToken_SkipsLocalAppCapability(t *testing.T) {
+	var called atomic.Bool
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		called.Store(true)
+	}))
+	t.Cleanup(srv.Close)
+
+	d := &Daemon{client: NewClient(srv.URL), logger: captureLogger(&bytes.Buffer{})}
+	d.client.SetToken("inkway_local_test-capability")
+	d.tryRenewToken(context.Background())
+	if called.Load() {
+		t.Fatal("local app capability must not call the account PAT renewal endpoint")
+	}
+}
+
+func TestIsLocalAppCapability(t *testing.T) {
+	if !isLocalAppCapability("inkway_local_test-capability") {
+		t.Fatal("expected local capability prefix to be recognized")
+	}
+	if isLocalAppCapability("mul_account-token") {
+		t.Fatal("account PAT must not be treated as a local app capability")
+	}
+}
+
 func TestTryRenewToken_LogsNotEligibleOnNoOp(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -112,7 +136,7 @@ func TestTryRenewToken_LogsNotEligibleOnNoOp(t *testing.T) {
 	}
 }
 
-func TestTryRenewToken_SurfacesReloginWarningOn401(t *testing.T) {
+func TestTryRenewToken_SurfacesLocalCredentialRecoveryOn401(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusUnauthorized)
@@ -128,12 +152,12 @@ func TestTryRenewToken_SurfacesReloginWarningOn401(t *testing.T) {
 	if !strings.Contains(out, "level=WARN") {
 		t.Fatalf("401 must surface as WARN, got: %s", out)
 	}
-	if !strings.Contains(out, "inkway login") {
-		t.Fatalf("401 warning must tell the user to run 'inkway login', got: %s", out)
+	if !strings.Contains(out, "reopen Inkway") {
+		t.Fatalf("401 warning must direct the user to reopen Inkway, got: %s", out)
 	}
 }
 
-func TestTryRenewToken_SurfacesReloginWarningOn401_WithProfile(t *testing.T) {
+func TestTryRenewToken_UsesSameLocalCredentialRecoveryForEveryProfile(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusUnauthorized)
 		_, _ = w.Write([]byte(`{"error":"invalid token"}`))
@@ -149,8 +173,8 @@ func TestTryRenewToken_SurfacesReloginWarningOn401_WithProfile(t *testing.T) {
 	d.tryRenewToken(context.Background())
 
 	out := buf.String()
-	if !strings.Contains(out, "--profile staging") {
-		t.Fatalf("profile-aware login hint missing, got: %s", out)
+	if !strings.Contains(out, "reopen Inkway") {
+		t.Fatalf("local credential recovery hint missing, got: %s", out)
 	}
 }
 
@@ -219,8 +243,8 @@ func TestPreflightAuth_RenewsBeforeWorkspaceSyncOnExpiredToken(t *testing.T) {
 	if !strings.Contains(out, "level=WARN") {
 		t.Fatalf("expected re-login WARN, got: %s", out)
 	}
-	if !strings.Contains(out, "inkway login") {
-		t.Fatalf("expected the actionable 'run inkway login' hint in the WARN, got: %s", out)
+	if !strings.Contains(out, "reopen Inkway") {
+		t.Fatalf("expected the local credential recovery hint in the WARN, got: %s", out)
 	}
 }
 

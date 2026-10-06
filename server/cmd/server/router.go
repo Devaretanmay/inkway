@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/netip"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -114,6 +115,12 @@ func registerPluginActionRoutes(r chi.Router, h *handler.Handler) {
 
 func allowedOrigins() []string {
 	raw := strings.TrimSpace(os.Getenv("CORS_ALLOWED_ORIGINS"))
+	if strings.EqualFold(strings.TrimSpace(os.Getenv("INKWAY_LOCAL_MODE")), "true") && raw == "" {
+		// Packaged Electron file renderers send a null or file:// origin. The
+		// bearer capability remains mandatory, so this does not grant access to
+		// an unauthenticated page on the machine.
+		return []string{"null", "file://", "http://localhost:5173", "http://localhost:5174"}
+	}
 	if raw == "" {
 		raw = strings.TrimSpace(os.Getenv("FRONTEND_ORIGIN"))
 	}
@@ -422,11 +429,12 @@ func NewRouterWithOptions(pool *pgxpool.Pool, hub *realtime.Hub, bus *events.Bus
 
 	cfSigner := auth.NewCloudFrontSignerFromEnv()
 	origins := allowedOrigins()
+	localMode, _ := strconv.ParseBool(strings.TrimSpace(os.Getenv("INKWAY_LOCAL_MODE")))
+	if localMode {
+		origins = append(origins, "null", "file://")
+	}
 
 	signupConfig := handler.Config{
-		AllowSignup:              os.Getenv("ALLOW_SIGNUP") != "false",
-		AllowedEmails:            splitAndTrim(os.Getenv("ALLOWED_EMAILS")),
-		AllowedEmailDomains:      splitAndTrim(os.Getenv("ALLOWED_EMAIL_DOMAINS")),
 		DisableWorkspaceCreation: os.Getenv("DISABLE_WORKSPACE_CREATION") == "true",
 		VCSIntegrationEnabled:    os.Getenv("INKWAY_VCS_INTEGRATION_ENABLED") == "true",
 		PublicURL:                strings.TrimRight(strings.TrimSpace(os.Getenv("INKWAY_PUBLIC_URL")), "/"),
@@ -1496,18 +1504,9 @@ func NewRouterWithOptions(pool *pgxpool.Pool, hub *realtime.Hub, bus *events.Bus
 	// version, surface and one bridge challenge.
 	r.Get("/plugin-surfaces/{token}", h.ServePluginSurface)
 
-	// Auth (public) — per-IP rate limiting.
-	if rdb == nil {
-		slog.Warn("auth rate limiting disabled: REDIS_URL not configured")
-	}
+	// Public routes retained for user-initiated product contact only.
 	trustedProxies := middleware.ParseTrustedProxies(os.Getenv("RATE_LIMIT_TRUSTED_PROXIES"))
-	authRL := middleware.RateLimit(rdb, envPositiveInt("RATE_LIMIT_AUTH", 5), time.Minute, trustedProxies)
-	authVerifyRL := middleware.RateLimit(rdb, envPositiveInt("RATE_LIMIT_AUTH_VERIFY", 20), time.Minute, trustedProxies)
 	contactSalesRL := middleware.RateLimit(rdb, envPositiveInt("RATE_LIMIT_CONTACT_SALES", 5), time.Hour, trustedProxies)
-	r.With(authRL).Post("/auth/send-code", h.SendCode)
-	r.With(authVerifyRL).Post("/auth/verify-code", h.VerifyCode)
-	r.With(authRL).Post("/auth/google", h.GoogleLogin)
-	r.Post("/auth/logout", h.Logout)
 
 	// Public API
 	r.Get("/api/config", h.GetConfig)
@@ -1662,14 +1661,11 @@ func NewRouterWithOptions(pool *pgxpool.Pool, hub *realtime.Hub, bus *events.Bus
 		// server/internal/handler/onboarding_shim.go.
 		r.Post("/api/me/onboarding/runtime-bootstrap", h.BootstrapOnboardingRuntime)
 		r.Post("/api/me/onboarding/no-runtime-bootstrap", h.BootstrapOnboardingNoRuntime)
-		r.Post("/api/cli-token", h.IssueCliToken)
 		// Sliding session renewal for clients that hold the session as a
 		// string (Desktop, mobile). Browsers get theirs re-issued inline by
 		// middleware.Auth and never call this (MUL-7436).
-		r.Post("/api/auth/refresh", h.RefreshSession)
 		r.Post("/api/upload-file", h.UploadFile)
 		r.Post("/api/feedback", h.CreateFeedback)
-		r.With(handler.RequireHumanActor).Post("/api/client-usage", h.UpsertClientUsage)
 
 		// Note (MUL-4309): the generic OpenAI-compatible passthrough endpoints
 		// (POST /api/llm/v1/chat/completions[/stream]) were intentionally
@@ -1693,6 +1689,23 @@ func NewRouterWithOptions(pool *pgxpool.Pool, hub *realtime.Hub, bus *events.Bus
 
 		r.Route("/api/workspaces", func(r chi.Router) {
 			r.Get("/", h.ListWorkspaces)
+			if localMode {
+				r.Route("/{id}", func(r chi.Router) {
+					r.Use(middleware.RequireWorkspaceMemberFromURL(queries, "id"))
+					r.Get("/", h.GetWorkspace)
+					r.Get("/fastpaths", h.ListWorkspaceInkFastPaths)
+					// Local mode still uses an internal owner membership to scope
+					// product writes. The renderer needs this read to resolve its
+					// local role; it does not expose account or invitation flows.
+					r.Get("/members", h.ListMembersWithUser)
+					r.Group(func(r chi.Router) {
+						r.Use(middleware.RequireWorkspaceRoleFromURL(queries, "id", "owner"))
+						r.Put("/", h.UpdateWorkspace)
+						r.Patch("/", h.UpdateWorkspace)
+					})
+				})
+				return
+			}
 			r.Post("/", h.CreateWorkspace)
 			r.Route("/{id}", func(r chi.Router) {
 				// Member-level access
@@ -1913,13 +1926,6 @@ func NewRouterWithOptions(pool *pgxpool.Pool, hub *realtime.Hub, bus *events.Bus
 		r.Post("/api/invitations/{id}/accept", h.AcceptInvitation)
 		r.Post("/api/invitations/{id}/decline", h.DeclineInvitation)
 		r.Post("/api/share-links/join", h.JoinByShareLink)
-
-		r.Route("/api/tokens", func(r chi.Router) {
-			r.Get("/", h.ListPersonalAccessTokens)
-			r.Post("/", h.CreatePersonalAccessToken)
-			r.Post("/current/renew", h.RenewCurrentPersonalAccessToken)
-			r.Delete("/{id}", h.RevokePersonalAccessToken)
-		})
 
 		// Cloud Billing proxy. Same upstream service / port as
 		// cloud-runtime — inkway-cloud's Fleet and Billing share
@@ -2607,21 +2613,6 @@ func optionalUUID(s string) pgtype.UUID {
 		return pgtype.UUID{}
 	}
 	return util.MustParseUUID(s)
-}
-
-func splitAndTrim(s string) []string {
-	if s == "" {
-		return nil
-	}
-	parts := strings.Split(s, ",")
-	res := make([]string, 0, len(parts))
-	for _, p := range parts {
-		trimmed := strings.TrimSpace(p)
-		if trimmed != "" {
-			res = append(res, trimmed)
-		}
-	}
-	return res
 }
 
 // composioStateSecret resolves the HMAC key for the connect-state. Prefers an

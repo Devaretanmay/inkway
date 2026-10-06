@@ -387,7 +387,7 @@ func (e *unknownProfileError) Error() string {
 	if len(e.Known) == 0 {
 		// The command is left unquoted so the shell-quoted profile name below
 		// stays the only quoting in the line and the hint pastes cleanly.
-		return fmt.Sprintf("unknown profile %q: no named profiles exist yet.\nCreate one with: inkway login --profile %s", e.Profile, shellQuoteArg(e.Profile))
+		return fmt.Sprintf("unknown profile %q: no named profiles exist yet. Create its server connection with: inkway --profile %s config set server_url <server-url>", e.Profile, shellQuoteArg(e.Profile))
 	}
 	return fmt.Sprintf("unknown profile %q\nKnown profiles: %s", e.Profile, strings.Join(e.Known, ", "))
 }
@@ -519,24 +519,15 @@ func requireKnownProfile(profile string) error {
 // the test binary itself, which ignores the daemon args and re-runs the suite.
 var daemonExecutable = selfexec.Resolve
 
-// requireDaemonAuth fails fast when the user never ran `inkway login`. The
-// daemon child performs the same check (resolveAuth) and dies immediately,
-// but the background parent can't see that exit — it would poll the health
-// port for the full 45s readiness window and then print a vague "check logs"
-// warning. Checking before spawning turns that silent stall into an
-// immediate, actionable error. Mirrors daemon.resolveAuth: the daemon only
-// authenticates via the stored config token, never INKWAY_TOKEN.
+// requireDaemonAuth avoids a long readiness wait when a profile has no local
+// runtime credential. Desktop creates and manages this credential itself.
 func requireDaemonAuth(profile string) error {
 	cfg, err := cli.LoadCLIConfigForProfile(profile)
 	if err != nil {
 		return fmt.Errorf("load CLI config: %w", err)
 	}
 	if cfg.Token == "" {
-		loginHint := "inkway login"
-		if profile != "" {
-			loginHint = fmt.Sprintf("inkway login --profile %s", profile)
-		}
-		return fmt.Errorf("you are not logged in. Run '%s' first, then start the daemon", loginHint)
+		return fmt.Errorf("no runtime credential is configured for this profile; open Inkway to reconnect its local runtime")
 	}
 	return nil
 }
@@ -751,16 +742,11 @@ func daemonStartupFailureError(logs daemonStartupLogs, waitErr error, profile, s
 	crashLines := readLogTailSince(logs.errLogPath, logs.errLogOffset, 40)
 	joined := strings.Join(append(append([]string{}, lines...), crashLines...), "\n")
 
-	loginHint := "inkway login"
-	if profile != "" {
-		loginHint += " --profile " + profile
-	}
-
 	switch {
 	case strings.Contains(joined, "auth token rejected") ||
 		strings.Contains(joined, "returned 401") ||
 		strings.Contains(joined, "not authenticated"):
-		return fmt.Errorf("daemon failed to start: the server rejected your login token (it may have expired or been revoked).\nRun '%s' to sign in again, then rerun 'inkway daemon start'.\nFull log: %s", loginHint, logs.logPath)
+		return fmt.Errorf("daemon failed to start because the local runtime credential was rejected. Reopen Inkway to refresh it.\nFull log: %s", logs.logPath)
 	case strings.Contains(joined, "connection refused") ||
 		strings.Contains(joined, "no such host") ||
 		strings.Contains(joined, "i/o timeout") ||
@@ -1188,18 +1174,13 @@ func requireDaemonRestartPreflight(cmd *cobra.Command, profile string) error {
 		return fmt.Errorf("refusing to restart: invalid server URL %q: %w", rawURL, err)
 	}
 
-	loginHint := "inkway login"
-	if profile != "" {
-		loginHint += " --profile " + profile
-	}
-
 	ctx, cancel := cli.APIContext(context.Background())
 	defer cancel()
 	if err := cli.NewAPIClient(baseURL, "", cfg.Token).GetJSON(ctx, "/api/me", nil); err != nil {
 		var httpErr *cli.HTTPError
 		if errors.As(err, &httpErr) {
 			if httpErr.StatusCode == http.StatusUnauthorized {
-				return fmt.Errorf("refusing to restart: the server rejected your login token (it may have expired or been revoked); the running daemon was left untouched.\nRun '%s' to sign in again, then rerun 'inkway daemon restart'", loginHint)
+				return fmt.Errorf("refusing to restart: the server rejected the local runtime credential; the running daemon was left untouched. Reopen Inkway to refresh it.")
 			}
 			return fmt.Errorf("refusing to restart: preflight check against %s failed (%w); the running daemon was left untouched", baseURL, err)
 		}

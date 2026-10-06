@@ -5,11 +5,11 @@ import { classifyAuthProbe, isAuthStatusError } from "./daemon-auth-probe";
 
 describe("classifyAuthProbe", () => {
   it("treats a 401 as expired login", () => {
-    expect(classifyAuthProbe({ status: 401 })).toBe("auth_expired");
+    expect(classifyAuthProbe({ status: 401 })).toBe("credential_expired");
   });
 
   it("treats a missing token as expired login", () => {
-    expect(classifyAuthProbe({ noToken: true })).toBe("auth_expired");
+    expect(classifyAuthProbe({ noToken: true })).toBe("credential_expired");
   });
 
   it("treats a 2xx as a valid token (failure is non-auth)", () => {

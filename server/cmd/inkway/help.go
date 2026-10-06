@@ -118,13 +118,12 @@ USAGE
 FLAGS
 {{.LocalFlags.FlagUsages}}
 EXAMPLES
-  $ inkway login
   $ inkway issue list --output json
   $ inkway daemon start
   $ inkway agent list --output json
 
 ENVIRONMENT VARIABLES
-  INKWAY_SERVER_URL    Override the default server URL
+  INKWAY_SERVER_URL    Connect to an explicitly configured server
   INKWAY_WORKSPACE_ID  Set the active workspace
 
 LEARN MORE

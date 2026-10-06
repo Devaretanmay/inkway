@@ -25,9 +25,13 @@ export function assertResolvedProfile(profile: string): void {
 // Desktop owns a dedicated CLI profile named after the target API host, so it
 // never reads or writes the user's hand-configured profiles. Profile dir:
 //   ~/.inkway/profiles/desktop-<host>/
-export function deriveProfileName(targetUrl: string): string {
+export function deriveProfileName(targetUrl: string, localScope = "inkway"): string {
   try {
     const url = new URL(targetUrl);
+    if (url.hostname === "localhost" || url.hostname === "127.0.0.1" || url.hostname === "::1" || url.hostname === "[::1]") {
+      const scope = localScope.toLowerCase().replace(/[^a-z0-9-]/g, "-").replace(/-+/g, "-");
+      return `desktop-local-${scope}`;
+    }
     const host = url.host.replace(/:/g, "-").toLowerCase();
     return `desktop-${host}`;
   } catch {

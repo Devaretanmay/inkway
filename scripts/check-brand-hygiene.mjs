@@ -6,6 +6,9 @@ const allowed = [
   /^docs\/branding\//,
   /^docs\/inkway-domain-migration\.md$/,
   /^scripts\/check-brand-hygiene\.mjs$/,
+  // make-alpha-release.mjs names the retired fragments only to reject them
+  // in release artifact filenames (BANNED_NAME_FRAGMENTS gate).
+  /^apps\/desktop\/scripts\/make-alpha-release\.mjs$/,
   /^docs\/(legacy|evidence)\//,
   /^benchmarks\/results\//,
   /^artifacts\/archive\/pre-inkway\//,
@@ -25,6 +28,15 @@ const allowed = [
 ];
 const legacy = /microloop|issuway|multica/i;
 const oldServiceHosts = /(?:[\w-]+\.)*multica\.ai|(?:multica-api|multica-app)\.copilothub\.ai/gi;
+const runtimeHostFiles = [
+  /^apps\/desktop\/src\/(main|preload)\/(?!.*\.test\.)/,
+  /^apps\/desktop\/src\/shared\/(?!.*\.test\.)/,
+  /^apps\/web\/(app|components|config|lib|features\/landing)\/(?!.*\.test\.)/,
+  /^apps\/web\/proxy\.ts$/,
+  /^packages\/(core|views)\/(api|platform|auth)\/(?!.*\.test\.)/,
+  /^server\/(cmd\/server|internal\/(handler|middleware|realtime))\/(?!.*_test\.go$)/,
+  /^\.env\.example$/,
+];
 
 const files = execFileSync("git", ["ls-files", "--cached", "--others", "--exclude-standard", "-z"], { encoding: "utf8" })
   .split("\0").filter(Boolean);
@@ -38,6 +50,10 @@ for (const file of files) {
   const content = bytes.toString("utf8")
     .replace(oldServiceHosts, "<existing-service-host>")
     .replace(/multicast/gi, "network-group");
+  if (runtimeHostFiles.some((pattern) => pattern.test(file)) && /(?:[\w-]+\.)*multica\.ai|(?:multica-api|multica-app)\.copilothub\.ai/i.test(bytes.toString("utf8"))) {
+    violations.push(`${file} (retired runtime service host)`);
+    continue;
+  }
   if (legacy.test(file) || legacy.test(content)) violations.push(file);
 }
 if (violations.length) {

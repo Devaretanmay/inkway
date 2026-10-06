@@ -14,10 +14,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/Devaretanmay/inkway/server/internal/analytics"
 	"github.com/Devaretanmay/inkway/server/internal/auth"
 	"github.com/Devaretanmay/inkway/server/internal/cloudruntime"
@@ -45,6 +41,10 @@ import (
 	db "github.com/Devaretanmay/inkway/server/pkg/db/generated"
 	"github.com/Devaretanmay/inkway/server/pkg/featureflag"
 	"github.com/Devaretanmay/inkway/server/pkg/llm"
+	"github.com/go-chi/chi/v5"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 // randomID returns a random 16-byte hex string used as a request ID for
@@ -66,9 +66,6 @@ type dbExecutor interface {
 }
 
 type Config struct {
-	AllowSignup         bool
-	AllowedEmails       []string
-	AllowedEmailDomains []string
 	// DisableWorkspaceCreation, when true, makes POST /api/workspaces return
 	// 403 for every caller. There is no role/owner exception because the repo
 	// has no platform-admin concept; operators bootstrap the workspace with
@@ -87,7 +84,7 @@ type Config struct {
 	// INKWAY_VCS_INTEGRATION_ENABLED; the self-host compose defaults it on.
 	VCSIntegrationEnabled bool
 	// PublicURL is the absolute base URL the API is reachable at from the
-	// public internet, with no trailing slash (e.g. "https://multica.ai").
+	// public internet, with no trailing slash.
 	// Used to build webhook_url responses and the fixed Remote MCP OAuth
 	// callback URI — never to decide request identity, routing, or workspace
 	// scope. Empty when unset; webhook clients can fall back to their own origin,

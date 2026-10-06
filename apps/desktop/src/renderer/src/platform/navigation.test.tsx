@@ -4,8 +4,7 @@ import { useEffect } from "react";
 
 // MUL-4741: the adapter mutates tab sessions in the REAL store (no router,
 // no mocks needed for it anymore) — the Coordinator, not tested here, is
-// what projects sessions into the single router. Overlay and auth stay
-// mocked so we can spy on their entry points.
+// what projects sessions into the single router. Only the overlay is mocked.
 
 const overlay = vi.hoisted(() => ({
   overlay: null as null | { type: string },
@@ -19,14 +18,6 @@ vi.mock("@/stores/window-overlay-store", () => ({
   }),
 }));
 
-const auth = vi.hoisted(() => ({ logout: vi.fn() }));
-
-vi.mock("@inkway/core/auth", () => ({
-  useAuthStore: Object.assign(() => null, {
-    getState: () => auth,
-  }),
-}));
-
 import { DesktopNavigationProvider, routeContentLinkPath } from "./navigation";
 import { currentPath, useNavigation } from "@inkway/views/navigation";
 import { useTabStore, getActiveTab } from "@/stores/tab-store";
@@ -35,7 +26,6 @@ beforeEach(() => {
   overlay.open.mockReset();
   overlay.close.mockReset();
   overlay.overlay = null;
-  auth.logout.mockReset();
   useTabStore.getState().reset();
   useTabStore.getState().switchWorkspace("acme"); // default tab /acme/issues
   Object.defineProperty(window, "desktopAPI", {
@@ -142,12 +132,11 @@ describe("push", () => {
     expect(getActiveTab(s)?.url).toBe("/butter/inbox");
   });
 
-  it("logs out instead of navigating for /login", () => {
+  it("routes legacy /login links back to Issues without logging out", () => {
     const getAdapter = renderProvider();
 
-    getAdapter().push("/login");
+    act(() => getAdapter().push("/login"));
 
-    expect(auth.logout).toHaveBeenCalledOnce();
     expect(getActiveTab(useTabStore.getState())?.url).toBe("/acme/issues");
   });
 

@@ -1,9 +1,5 @@
-import { app } from "electron";
-import { readFile } from "fs/promises";
-import { join } from "path";
 import {
   DEFAULT_RUNTIME_CONFIG,
-  parseRuntimeConfig,
   runtimeConfigFromDevEnv,
   type RuntimeConfig,
   type RuntimeConfigEnv,
@@ -13,7 +9,6 @@ import {
 export async function loadRuntimeConfig(options: {
   isDev: boolean;
   env: RuntimeConfigEnv;
-  configPath?: string;
 }): Promise<RuntimeConfigResult> {
   if (options.isDev) {
     try {
@@ -23,38 +18,12 @@ export async function loadRuntimeConfig(options: {
     }
   }
 
-  const configPath = options.configPath ?? desktopConfigPath();
-  try {
-    const raw = await readFile(configPath, "utf-8");
-    return { ok: true, config: parseRuntimeConfig(raw) };
-  } catch (err) {
-    if (isMissingFileError(err)) {
-      return { ok: true, config: { ...DEFAULT_RUNTIME_CONFIG } };
-    }
-    return {
-      ok: false,
-      error: {
-        message: `Invalid ${configPath}: ${errorMessage(err)}`,
-      },
-    };
-  }
+  // Packaged desktop never reads a user-controlled or inherited hosted URL.
+  return { ok: true, config: { ...DEFAULT_RUNTIME_CONFIG } };
 }
 
-export function desktopConfigPath(): string {
-  return join(app.getPath("home"), ".inkway", "desktop.json");
-}
-
-function isMissingFileError(err: unknown): boolean {
-  return Boolean(
-    err &&
-      typeof err === "object" &&
-      "code" in err &&
-      (err as NodeJS.ErrnoException).code === "ENOENT",
-  );
-}
-
-function errorMessage(err: unknown): string {
-  return err instanceof Error ? err.message : String(err);
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
 }
 
 export type { RuntimeConfig, RuntimeConfigResult };

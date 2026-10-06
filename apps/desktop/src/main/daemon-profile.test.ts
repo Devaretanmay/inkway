@@ -20,14 +20,24 @@ const DEFAULT_CLI_CONFIG = join(INKWAY_DIR, "config.json");
 
 describe("deriveProfileName", () => {
   it("names the profile after the target host", () => {
-    expect(deriveProfileName("https://api.multica.ai")).toBe(
-      "desktop-api.multica.ai",
+    expect(deriveProfileName("https://api.example.test")).toBe(
+      "desktop-api.example.test",
     );
   });
 
-  it("replaces the port colon so the name is path-safe", () => {
-    expect(deriveProfileName("http://localhost:8080")).toBe(
-      "desktop-localhost-8080",
+  it("uses one stable profile for the app-owned loopback server across launches", () => {
+    expect(deriveProfileName("http://127.0.0.1:41001")).toBe("desktop-local-inkway");
+    expect(deriveProfileName("http://127.0.0.1:50993")).toBe("desktop-local-inkway");
+    expect(deriveProfileName("http://localhost:41001")).toBe("desktop-local-inkway");
+  });
+
+  it("does not create a new profile for each app-owned backend port", () => {
+    expect(deriveProfileName("http://localhost:8080")).toBe("desktop-local-inkway");
+  });
+
+  it("names isolated development profiles without colliding with the user's CLI profile", () => {
+    expect(deriveProfileName("http://127.0.0.1:41001", "local-proof")).toBe(
+      "desktop-local-local-proof",
     );
   });
 
@@ -38,18 +48,18 @@ describe("deriveProfileName", () => {
 
 describe("profile paths", () => {
   it("always resolves under profiles/<name>", () => {
-    const dir = join(INKWAY_DIR, "profiles", "desktop-api.multica.ai");
-    expect(profileDir("desktop-api.multica.ai")).toBe(dir);
-    expect(profileConfigPath("desktop-api.multica.ai")).toBe(
+    const dir = join(INKWAY_DIR, "profiles", "desktop-api.example.test");
+    expect(profileDir("desktop-api.example.test")).toBe(dir);
+    expect(profileConfigPath("desktop-api.example.test")).toBe(
       join(dir, "config.json"),
     );
-    expect(profileLogPath("desktop-api.multica.ai")).toBe(
+    expect(profileLogPath("desktop-api.example.test")).toBe(
       join(dir, "daemon.log"),
     );
-    expect(profilePidPath("desktop-api.multica.ai")).toBe(
+    expect(profilePidPath("desktop-api.example.test")).toBe(
       join(dir, "daemon.pid"),
     );
-    expect(profileUserIdPath("desktop-api.multica.ai")).toBe(
+    expect(profileUserIdPath("desktop-api.example.test")).toBe(
       join(dir, ".desktop-user-id"),
     );
   });
@@ -65,7 +75,7 @@ describe("profile paths", () => {
   });
 
   it("never yields the default CLI config path for any input", () => {
-    for (const name of ["desktop-api.multica.ai", "desktop", "x"]) {
+    for (const name of ["desktop-api.example.test", "desktop-local", "desktop", "x"]) {
       expect(profileConfigPath(name)).not.toBe(DEFAULT_CLI_CONFIG);
     }
     expect(() => profileConfigPath("")).toThrow();
@@ -74,9 +84,9 @@ describe("profile paths", () => {
 
 describe("profileArgs", () => {
   it("selects the Desktop-owned profile", () => {
-    expect(profileArgs("desktop-api.multica.ai")).toEqual([
+    expect(profileArgs("desktop-api.example.test")).toEqual([
       "--profile",
-      "desktop-api.multica.ai",
+      "desktop-api.example.test",
     ]);
   });
 
@@ -96,14 +106,14 @@ describe("healthPortForProfile", () => {
   });
 
   it("never derives the default profile's port", () => {
-    for (const name of ["desktop-api.multica.ai", "desktop", "x", "a".repeat(50)]) {
+    for (const name of ["desktop-api.example.test", "desktop-local", "desktop", "x", "a".repeat(50)]) {
       expect(healthPortForProfile(name)).not.toBe(DEFAULT_HEALTH_PORT);
     }
   });
 
   it("derives a stable per-profile port above the default", () => {
-    const port = healthPortForProfile("desktop-api.multica.ai");
+    const port = healthPortForProfile("desktop-api.example.test");
     expect(port).toBeGreaterThan(DEFAULT_HEALTH_PORT);
-    expect(port).toBe(healthPortForProfile("desktop-api.multica.ai"));
+    expect(port).toBe(healthPortForProfile("desktop-api.example.test"));
   });
 });

@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import { InkwayLanding } from "@/features/landing/components/inkway-landing";
 
 export default function LandingPage() {
-  redirect("/login");
+  return <InkwayLanding />;
 }

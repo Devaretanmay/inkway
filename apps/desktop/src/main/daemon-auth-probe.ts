@@ -20,7 +20,7 @@ export interface AuthProbeOutcome {
   networkError?: boolean;
 }
 
-export type AuthProbeResult = "auth_expired" | "ok" | "unknown";
+export type AuthProbeResult = "credential_expired" | "ok" | "unknown";
 
 /**
  * Whether an error represents a genuine auth rejection (HTTP 401) as opposed to
@@ -42,13 +42,13 @@ export function isAuthStatusError(err: unknown): boolean {
 
 export function classifyAuthProbe(outcome: AuthProbeOutcome): AuthProbeResult {
   // No credential to validate → the user must sign in.
-  if (outcome.noToken) return "auth_expired";
+  if (outcome.noToken) return "credential_expired";
   // Couldn't reach the server → this is a network problem, not an auth one.
   // Stay "unknown" so the caller keeps showing "starting"/"stopped" instead of
   // wrongly prompting for re-login.
   if (outcome.networkError) return "unknown";
   // The server explicitly rejected the token.
-  if (outcome.status === 401) return "auth_expired";
+  if (outcome.status === 401) return "credential_expired";
   // The token is accepted — the daemon is failing for some other reason.
   if (outcome.status !== undefined && outcome.status >= 200 && outcome.status < 300) {
     return "ok";

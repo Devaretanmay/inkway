@@ -7,7 +7,6 @@
     "dev:web": "turbo dev --filter=@inkway/web",
     "dev:docs": "turbo dev --filter=@inkway/docs",
     "dev:desktop": "turbo dev --filter=@inkway/desktop",
-    "dev:desktop:staging": "turbo dev:staging --filter=@inkway/desktop",
     "dev:mobile": "pnpm -C apps/mobile dev",
     "dev:mobile:staging": "pnpm -C apps/mobile dev:staging",
     "dev:mobile:prod": "pnpm -C apps/mobile dev:prod",

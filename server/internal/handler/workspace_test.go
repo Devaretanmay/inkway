@@ -95,7 +95,6 @@ func TestCreateWorkspace_DisabledByConfig(t *testing.T) {
 
 	prev := testHandler.cfg
 	testHandler.cfg = Config{
-		AllowSignup:              prev.AllowSignup,
 		DisableWorkspaceCreation: true,
 	}
 	t.Cleanup(func() { testHandler.cfg = prev })

@@ -13,7 +13,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/Devaretanmay/inkway/server/internal/analytics"
 	"github.com/Devaretanmay/inkway/server/internal/auth"
 	"github.com/Devaretanmay/inkway/server/internal/daemonws"
@@ -23,17 +22,18 @@ import (
 	"github.com/Devaretanmay/inkway/server/internal/events"
 	"github.com/Devaretanmay/inkway/server/internal/handler"
 	"github.com/Devaretanmay/inkway/server/internal/integrations/wecom"
+	"github.com/Devaretanmay/inkway/server/internal/localidentity"
 	"github.com/Devaretanmay/inkway/server/internal/logger"
 	"github.com/Devaretanmay/inkway/server/internal/maintenance"
 	obsmetrics "github.com/Devaretanmay/inkway/server/internal/metrics"
 	"github.com/Devaretanmay/inkway/server/internal/profiling"
 	"github.com/Devaretanmay/inkway/server/internal/realtime"
 	"github.com/Devaretanmay/inkway/server/internal/scheduler"
-	"github.com/Devaretanmay/inkway/server/internal/selfhosttelemetry"
 	"github.com/Devaretanmay/inkway/server/internal/service"
 	db "github.com/Devaretanmay/inkway/server/pkg/db/generated"
 	"github.com/Devaretanmay/inkway/server/pkg/featureflag"
 	"github.com/Devaretanmay/inkway/server/pkg/llm"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -326,10 +326,6 @@ func newMainHTTPServer(addr string, handler http.Handler) *http.Server {
 
 func main() {
 	logger.Init()
-	// Read the opt-out before constructing any telemetry dependency. In the
-	// disabled case no collector or HTTP client is ever created.
-	telemetryConfig := selfhosttelemetry.ConfigFromDoNotTrack(os.Getenv("DO_NOT_TRACK"))
-	selfhosttelemetry.LogStartupStatus(slog.Default(), telemetryConfig)
 	// Warn about missing configuration
 	if err := jwtSecretBootError(os.Getenv("JWT_SECRET"), os.Getenv("APP_ENV")); err != nil {
 		slog.Error(
@@ -342,9 +338,6 @@ func main() {
 	if os.Getenv("JWT_SECRET") == "" {
 		slog.Warn("JWT_SECRET is not set — using insecure dev default (allowed only because APP_ENV is not production).")
 	}
-	if os.Getenv("RESEND_API_KEY") == "" && strings.TrimSpace(os.Getenv("SMTP_HOST")) == "" {
-		slog.Warn("no email backend configured (RESEND_API_KEY and SMTP_HOST both empty) — verification codes will be printed to the log instead of emailed.")
-	}
 	if os.Getenv("INKWAY_DEV_VERIFICATION_CODE") != "" {
 		if strings.EqualFold(strings.TrimSpace(os.Getenv("APP_ENV")), "production") {
 			slog.Warn("INKWAY_DEV_VERIFICATION_CODE is set but ignored because APP_ENV=production.")
@@ -356,6 +349,11 @@ func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
+	}
+	listenAddress, err := listenAddressForMode(port, os.Getenv("INKWAY_LOCAL_MODE"), os.Getenv("INKWAY_BIND_ADDRESS"))
+	if err != nil {
+		slog.Error("refusing to start with invalid listener configuration", "error", err)
+		os.Exit(1)
 	}
 	shutdownHoldDuration := envNonNegativeDuration("INKWAY_SHUTDOWN_HOLD_DURATION", 0)
 
@@ -407,6 +405,12 @@ func main() {
 	stopStartup()
 	slog.Info("connected to database")
 	logPoolConfig("primary", pool)
+	if localMode, _ := strconv.ParseBool(strings.TrimSpace(os.Getenv("INKWAY_LOCAL_MODE"))); localMode {
+		if err := localidentity.Ensure(context.Background(), pool); err != nil {
+			slog.Error("unable to ensure local Inkway identity", "error", err)
+			os.Exit(1)
+		}
+	}
 
 	// The replica is an optional capacity optimization, never a startup
 	// dependency. Invalid configuration preserves primary-only behavior. New
@@ -708,7 +712,7 @@ func main() {
 	// the scheduler's Run goroutine starts so the field write is race-free.
 	heartbeatScheduler.RecoveryNotifier = h
 
-	srv := newMainHTTPServer(":"+port, r)
+	srv := newMainHTTPServer(listenAddress, r)
 	profilingServer := profiling.NewServer()
 	maintenanceServer, maintenanceErr := maintenance.NewServer(os.Getenv("MAINTENANCE_PORT"), maintenance.NewService(pool, maintenance.StatusCategory{}))
 	if maintenanceErr != nil {
@@ -718,7 +722,6 @@ func main() {
 	// Start background workers.
 	sweepCtx, sweepCancel := context.WithCancel(context.Background())
 	autopilotCtx, autopilotCancel := context.WithCancel(context.Background())
-	telemetryWorker := selfhosttelemetry.New(pool, version, telemetryConfig, slog.Default())
 	// Reuse the router's services here. In particular, the router wires the
 	// EmptyClaim cache into TaskService; constructing a second TaskService for
 	// scheduled Autopilot dispatch would send the daemon wakeup without bumping
@@ -749,9 +752,6 @@ func main() {
 	// work, so there is no separate queue TTL to tune: a busy runtime keeps its
 	// backlog, and a departed one retires everything it owned at once.
 	go runRuntimeSweeper(sweepCtx, queries, liveness, taskSvc, bus, runtimeReconnectGrace)
-	if telemetryWorker != nil {
-		go telemetryWorker.Run(sweepCtx)
-	}
 	go runDelegatedFailureRecoverySweeper(sweepCtx, taskSvc)
 	// Seven-day runtime retention does not share the 30-second liveness tick:
 	// its bounded transactions run independently once per hour, so a slow GC

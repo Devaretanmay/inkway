@@ -440,6 +440,23 @@ func TestIssueTableCursorRejectsAnotherQuery(t *testing.T) {
 	}
 }
 
+func TestValidTimestampCursorAcceptsPostgresTimezoneOffsets(t *testing.T) {
+	for _, value := range []string{
+		"2026-10-05 12:34:56.123456+05:30",
+		"2026-10-05 12:34:56+00",
+		"2026-10-05T12:34:56.123456+05:30",
+	} {
+		if !validTimestampCursor(value) {
+			t.Errorf("validTimestampCursor(%q) = false", value)
+		}
+	}
+	for _, value := range []string{"not-a-timestamp", "2026-99-99 12:34:56+05:30"} {
+		if validTimestampCursor(value) {
+			t.Errorf("validTimestampCursor(%q) = true", value)
+		}
+	}
+}
+
 func TestIssueTablePositionCursorIncludesIndexableLowerBound(t *testing.T) {
 	cursorValue := "90000"
 	cursor := issueTableCursor{

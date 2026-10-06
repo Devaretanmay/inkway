@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { InkwayIcon } from "@inkway/ui/components/common/inkway-icon";
 import { cn } from "@inkway/ui/lib/utils";
-import { useAuthStore } from "@inkway/core/auth";
 import {
   XMark,
   GitHubMark,
@@ -17,7 +16,6 @@ import { useDashboardCtaHref } from "../utils/use-dashboard-cta";
 
 export function LandingFooter() {
   const { t, locale, setLocale } = useLocale();
-  const user = useAuthStore((s) => s.user);
   const ctaHref = useDashboardCtaHref();
   const groups = Object.values(t.footer.groups);
 
@@ -69,7 +67,7 @@ export function LandingFooter() {
                 href={ctaHref}
                 className="inline-flex items-center justify-center rounded-(--landing-radius-button) bg-white px-5 py-2.5 text-label font-semibold text-[#0a0d12] transition-colors hover:bg-white/88"
               >
-                {user ? t.header.dashboard : t.footer.cta}
+                {t.footer.cta}
               </Link>
             </div>
           </div>

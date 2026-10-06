@@ -71,6 +71,21 @@ func TestAuthenticateTokenRejectsTemporarilyDisabledJWTUser(t *testing.T) {
 	}
 }
 
+func TestAuthenticateTokenAcceptsLocalAppTokenOnlyInLocalMode(t *testing.T) {
+	t.Setenv("INKWAY_LOCAL_MODE", "true")
+	t.Setenv("INKWAY_LOCAL_APP_TOKEN", "local-test-token")
+	uid, errMsg := authenticateToken("local-test-token", nil, context.Background())
+	if errMsg != "" || uid != "00000000-0000-4000-8000-000000000001" {
+		t.Fatalf("local app token = (%q, %q), want local owner", uid, errMsg)
+	}
+
+	t.Setenv("INKWAY_LOCAL_MODE", "false")
+	uid, errMsg = authenticateToken("local-test-token", nil, context.Background())
+	if uid != "" || errMsg == "" {
+		t.Fatalf("local token outside local mode = (%q, %q), want rejection", uid, errMsg)
+	}
+}
+
 func TestAuthenticateTokenRejectsTemporarilyDisabledPATUser(t *testing.T) {
 	uid, errMsg := authenticateToken("mul_disabled", staticPATResolver{
 		"mul_disabled": "1d542296-17c6-484a-9914-dcee589be116",

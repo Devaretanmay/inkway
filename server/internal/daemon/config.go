@@ -72,7 +72,6 @@ const (
 	DefaultMaxConcurrentTasks             = 20
 	DefaultGCInterval                     = 2 * time.Hour
 	DefaultGCTTL                          = 24 * time.Hour      // 1 day — AI-coding issues rarely stay open long
-	DefaultGCCompletedTaskTTLCloud        = 14 * 24 * time.Hour // 14 days — Inkway Cloud bounds completed issue-task env retention by default; see defaultGCCompletedTaskTTL
 	DefaultGCCompletedTaskTTLSelfHost     = 0                   // disabled — self-host keeps every completed env until its issue goes terminal, unless an operator opts in
 	DefaultGCOrphanTTL                    = 72 * time.Hour      // 3 days — orphans with no meta (crashes, pre-GC leftovers)
 	DefaultGCArtifactTTL                  = 12 * time.Hour      // 12h — drop regenerable artifacts once a task has been completed this long
@@ -590,16 +589,9 @@ func LoadConfig(overrides Overrides) (Config, error) {
 	gcRepoMaintenanceEnabled := boolFromEnv("INKWAY_GC_REPO_MAINTENANCE_ENABLED", true)
 	gcArtifactPatterns := patternsFromEnv("INKWAY_GC_ARTIFACT_PATTERNS", DefaultGCArtifactPatterns)
 
-	// Auto-update config: default -> env override -> CLI override.
-	//
-	// Default is opt-in on Inkway Cloud (api.multica.ai) and opt-out for
-	// self-hosted instances. Self-host operators frequently run a fork with
-	// their own patches, and silently upgrading their daemon to an upstream
-	// GitHub release would clobber that work; they also commonly stay on an
-	// older server build, which a fresh CLI may no longer talk to. Keeping
-	// auto-update off by default for self-host avoids both footguns (MUL-2381).
-	// Operators on either side can flip the default with INKWAY_DAEMON_AUTO_UPDATE.
-	autoUpdateEnabled := boolFromEnv("INKWAY_DAEMON_AUTO_UPDATE", isOfficialCloudServer(serverBaseURL))
+	// Auto-update is always opt-in. A local desktop launch must not contact a
+	// release service without an explicit user or operator choice.
+	autoUpdateEnabled := boolFromEnv("INKWAY_DAEMON_AUTO_UPDATE", false)
 	if overrides.DisableAutoUpdate {
 		autoUpdateEnabled = false
 	}
@@ -671,48 +663,10 @@ func LoadConfig(overrides Overrides) (Config, error) {
 	}, nil
 }
 
-// officialCloudHost is the hostname of Inkway's hosted cloud. It's the only
-// origin we treat as "official" for the auto-update default — staging,
-// preview, and any future *.multica.ai subdomains are deliberately excluded
-// so they inherit the safer self-host default until explicitly opted in.
-const officialCloudHost = "api.multica.ai"
-
-// isOfficialCloudServer reports whether the resolved server base URL points
-// at Inkway's hosted cloud. Used to pick defaults that are safe on
-// infrastructure we operate but not on someone else's: auto-update (cloud
-// users run a server that publishes the matching CLI release, so opt-in
-// self-update is safe, while self-host users may run a fork or pin to an
-// older server) and the completed-task retention TTL (see
-// defaultGCCompletedTaskTTL). Matching is host-only and case-insensitive —
-// port and path are ignored.
-func isOfficialCloudServer(baseURL string) bool {
-	u, err := url.Parse(strings.TrimSpace(baseURL))
-	if err != nil {
-		return false
-	}
-	return strings.EqualFold(u.Hostname(), officialCloudHost)
-}
-
-// defaultGCCompletedTaskTTL picks the completed-task retention default from the
-// deployment kind, the same way the auto-update default is picked.
-//
-// Full removal of a completed task environment is irreversible: it takes the
-// checkout, .git (including work an agent left uncommitted), output/ and logs/
-// with it. On Inkway Cloud that trade is ours to make — we operate the nodes,
-// a full disk is our incident rather than a user's, and unbounded retention has
-// no operator watching it. On self-host the same default would turn a routine
-// daemon upgrade into a silent deletion of data the operator never agreed to
-// give up, so it stays disabled until they set INKWAY_GC_COMPLETED_TASK_TTL
-// themselves. Either side can override in either direction; cloud disables it
-// again with an explicit 0.
-//
-// Non-production cloud origins (staging, previews) fall to the self-host value
-// along with everything else officialCloudHost excludes, and opt in explicitly
-// if they want the bound.
-func defaultGCCompletedTaskTTL(serverBaseURL string) time.Duration {
-	if isOfficialCloudServer(serverBaseURL) {
-		return DefaultGCCompletedTaskTTLCloud
-	}
+// Completed task cleanup defaults to disabled in the local product. Removing
+// a run directory can delete uncommitted work, so cleanup requires explicit
+// retention configuration.
+func defaultGCCompletedTaskTTL(_ string) time.Duration {
 	return DefaultGCCompletedTaskTTLSelfHost
 }
 

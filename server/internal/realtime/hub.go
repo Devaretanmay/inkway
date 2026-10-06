@@ -2,6 +2,7 @@ package realtime
 
 import (
 	"context"
+	"crypto/subtle"
 	"encoding/json"
 	"errors"
 	"log/slog"
@@ -15,9 +16,10 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/Devaretanmay/inkway/server/internal/auth"
+	"github.com/Devaretanmay/inkway/server/internal/localidentity"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/gorilla/websocket"
-	"github.com/Devaretanmay/inkway/server/internal/auth"
 )
 
 // MembershipChecker verifies a user belongs to a workspace.
@@ -677,6 +679,13 @@ func (h *Hub) Snapshot() map[string]any {
 
 // authenticateToken validates a JWT or PAT string and returns the user ID.
 func authenticateToken(tokenStr string, pr PATResolver, ctx context.Context) (string, string) {
+	if strings.EqualFold(strings.TrimSpace(os.Getenv("INKWAY_LOCAL_MODE")), "true") {
+		localToken := os.Getenv("INKWAY_LOCAL_APP_TOKEN")
+		if localToken != "" && subtle.ConstantTimeCompare([]byte(tokenStr), []byte(localToken)) == 1 {
+			userID, _ := localidentity.IDs()
+			return userID, ""
+		}
+	}
 	if strings.HasPrefix(tokenStr, "mul_") {
 		if pr == nil {
 			return "", `{"error":"invalid token"}`

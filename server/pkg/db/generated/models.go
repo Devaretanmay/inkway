@@ -478,7 +478,7 @@ type ChannelTaskDelivery struct {
 type ChannelUserBinding struct {
 	ID             pgtype.UUID        `json:"id"`
 	WorkspaceID    pgtype.UUID        `json:"workspace_id"`
-	InkwayUserID  pgtype.UUID        `json:"inkway_user_id"`
+	InkwayUserID   pgtype.UUID        `json:"inkway_user_id"`
 	InstallationID pgtype.UUID        `json:"installation_id"`
 	ChannelType    string             `json:"channel_type"`
 	ChannelUserID  string             `json:"channel_user_id"`
@@ -542,26 +542,6 @@ type ChatSession struct {
 	PinnedAt            pgtype.Timestamptz `json:"pinned_at"`
 	ProjectID           pgtype.UUID        `json:"project_id"`
 	ExplicitlyCreatedAt pgtype.Timestamptz `json:"explicitly_created_at"`
-}
-
-type ClientUsageDaily struct {
-	UserID          pgtype.UUID        `json:"user_id"`
-	ClientType      string             `json:"client_type"`
-	InstallID       pgtype.UUID        `json:"install_id"`
-	ActivityDate    pgtype.Date        `json:"activity_date"`
-	WorkspaceID     pgtype.UUID        `json:"workspace_id"`
-	ClientVersion   string             `json:"client_version"`
-	Os              string             `json:"os"`
-	FirstActiveAt   pgtype.Timestamptz `json:"first_active_at"`
-	LastActiveAt    pgtype.Timestamptz `json:"last_active_at"`
-	RuntimeProbedAt pgtype.Timestamptz `json:"runtime_probed_at"`
-	ProbeResult     pgtype.Text        `json:"probe_result"`
-	RuntimeCount    pgtype.Int4        `json:"runtime_count"`
-	ProviderSummary []byte             `json:"provider_summary"`
-	OnlineCount     pgtype.Int4        `json:"online_count"`
-	OfflineCount    pgtype.Int4        `json:"offline_count"`
-	CreatedAt       pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
 }
 
 type Comment struct {
@@ -1131,7 +1111,7 @@ type LarkOutboundCardMessage struct {
 type LarkUserBinding struct {
 	ID             pgtype.UUID        `json:"id"`
 	WorkspaceID    pgtype.UUID        `json:"workspace_id"`
-	InkwayUserID  pgtype.UUID        `json:"inkway_user_id"`
+	InkwayUserID   pgtype.UUID        `json:"inkway_user_id"`
 	InstallationID pgtype.UUID        `json:"installation_id"`
 	LarkOpenID     string             `json:"lark_open_id"`
 	UnionID        pgtype.Text        `json:"union_id"`
@@ -1343,6 +1323,28 @@ type QuickAction struct {
 	CreatedByID   pgtype.UUID        `json:"created_by_id"`
 	CreatedAt     pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt     pgtype.Timestamptz `json:"updated_at"`
+}
+
+type RuntimeInkHealth struct {
+	RuntimeID pgtype.UUID        `json:"runtime_id"`
+	Status    string             `json:"status"`
+	UpdatedAt pgtype.Timestamptz `json:"updated_at"`
+}
+
+type RuntimeInkSite struct {
+	RuntimeID         pgtype.UUID        `json:"runtime_id"`
+	SiteName          string             `json:"site_name"`
+	SiteVersion       string             `json:"site_version"`
+	Status            string             `json:"status"`
+	Observations      int64              `json:"observations"`
+	VerifiedOutcomes  int64              `json:"verified_outcomes"`
+	FastServed        int64              `json:"fast_served"`
+	Coverage          float64            `json:"coverage"`
+	FalseServes       int64              `json:"false_serves"`
+	LastMaintenance   pgtype.Timestamptz `json:"last_maintenance"`
+	ModelCallsAvoided pgtype.Int8        `json:"model_calls_avoided"`
+	SavingsBasis      pgtype.Text        `json:"savings_basis"`
+	UpdatedAt         pgtype.Timestamptz `json:"updated_at"`
 }
 
 type RuntimeProfile struct {
@@ -1657,16 +1659,6 @@ type VcsPullRequest struct {
 	ChangedFiles    int32              `json:"changed_files"`
 	CreatedAt       pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt       pgtype.Timestamptz `json:"updated_at"`
-}
-
-type VerificationCode struct {
-	ID        pgtype.UUID        `json:"id"`
-	Email     string             `json:"email"`
-	Code      string             `json:"code"`
-	ExpiresAt pgtype.Timestamptz `json:"expires_at"`
-	Used      bool               `json:"used"`
-	CreatedAt pgtype.Timestamptz `json:"created_at"`
-	Attempts  int32              `json:"attempts"`
 }
 
 type WebhookDelivery struct {
